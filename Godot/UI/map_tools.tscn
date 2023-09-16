@@ -1,0 +1,104 @@
+[gd_scene load_steps=2 format=3 uid="uid://ckr01rwlxratn"]
+
+[ext_resource type="Script" path="res://scripts/map_tools.gd" id="1_0o8uf"]
+
+[node name="ToolBar" type="Control"]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+script = ExtResource("1_0o8uf")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+offset_right = 71.0
+offset_bottom = 190.0
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="Select" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+text = "➤"
+
+[node name="Draw" type="OptionButton" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+alignment = 1
+item_count = 3
+selected = 0
+popup/item_0/text = "▧"
+popup/item_0/id = 0
+popup/item_1/text = "~"
+popup/item_1/id = 1
+popup/item_2/text = "○"
+popup/item_2/id = 2
+
+[node name="Measure" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+text = "▧"
+
+[node name="Button3" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+text = "▧"
+
+[node name="MarginContainer2" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -107.0
+offset_right = 89.0
+grow_vertical = 0
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SpinBox" type="SpinBox" parent="MarginContainer2/VBoxContainer"]
+layout_mode = 2
+value = 10.0
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "C1"
+
+[node name="ColorPickerButton2" type="ColorPickerButton" parent="MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "C2"
+color = Color(1, 1, 1, 1)
+
+[connection signal="mouse_entered" from="MarginContainer" to="." method="_on_margin_container_mouse_entered"]
+[connection signal="mouse_exited" from="MarginContainer" to="." method="_on_margin_container_mouse_exited"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Select" to="." method="_on_select_pressed"]
+[connection signal="item_selected" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_item_selected"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_pressed"]
+[connection signal="focus_entered" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_focus_entered"]
+[connection signal="value_changed" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
+[connection signal="popup_closed" from="MarginContainer2/VBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_popup_closed"]
+[connection signal="pressed" from="MarginContainer2/VBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_pressed"]
+[connection signal="popup_closed" from="MarginContainer2/VBoxContainer/ColorPickerButton2" to="." method="_on_color_picker_button_2_popup_closed"]
+[connection signal="pressed" from="MarginContainer2/VBoxContainer/ColorPickerButton2" to="." method="_on_color_picker_button_2_pressed"]

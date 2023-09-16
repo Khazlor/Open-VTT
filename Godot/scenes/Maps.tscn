@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=3 uid="uid://7ynxnxtwfalq"]
+
+[ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="1_65ntf"]
+[ext_resource type="Script" path="res://scripts/Maps.gd" id="1_wdgyu"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wdgyu")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.117647, 0.145098, 0.254902, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 2
+size_flags_stretch_ratio = 0.0
+theme_override_fonts/font = ExtResource("1_65ntf")
+theme_override_font_sizes/font_size = 40
+text = "Map Browser"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="MapGrid" type="GridContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="Back" type="Button" parent="."]
+layout_mode = 1
+offset_left = 56.0
+offset_top = 56.0
+offset_right = 103.0
+offset_bottom = 104.0
+rotation = 3.14159
+theme_override_font_sizes/font_size = 20
+text = "➔"
+
+[node name="NewMap" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -56.0
+offset_top = 8.0
+offset_right = -9.0
+offset_bottom = 56.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "+"
+
+[connection signal="resized" from="." to="." method="_on_resized"]
+[connection signal="pressed" from="Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="NewMap" to="." method="_on_new_map_pressed"]

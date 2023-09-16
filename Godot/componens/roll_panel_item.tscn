@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://gft43bnph770"]
+
+[ext_resource type="Script" path="res://scripts/roll_panel_item_Result.gd" id="1_542ih"]
+
+[node name="Roll_panel_item" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Text" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Text"
+
+[node name="Result" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+script = ExtResource("1_542ih")
