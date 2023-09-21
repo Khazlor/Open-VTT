@@ -9,6 +9,7 @@ func _ready():
 func _process(delta):
 	pass
 	
+#custom tooltip for rolls - using RichTextLabel to allow BBCode formatting
 func _make_custom_tooltip(for_text):
 	var regex = RegEx.new()
 	regex.compile("\\[.*?\\]")

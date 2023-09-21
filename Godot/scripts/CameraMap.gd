@@ -1,5 +1,6 @@
 extends Camera2D
 
+#settings for map camera navigation
 var zoomSpd: float = 0.05
 var minZoom: float = 0.001
 var maxZoom: float = 2.0
@@ -15,9 +16,11 @@ func _process(delta):
 	pass
 
 func _input(event):
+	#movement
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
 		position -= event.relative * dragSen / zoom
 		
+	#zoom
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			zoom += Vector2(zoomSpd, zoomSpd)

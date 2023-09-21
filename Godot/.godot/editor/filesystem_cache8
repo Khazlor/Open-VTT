@@ -1,0 +1,36 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1695327405
+icon.svg::CompressedTexture2D::5688168929623848734::1695301405::1695301703::1::::<><>::
+::res://componens/::1695301405
+draw.tscn::PackedScene::1998716960252659742::1695301405::0::1::::<><>::res://scripts/draw.gd
+mapcard.tscn::PackedScene::613806455134821959::1695301405::0::1::::<><>::uid://ihv74426u2cc
+roll_panel.tscn::PackedScene::6099297127118497203::1695301405::0::1::::<><>::res://scripts/roll_panel.gd<>uid://gft43bnph770
+roll_panel_item.tscn::PackedScene::432661834293925217::1695301405::0::1::::<><>::res://scripts/roll_panel_item_Result.gd
+::res://fonts/::1695301703
+Seagram tfb.ttf::FontFile::2438884139627817619::1695301405::1695301703::1::::<><>::
+::res://images/::1695301718
+grid.png::CompressedTexture2D::1474930913140686427::1695301405::1695301703::1::::<><>::
+grid_white.png::CompressedTexture2D::7922166908469498376::1695301405::1695301703::1::::<><>::
+map_84x45.png::CompressedTexture2D::1808288170983946913::1695301405::1695301704::1::::<><>::
+map_108x100.jpg::CompressedTexture2D::5491187779959606948::1695301405::1695301718::1::::<><>::
+Placeholder-1479066.png::CompressedTexture2D::577295164881212386::1695301405::1695301703::1::::<><>::
+::res://resources/::1695301405
+globals.gd::GDScript::-1::1695301405::0::1::::Tool<>Node<>::
+Map_res.gd::GDScript::-1::1695301405::0::1::::Map_res<>Resource<>::
+Save_data.gd::GDScript::-1::1695301405::0::1::::Save<>Node<>::
+::res://scenes/::1695307956
+main_menu.tscn::PackedScene::186097303771105552::1695307956::0::1::::<><>::res://scripts/main_menu.gd<>uid://ba0ochwu4b23x::::res://fonts/Seagram tfb.ttf
+map.tscn::PackedScene::4960444678004144274::1695301405::0::1::::<><>::res://scripts/CameraMap.gd<>res://scripts/map.gd<>uid://ihv74426u2cc
+Maps.tscn::PackedScene::2296419175907170350::1695301405::0::1::::<><>::uid://ba0ochwu4b23x
+::res://scripts/::1695307291
+CameraMap.gd::GDScript::-1::1695302300::0::1::::<>Camera2D<>::
+draw.gd::GDScript::-1::1695307291::0::1::::<>Node2D<>::
+main_menu.gd::GDScript::-1::1695301405::0::1::::<>Control<>::
+map.gd::GDScript::-1::1695301405::0::1::::<>Node2D<>::
+mapcard.gd::GDScript::-1::1695301405::0::1::::<>Control<>::
+Maps.gd::GDScript::-1::1695301405::0::1::::<>Control<>::
+map_tools.gd::GDScript::-1::1695301405::0::1::::<>Control<>::
+roll_panel.gd::GDScript::-1::1695301405::0::1::::<>Control<>::
+roll_panel_item_Result.gd::GDScript::-1::1695301405::0::1::::<>RichTextLabel<>::
+::res://UI/::1695301405
+map_tools.tscn::PackedScene::5511389508460074859::1695301405::0::1::::<><>::res://scripts/map_tools.gd

@@ -12,15 +12,17 @@ var begin: Vector2
 var min_max_x_y: Vector4 # min_x min_y max_x max_y
 
 #select
-var select_box: Panel
-var selected = []
+var select_box: Panel #visual setection box
+var selected = [] #list of selected items
 var mouse_over_selected = false
 var selected_creating = false
 var selected_scaling = false
+#hadles around selection - top bottom left right
 var mouse_over_tl = false
 var mouse_over_bl = false
 var mouse_over_tr = false
 var mouse_over_br = false
+
 var select_size: Vector2
 var select_pos: Vector2
 var select_size_org: Vector2
@@ -31,27 +33,33 @@ var flip_x = false
 var flip_y = false
 
 func _ready():
-	get_viewport().files_dropped.connect(on_files_dropped)
+	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _input(event):
+	#button pressed
 	if Input.is_action_just_pressed("mouseleft") and Globals.mouseOverButton:
 		draw_enable = false
 		return
+	#pressed (not button)
 	if Input.is_action_just_pressed("mouseleft"):
 		draw_enable = true
+	#line drawing finished
 	if Input.is_action_just_released("mouseleft") and Globals.tool == "lines":
 		if current_rect == null:
 			return
 		if min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
 			lines.remove_child(current_rect)
 			return
+		#setting size of box around line for selection purposes
 		current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
 		current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 		current_line.position = -current_rect.position
 		current_rect = null
+	#select box drawing | scaling finished
 	if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
 		if mouse_over_selected and !selected_creating:
 			return
+		#scaling selection finished
 		if selected_scaling:
 			selected_scaling = false
 			flip_x = false
@@ -87,15 +95,18 @@ func _input(event):
 			return
 		if !selected_creating:
 			return
+		#selection box finished drawing
 		selected_creating = false
 		selected.clear()
 		if $Select.get_child_count() == 0:
 			return
 		var lines_children = lines.get_children()
+		#max select box size and position based on drawn size
 		var max_x = select_box.position.x
 		var max_y = select_box.position.y
 		var min_x = select_box.size.x + select_box.position.x
 		var min_y = select_box.size.y + select_box.position.y
+		#snap selection size to children
 		for child in lines_children:
 #			if child.is_class("Panel"):
 			if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
@@ -152,7 +163,7 @@ func _input(event):
 			return
 		select_box.set_begin(Vector2(min_x, min_y))
 		select_box.set_end(Vector2(max_x, max_y))
-		#control points
+		#control points - handles
 		create_handle(Control.PRESET_TOP_LEFT, 15)
 		current_panel.connect("gui_input", _tl_handle_mouse_pressed)
 		current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
@@ -169,16 +180,18 @@ func _input(event):
 		
 		print(select_box.get_begin())
 		print(select_box.get_end())
+	#circle or rect drawing finished
 	if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
 		if current_panel == null:
 			return
 		if current_panel.size.x == 0 or current_panel.size.y == 0:
 			lines.remove_child(current_panel)
+	#else button held -> drawing
 	if draw_enable:
 		if Globals.tool == "rect":
 			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				pressed = event.pressed
-				
+				#just pressed - create objects
 				if pressed:
 					current_panel = Panel.new()
 					begin = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
@@ -191,6 +204,7 @@ func _input(event):
 					current_panel.add_theme_stylebox_override("panel", style)
 					lines.add_child(current_panel)
 					
+			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
 				if begin.x > end.x and begin.y > end.y:
@@ -213,7 +227,7 @@ func _input(event):
 		if Globals.tool == "lines":
 			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				pressed = event.pressed
-				
+				#just pressed - create objects
 				if pressed:
 					current_rect = ColorRect.new()
 					current_rect.color = Color(0,0,0,0)
@@ -225,7 +239,7 @@ func _input(event):
 					var pos = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
 					min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
 					current_line.add_point(pos)
-					
+			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var pos = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
 				if min_max_x_y.x > pos.x: #min x
@@ -241,7 +255,7 @@ func _input(event):
 		if Globals.tool == "circle":
 			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				pressed = event.pressed
-				
+				#just pressed - create objects
 				if pressed:
 					current_panel = Panel.new()
 					begin = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
@@ -254,7 +268,7 @@ func _input(event):
 					style.corner_detail = 12
 					current_panel.add_theme_stylebox_override("panel", style)
 					lines.add_child(current_panel)
-
+			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
 				if begin.x > end.x and begin.y > end.y:
@@ -295,8 +309,9 @@ func _input(event):
 						selected_org_scales.append(object.scale)
 						selected_org_pos.append(object.position)
 					return
-				
+				#just pressed - create objects
 				if pressed:
+					#remove old select
 					if $Select.get_child_count() != 0:
 						$Select.remove_child($Select.get_child(0))
 #					if $Select.get_child_count() != 0:
@@ -319,14 +334,16 @@ func _input(event):
 #						current_panel.set_begin(begin)
 #						current_panel.set_end(begin)
 					selected_creating = true
-					
+			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				if mouse_over_selected and !selected_creating and !selected_scaling: #drag
+				#drag - move objects
+				if mouse_over_selected and !selected_creating and !selected_scaling:
 					var relative_offset = event.relative/get_node("../Camera2D").zoom
 					for object in selected:
 						object.position += relative_offset
 					$Select.get_child(0).position += relative_offset
 					return
+				#scale objects
 				elif selected_scaling:
 					select_pos = select_box.position
 					select_size = select_box.size
@@ -470,6 +487,7 @@ func _input(event):
 							mouse_over_tl = true
 							mouse_over_br = false
 					return
+				#drawing selection bow - update size
 				else:
 					var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
 					if begin.x > end.x and begin.y > end.y:
@@ -488,6 +506,8 @@ func _input(event):
 							select_box.size.x = select_box.size.y
 						else:
 							select_box.size.y = select_box.size.x
+							
+#debug
 func _on_select_pressed(event: InputEvent):
 	if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		print("selected: ", selected)
@@ -510,6 +530,9 @@ func _on_select_mouse_exited():
 #	current_panel.add_theme_stylebox_override("panel", style)
 #	$Select.get_child(0).add_child(current_panel)
 
+#creates handle for selection box
+#preset - anchor point
+#s - size
 func create_handle(preset: Control.LayoutPreset, s: float):
 	current_panel = Panel.new()
 	current_panel.position = Vector2(-s/2,-s/2)
@@ -558,6 +581,7 @@ func _br_handle_mouse_exited():
 	if !selected_scaling:
 		mouse_over_br = false
 
+#drag and drop images
 func on_files_dropped(files):
 	print(files)
 	for file in files:
