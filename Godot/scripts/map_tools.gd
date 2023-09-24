@@ -9,7 +9,6 @@ func _process(delta):
 	pass
 
 
-
 func _on_draw_item_selected(index):
 	if index == 0:
 		Globals.tool = "rect"
@@ -54,3 +53,17 @@ func _on_draw_pressed():
 		Globals.tool = "lines"
 	elif index == 2:
 		Globals.tool = "circle"
+
+
+func _on_snap_options_pressed():
+	$MarginContainer/VBoxContainer/SnapPopupPanel.visible = true
+
+
+
+
+func _on_snap_check_box_toggled(button_pressed):
+	Globals.snapping = not Globals.snapping
+
+
+func _on_snap_fraction_option_button_item_selected(index):
+	Globals.snappingFraction = index + 1

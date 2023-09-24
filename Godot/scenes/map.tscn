@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
@@ -8,9 +8,17 @@
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
 [ext_resource type="PackedScene" uid="uid://3qgtuhwblt4q" path="res://componens/draw.tscn" id="6_txqn8"]
 [ext_resource type="Texture2D" uid="uid://dk4s6w4hwuvxg" path="res://images/grid_white.png" id="7_uhnxr"]
+[ext_resource type="Shader" path="res://shaders/grid.gdshader" id="9_4m3b1"]
 
 [sub_resource type="TileSet" id="TileSet_xj2wd"]
 tile_size = Vector2i(70, 70)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nrof3"]
+shader = ExtResource("9_4m3b1")
+shader_parameter/size = Vector2(1280, 720)
+shader_parameter/line_width = 0.1
+shader_parameter/offset = Vector2(0, 0)
+shader_parameter/grid_size = 50.0
 
 [node name="Map" type="Node2D"]
 texture_repeat = 2
@@ -33,7 +41,6 @@ cell_quadrant_size = 70
 format = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(576, 320)
 script = ExtResource("1_ihf1l")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -53,10 +60,18 @@ grow_horizontal = 0
 [node name="Draw" parent="." instance=ExtResource("6_txqn8")]
 texture_repeat = 2
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0, 0.592157, 0.447059, 1)
+[node name="Node2D" type="Node2D" parent="."]
+material = SubResource("ShaderMaterial_nrof3")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_mirroring = Vector2(70000, 70000)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+modulate = Color(0.360784, 0.545098, 0.509804, 0.309804)
 texture_filter = 2
 texture_repeat = 2
 texture = ExtResource("7_uhnxr")
 region_enabled = true
-region_rect = Rect2(0, 0, 7e+06, 7e+06)
+region_rect = Rect2(0, 0, 70000, 70000)

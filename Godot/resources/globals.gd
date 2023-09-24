@@ -1,6 +1,8 @@
 class_name Tool
 extends Node
 
+var snapping = false
+var snappingFraction = 1
 var tool = "rect"
 var colorLines = Color(0,0,0,1)
 var colorBack = Color(1,1,1,1)

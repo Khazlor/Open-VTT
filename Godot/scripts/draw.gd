@@ -32,11 +32,51 @@ var selected_org_pos = []
 var flip_x = false
 var flip_y = false
 
+var mouse_pos = Vector2(0,0)
+
+var last_event_pos = Vector2(-1,-1)
+
 func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _input(event):
-	#button pressed
+	#button pressed or mouse moved
+	var mouse_pos = get_global_mouse_position()
+	if Globals.snapping == true:
+#		var snapping_camera_adjusted = get_node("../Camera2D").zoom
+#		var snapping_camera_offset = Vector2(fmod(get_node("../Camera2D").position.x, 70), fmod(get_node("../Camera2D").position.y, 70))
+#		if snapping_camera_offset.x < 0:
+#			snapping_camera_offset.x = 70 + snapping_camera_offset.x
+#		if snapping_camera_offset.y < 0:
+#			snapping_camera_offset.y = 70 + snapping_camera_offset.y
+##		print(snapping_camera_adjusted)
+#		print(get_node("../Camera2D").position)
+#		print (event.position)
+#		print (snapping_camera_offset)
+#		var posxmod = fmod((event.position.x + snapping_camera_offset.x), 70 * snapping_camera_adjusted.x)
+#		if posxmod < 70/2:
+#			event.position.x -= posxmod
+#		else:
+#			event.position.x += (70-posxmod)
+#		var posymod = fmod((event.position.y + snapping_camera_offset.y), 70 * snapping_camera_adjusted.y)
+#		if posymod < 70/2:
+#			event.position.y -= posymod
+#		else:
+#			event.position.y += (70-posymod)
+			
+#		print(Vector2(fmod(get_node("../Camera2D").position.x, 70), fmod(get_node("../Camera2D").position.y, 70)))
+#		event.position = 70 * round(event.position/70)
+#		print(event.position)
+
+		print(mouse_pos)
+		mouse_pos = round(mouse_pos/(70/Globals.snappingFraction))*(70/Globals.snappingFraction) #snap to grid
+		print(mouse_pos)
+	#skip if position not changed
+#	if last_event_pos == event.position:
+#		return
+#	else:
+#		last_event_pos = event.position
+	
 	if Input.is_action_just_pressed("mouseleft") and Globals.mouseOverButton:
 		draw_enable = false
 		return
@@ -194,7 +234,7 @@ func _input(event):
 				#just pressed - create objects
 				if pressed:
 					current_panel = Panel.new()
-					begin = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+					begin = mouse_pos
 					current_panel.set_begin(begin)
 					current_panel.set_end(begin)
 					var style = StyleBoxFlat.new()
@@ -206,7 +246,7 @@ func _input(event):
 					
 			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+				var end = mouse_pos
 				if begin.x > end.x and begin.y > end.y:
 					current_panel.set_begin(end)
 					current_panel.set_end(begin)
@@ -236,12 +276,12 @@ func _input(event):
 					current_line.width = Globals.lineWidth
 					lines.add_child(current_rect)
 					current_rect.add_child(current_line)
-					var pos = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+					var pos = mouse_pos
 					min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
 					current_line.add_point(pos)
 			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				var pos = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+				var pos = mouse_pos
 				if min_max_x_y.x > pos.x: #min x
 					min_max_x_y.x = pos.x
 				if min_max_x_y.y > pos.y: #min y
@@ -258,7 +298,7 @@ func _input(event):
 				#just pressed - create objects
 				if pressed:
 					current_panel = Panel.new()
-					begin = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+					begin = mouse_pos
 					current_panel.set_begin(begin)
 					current_panel.set_end(begin)
 					var style = StyleBoxFlat.new()
@@ -270,7 +310,7 @@ func _input(event):
 					lines.add_child(current_panel)
 			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+				var end = mouse_pos
 				if begin.x > end.x and begin.y > end.y:
 					current_panel.set_begin(end)
 					current_panel.set_end(begin)
@@ -316,7 +356,7 @@ func _input(event):
 						$Select.remove_child($Select.get_child(0))
 #					if $Select.get_child_count() != 0:
 					select_box = Panel.new()
-					begin = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+					begin = mouse_pos
 					select_box.set_begin(begin)
 					var style = StyleBoxFlat.new()
 					style.bg_color = Color(0.5,0.5,1,0.2)
@@ -489,7 +529,7 @@ func _input(event):
 					return
 				#drawing selection bow - update size
 				else:
-					var end = (event.position - Vector2(get_viewport().size/2))/get_node("../Camera2D").zoom + get_node("../Camera2D").position
+					var end = mouse_pos
 					if begin.x > end.x and begin.y > end.y:
 						select_box.set_begin(end)
 						select_box.set_end(begin)
