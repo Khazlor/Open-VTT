@@ -40,7 +40,6 @@ func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _input(event):
-	#button pressed or mouse moved
 	var mouse_pos = get_global_mouse_position()
 	if Globals.snapping == true:
 #		var snapping_camera_adjusted = get_node("../Camera2D").zoom
@@ -76,7 +75,8 @@ func _input(event):
 #		return
 #	else:
 #		last_event_pos = event.position
-	
+
+	#button pressed or mouse moved
 	if Input.is_action_just_pressed("mouseleft") and Globals.mouseOverButton:
 		draw_enable = false
 		return
@@ -105,31 +105,27 @@ func _input(event):
 			flip_x = false
 			flip_y = false
 			if mouse_over_tl:
-				var mouse = get_global_mouse_position()
 				current_panel = select_box.get_child(0)
-				if mouse.x > current_panel.position.x and mouse.x < current_panel.position.x + current_panel.size.x:
-					if mouse.y > current_panel.position.y and mouse.y < current_panel.position.y + current_panel.size.y:
+				if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
+					if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 						return
 				mouse_over_tl = false
 			if mouse_over_bl:
-				var mouse = get_global_mouse_position()
 				current_panel = select_box.get_child(1)
-				if mouse.x > current_panel.position.x and mouse.x < current_panel.position.x + current_panel.size.x:
-					if mouse.y > current_panel.position.y and mouse.y < current_panel.position.y + current_panel.size.y:
+				if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
+					if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 						return
 				mouse_over_bl = false
 			if mouse_over_tr:
-				var mouse = get_global_mouse_position()
 				current_panel = select_box.get_child(2)
-				if mouse.x > current_panel.position.x and mouse.x < current_panel.position.x + current_panel.size.x:
-					if mouse.y > current_panel.position.y and mouse.y < current_panel.position.y + current_panel.size.y:
+				if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
+					if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 						return
 				mouse_over_tr = false
 			if mouse_over_br:
-				var mouse = get_global_mouse_position()
 				current_panel = select_box.get_child(3)
-				if mouse.x > current_panel.position.x and mouse.x < current_panel.position.x + current_panel.size.x:
-					if mouse.y > current_panel.position.y and mouse.y < current_panel.position.y + current_panel.size.y:
+				if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
+					if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 						return
 				mouse_over_br = false
 			return
@@ -198,9 +194,42 @@ func _input(event):
 #								max_y = child.get_point_position(child.get_point_count()-1).y
 		print(selected)
 		if selected.is_empty():
-			select_box.set_begin(Vector2(0,0))
-			select_box.set_end(Vector2(0,0))
-			return
+			for x in range(lines_children.size()):
+				var child = lines_children[-x-1]
+				print("mouse pos: ", mouse_pos)
+				print("pos: ", child.position)
+				print("size: ", child.size)
+				print("scale: ", child.scale)
+				if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
+					if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+						if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+							selected.append(child)
+							if child.scale.x > 0:
+								if child.position.x < min_x:
+									min_x = child.position.x
+								if child.position.x + child.size.x*child.scale.x > max_x:
+									max_x = child.position.x + child.size.x*child.scale.x
+							else:
+								if child.position.x + child.size.x*child.scale.x < min_x:
+									min_x = child.position.x + child.size.x*child.scale.x
+								if child.position.x > max_x:
+									max_x = child.position.x
+							if child.scale.y > 0:
+								if child.position.y < min_y:
+									min_y = child.position.y
+								if child.position.y + child.size.y*child.scale.y > max_y:
+									max_y = child.position.y + child.size.y*child.scale.y
+							else:
+								if child.position.y + child.size.y*child.scale.y < min_y:
+									min_y = child.position.y + child.size.y*child.scale.y
+							if child.position.y > max_y:
+									max_y = child.position.y
+							break
+			if selected.is_empty():
+				select_box.set_begin(Vector2(0,0))
+				select_box.set_end(Vector2(0,0))
+				return
+		print(selected)
 		select_box.set_begin(Vector2(min_x, min_y))
 		select_box.set_end(Vector2(max_x, max_y))
 		#control points - handles
@@ -257,6 +286,7 @@ func _input(event):
 					current_panel.set_begin(Vector2(begin.x, end.y))
 					current_panel.set_end(Vector2(end.x, begin.y))
 				else:
+					current_panel.set_begin(begin)
 					current_panel.set_end(end)
 				if Input.is_action_pressed("shift"):
 					if current_panel.size.x < current_panel.size.y:
@@ -321,6 +351,7 @@ func _input(event):
 					current_panel.set_begin(Vector2(begin.x, end.y))
 					current_panel.set_end(Vector2(end.x, begin.y))
 				else:
+					current_panel.set_begin(begin)
 					current_panel.set_end(end)
 				if current_panel.size.x < current_panel.size.y:
 					current_panel.scale.x = current_panel.size.aspect()
@@ -352,12 +383,13 @@ func _input(event):
 				#just pressed - create objects
 				if pressed:
 					#remove old select
-					if $Select.get_child_count() != 0:
+					while $Select.get_child_count() != 0:
 						$Select.remove_child($Select.get_child(0))
 #					if $Select.get_child_count() != 0:
 					select_box = Panel.new()
 					begin = mouse_pos
 					select_box.set_begin(begin)
+					select_box.set_end(begin)
 					var style = StyleBoxFlat.new()
 					style.bg_color = Color(0.5,0.5,1,0.2)
 					style.border_color = Color.CORNSILK
@@ -540,6 +572,7 @@ func _input(event):
 						select_box.set_begin(Vector2(begin.x, end.y))
 						select_box.set_end(Vector2(end.x, begin.y))
 					else:
+						select_box.set_begin(begin)
 						select_box.set_end(end)
 					if Input.is_action_pressed("shift"):
 						if select_box.size.x < select_box.size.y:
