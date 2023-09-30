@@ -9,6 +9,8 @@ var current_panel: Panel #rect
 var current_line: Line2D
 var current_rect: ColorRect
 var current_label: Label
+var current_circle: CustomCircle
+var current_ellipse: CustomEllipse
 var begin: Vector2
 var min_max_x_y: Vector4 # min_x min_y max_x max_y
 
@@ -328,42 +330,29 @@ func _input(event):
 				pressed = event.pressed
 				#just pressed - create objects
 				if pressed:
-					current_panel = Panel.new()
+					current_ellipse = CustomEllipse.new()
 					begin = mouse_pos
-					current_panel.set_begin(begin)
-					current_panel.set_end(begin)
-					var style = StyleBoxFlat.new()
-					style.bg_color = Globals.colorBack
-					style.border_color = Globals.colorLines
-					style.set_border_width_all(Globals.lineWidth)
-					style.corner_detail = 12
-					current_panel.add_theme_stylebox_override("panel", style)
-					lines.add_child(current_panel)
+					current_ellipse.set_begin(begin)
+					current_ellipse.set_end(begin)
+					lines.add_child(current_ellipse)
 			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var end = mouse_pos
 				if begin.x > end.x and begin.y > end.y:
-					current_panel.set_begin(end)
-					current_panel.set_end(begin)
+					current_ellipse.set_begin(end)
+					current_ellipse.set_end(begin)
 				elif begin.x > end.x:
-					current_panel.set_begin(Vector2(end.x, begin.y))
-					current_panel.set_end(Vector2(begin.x, end.y))
+					current_ellipse.set_begin(Vector2(end.x, begin.y))
+					current_ellipse.set_end(Vector2(begin.x, end.y))
 				elif begin.y > end.y:
-					current_panel.set_begin(Vector2(begin.x, end.y))
-					current_panel.set_end(Vector2(end.x, begin.y))
+					current_ellipse.set_begin(Vector2(begin.x, end.y))
+					current_ellipse.set_end(Vector2(end.x, begin.y))
 				else:
-					current_panel.set_begin(begin)
-					current_panel.set_end(end)
-				if current_panel.size.x < current_panel.size.y:
-					current_panel.scale.x = current_panel.size.aspect()
-					current_panel.size.x = current_panel.size.y
-				else:
-					current_panel.scale.y = 1/current_panel.size.aspect()
-					current_panel.size.y = current_panel.size.x
+					current_ellipse.set_begin(begin)
+					current_ellipse.set_end(end)
 				if Input.is_action_pressed("shift"):
-					current_panel.scale.x = 1
-					current_panel.scale.y = 1
-				current_panel.get_theme_stylebox("panel", "").set_corner_radius_all(current_panel.size.x)
+					current_ellipse.size.x = current_ellipse.size.y
+				current_ellipse.queue_redraw()
 				
 		if Globals.tool == "measure":
 			if Globals.measureTool == 1: #measure line
@@ -375,9 +364,8 @@ func _input(event):
 						current_line.default_color = Globals.colorLines
 						current_line.width = min(Globals.lineWidth,3)
 						lines.add_child(current_line)
-						var pos = mouse_pos
-						current_line.add_point(pos)
-						current_line.add_point(pos)
+						current_line.add_point(mouse_pos)
+						current_line.add_point(mouse_pos)
 						current_rect = ColorRect.new()
 						current_rect.set_size(Vector2(0,0))
 						current_label = Label.new()
@@ -397,28 +385,24 @@ func _input(event):
 					pressed = event.pressed
 					#just pressed - create objects
 					if pressed:
+						begin = mouse_pos
+						current_circle = CustomCircle.new()
+						current_circle.set_position(mouse_pos)
+						current_circle.center = begin
+						lines.add_child(current_circle)
 						current_rect = ColorRect.new()
-						current_rect.color = Color(0,0,0,0)
-						current_line = Line2D.new()
-						current_line.default_color = Globals.colorLines
-						current_line.width = Globals.lineWidth
+						current_rect.set_size(Vector2(0,0))
+						current_label = Label.new()
 						lines.add_child(current_rect)
-						current_rect.add_child(current_line)
-						var pos = mouse_pos
-						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
-						current_line.add_point(pos)
+						current_rect.add_child(current_label)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-					var pos = mouse_pos
-					if min_max_x_y.x > pos.x: #min x
-						min_max_x_y.x = pos.x
-					if min_max_x_y.y > pos.y: #min y
-						min_max_x_y.y = pos.y
-					if min_max_x_y.z < pos.x: #max x
-						min_max_x_y.z = pos.x
-					if min_max_x_y.w < pos.y: #max y
-						min_max_x_y.w = pos.y
-					current_line.add_point(pos)
+					current_circle.radius = begin.distance_to(mouse_pos)
+					current_label.text = str(snapped(begin.distance_to(mouse_pos)/14, 0.01)) + " ft"
+					current_rect.set_position(mouse_pos)
+					current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
+					print(current_circle.center, begin)
+					print(current_circle.radius, current_circle.size, current_circle.position, mouse_pos)
 					
 			if Globals.measureTool == 3: #measure angle
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):

@@ -210,14 +210,6 @@ layout_mode = 2
 text = "C2"
 color = Color(1, 1, 1, 1)
 
-[node name="ColorRect" type="ColorRect" parent="."]
-layout_mode = 0
-offset_left = 700.0
-offset_top = 173.0
-offset_right = 700.0
-offset_bottom = 173.0
-color = Color(0.207843, 0.207843, 0.207843, 1)
-
 [connection signal="mouse_entered" from="MarginContainer" to="." method="_on_margin_container_mouse_entered"]
 [connection signal="mouse_exited" from="MarginContainer" to="." method="_on_margin_container_mouse_exited"]
 [connection signal="toggled" from="MarginContainer/VBoxContainer/SnapPanelContainer/HBoxContainer/SnapCheckBox" to="." method="_on_snap_check_box_toggled"]
