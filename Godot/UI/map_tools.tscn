@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://ckr01rwlxratn"]
+[gd_scene load_steps=3 format=3 uid="uid://ckr01rwlxratn"]
 
 [ext_resource type="Script" path="res://scripts/map_tools.gd" id="1_0o8uf"]
+[ext_resource type="ButtonGroup" uid="uid://c4u5dlx2ww4iq" path="res://resources/button_groups/measure_button_group.tres" id="2_p381y"]
 
 [node name="ToolBar" type="Control"]
 layout_mode = 3
@@ -100,13 +101,76 @@ popup/item_1/id = 1
 popup/item_2/text = "○"
 popup/item_2/id = 2
 
-[node name="Measure" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Measure" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 mouse_filter = 1
 theme_override_font_sizes/font_size = 25
-text = "▧"
+text = "📏"
+
+[node name="MeasureOptions" type="OptionButton" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="MeasurePopupPanel" type="PopupPanel" parent="MarginContainer/VBoxContainer"]
+title = "Snap Settings"
+position = Vector2i(0, 190)
+size = Vector2i(165, 234)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MeasurePopupPanel"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 161.0
+offset_bottom = 246.0
+
+[node name="MeasureLineRadio" type="CheckButton" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+button_group = ExtResource("2_p381y")
+text = "Line"
+
+[node name="MeasureDiagonalLabel" type="Label" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Diagonal movement"
+
+[node name="SnapFractionOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+item_count = 3
+selected = 0
+popup/item_0/text = "5ft"
+popup/item_0/id = 0
+popup/item_1/text = "7.5ft"
+popup/item_1/id = 1
+popup/item_2/text = "10ft"
+popup/item_2/id = 2
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="MeasureCircleRadio" type="CheckButton" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+button_group = ExtResource("2_p381y")
+text = "Circle"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="MeasureAngleRadio" type="CheckButton" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+button_group = ExtResource("2_p381y")
+text = "Angle"
+
+[node name="MeasureAngleLabel3" type="Label" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Angle"
+
+[node name="MeasureAngleLabel2" type="Label" parent="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Angle"
 
 [node name="Button3" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -146,6 +210,14 @@ layout_mode = 2
 text = "C2"
 color = Color(1, 1, 1, 1)
 
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 173.0
+offset_right = 700.0
+offset_bottom = 173.0
+color = Color(0.207843, 0.207843, 0.207843, 1)
+
 [connection signal="mouse_entered" from="MarginContainer" to="." method="_on_margin_container_mouse_entered"]
 [connection signal="mouse_exited" from="MarginContainer" to="." method="_on_margin_container_mouse_exited"]
 [connection signal="toggled" from="MarginContainer/VBoxContainer/SnapPanelContainer/HBoxContainer/SnapCheckBox" to="." method="_on_snap_check_box_toggled"]
@@ -154,6 +226,12 @@ color = Color(1, 1, 1, 1)
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Select" to="." method="_on_select_pressed"]
 [connection signal="item_selected" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_item_selected"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Measure" to="." method="_on_measure_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/MeasureOptions" to="." method="_on_measure_options_pressed"]
+[connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureLineRadio" to="." method="_on_measure_line_radio_toggled"]
+[connection signal="item_selected" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/SnapFractionOptionButton" to="." method="_on_snap_fraction_option_button_item_selected"]
+[connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureCircleRadio" to="." method="_on_measure_circle_radio_toggled"]
+[connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureAngleRadio" to="." method="_on_measure_angle_radio_toggled"]
 [connection signal="focus_entered" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_focus_entered"]
 [connection signal="value_changed" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
 [connection signal="popup_closed" from="MarginContainer2/VBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_popup_closed"]

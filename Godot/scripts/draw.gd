@@ -8,6 +8,7 @@ var draw_enable = true
 var current_panel: Panel #rect
 var current_line: Line2D
 var current_rect: ColorRect
+var current_label: Label
 var begin: Vector2
 var min_max_x_y: Vector4 # min_x min_y max_x max_y
 
@@ -363,6 +364,89 @@ func _input(event):
 					current_panel.scale.x = 1
 					current_panel.scale.y = 1
 				current_panel.get_theme_stylebox("panel", "").set_corner_radius_all(current_panel.size.x)
+				
+		if Globals.tool == "measure":
+			if Globals.measureTool == 1: #measure line
+				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					pressed = event.pressed
+					#just pressed - create objects
+					if pressed:
+						current_line = Line2D.new()
+						current_line.default_color = Globals.colorLines
+						current_line.width = min(Globals.lineWidth,3)
+						lines.add_child(current_line)
+						var pos = mouse_pos
+						current_line.add_point(pos)
+						current_line.add_point(pos)
+						current_rect = ColorRect.new()
+						current_rect.set_size(Vector2(0,0))
+						current_label = Label.new()
+						current_line.add_child(current_rect)
+						current_rect.add_child(current_label)
+						current_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+				#moved - modify objects
+				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					current_line.set_point_position(1, mouse_pos)
+					current_label.text = str(snapped(current_line.get_point_position(0).distance_to(current_line.get_point_position(1))/14, 0.01)) + " ft"
+					current_rect.set_position(mouse_pos)
+					current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
+					print(current_label.anchors_preset)
+					
+			if Globals.measureTool == 2: #measure circle
+				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					pressed = event.pressed
+					#just pressed - create objects
+					if pressed:
+						current_rect = ColorRect.new()
+						current_rect.color = Color(0,0,0,0)
+						current_line = Line2D.new()
+						current_line.default_color = Globals.colorLines
+						current_line.width = Globals.lineWidth
+						lines.add_child(current_rect)
+						current_rect.add_child(current_line)
+						var pos = mouse_pos
+						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
+						current_line.add_point(pos)
+				#moved - modify objects
+				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					var pos = mouse_pos
+					if min_max_x_y.x > pos.x: #min x
+						min_max_x_y.x = pos.x
+					if min_max_x_y.y > pos.y: #min y
+						min_max_x_y.y = pos.y
+					if min_max_x_y.z < pos.x: #max x
+						min_max_x_y.z = pos.x
+					if min_max_x_y.w < pos.y: #max y
+						min_max_x_y.w = pos.y
+					current_line.add_point(pos)
+					
+			if Globals.measureTool == 3: #measure angle
+				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					pressed = event.pressed
+					#just pressed - create objects
+					if pressed:
+						current_rect = ColorRect.new()
+						current_rect.color = Color(0,0,0,0)
+						current_line = Line2D.new()
+						current_line.default_color = Globals.colorLines
+						current_line.width = Globals.lineWidth
+						lines.add_child(current_rect)
+						current_rect.add_child(current_line)
+						var pos = mouse_pos
+						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
+						current_line.add_point(pos)
+				#moved - modify objects
+				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					var pos = mouse_pos
+					if min_max_x_y.x > pos.x: #min x
+						min_max_x_y.x = pos.x
+					if min_max_x_y.y > pos.y: #min y
+						min_max_x_y.y = pos.y
+					if min_max_x_y.z < pos.x: #max x
+						min_max_x_y.z = pos.x
+					if min_max_x_y.w < pos.y: #max y
+						min_max_x_y.w = pos.y
+					current_line.add_point(pos)
 				
 		if Globals.tool == "select":
 			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):

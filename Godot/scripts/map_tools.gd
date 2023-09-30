@@ -56,9 +56,8 @@ func _on_draw_pressed():
 
 
 func _on_snap_options_pressed():
-	$MarginContainer/VBoxContainer/SnapPopupPanel.visible = true
-
-
+	$MarginContainer/VBoxContainer/SnapPopupPanel.visible = not $MarginContainer/VBoxContainer/SnapPopupPanel.visible
+	$MarginContainer/VBoxContainer/SnapPanelContainer/HBoxContainer/SnapOptions.get_popup().visible = false
 
 
 func _on_snap_check_box_toggled(button_pressed):
@@ -67,3 +66,29 @@ func _on_snap_check_box_toggled(button_pressed):
 
 func _on_snap_fraction_option_button_item_selected(index):
 	Globals.snappingFraction = index + 1
+
+
+func _on_measure_options_pressed():
+	$MarginContainer/VBoxContainer/MeasurePopupPanel.visible = not $MarginContainer/VBoxContainer/MeasurePopupPanel.visible
+	$MarginContainer/VBoxContainer/HBoxContainer/MeasureOptions.get_popup().visible = false
+
+
+func _on_measure_pressed():
+	Globals.tool = "measure"
+	
+
+
+
+func _on_measure_line_radio_toggled(button_pressed):
+	if button_pressed:
+		Globals.measureTool = 1
+
+
+func _on_measure_circle_radio_toggled(button_pressed):
+	if button_pressed:
+		Globals.measureTool = 2
+
+
+func _on_measure_angle_radio_toggled(button_pressed):
+	if button_pressed:
+		Globals.measureTool = 3
