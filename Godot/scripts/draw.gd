@@ -11,6 +11,7 @@ var current_rect: ColorRect
 var current_label: Label
 var current_circle: CustomCircle
 var current_ellipse: CustomEllipse
+var current_arc: CustomArc
 var begin: Vector2
 var min_max_x_y: Vector4 # min_x min_y max_x max_y
 
@@ -409,28 +410,27 @@ func _input(event):
 					pressed = event.pressed
 					#just pressed - create objects
 					if pressed:
+						begin = mouse_pos
+						current_arc = CustomArc.new()
+						current_arc.set_position(mouse_pos)
+						current_arc.center = begin
+						current_arc.angle_size = Globals.measureAngle
+						lines.add_child(current_arc)
 						current_rect = ColorRect.new()
-						current_rect.color = Color(0,0,0,0)
-						current_line = Line2D.new()
-						current_line.default_color = Globals.colorLines
-						current_line.width = Globals.lineWidth
+						current_rect.set_size(Vector2(0,0))
+						current_label = Label.new()
 						lines.add_child(current_rect)
-						current_rect.add_child(current_line)
-						var pos = mouse_pos
-						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
-						current_line.add_point(pos)
+						current_rect.add_child(current_label)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-					var pos = mouse_pos
-					if min_max_x_y.x > pos.x: #min x
-						min_max_x_y.x = pos.x
-					if min_max_x_y.y > pos.y: #min y
-						min_max_x_y.y = pos.y
-					if min_max_x_y.z < pos.x: #max x
-						min_max_x_y.z = pos.x
-					if min_max_x_y.w < pos.y: #max y
-						min_max_x_y.w = pos.y
-					current_line.add_point(pos)
+					current_arc.angle_direction = (mouse_pos - begin).angle()
+					print(begin.angle_to(mouse_pos))
+					current_arc.radius = begin.distance_to(mouse_pos)
+					current_label.text = str(snapped(begin.distance_to(mouse_pos)/14, 0.01)) + " ft"
+					current_rect.set_position(mouse_pos)
+					current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
+					print(current_arc.center, begin)
+					print(current_arc.radius, " ", current_arc.angle_size, " ", current_arc.angle_direction, mouse_pos)
 				
 		if Globals.tool == "select":
 			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):

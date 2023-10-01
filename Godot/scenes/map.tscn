@@ -96,7 +96,7 @@ motion_mirroring = Vector2(70000, 70000)
 [node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 modulate = Color(0.360784, 0.545098, 0.509804, 0.309804)
 texture_filter = 2
-texture_repeat = 2
+texture_repeat = 3
 texture = ExtResource("7_uhnxr")
 region_enabled = true
 region_rect = Rect2(0, 0, 70000, 70000)

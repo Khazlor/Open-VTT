@@ -92,3 +92,7 @@ func _on_measure_circle_radio_toggled(button_pressed):
 func _on_measure_angle_radio_toggled(button_pressed):
 	if button_pressed:
 		Globals.measureTool = 3
+
+
+func _on_line_edit_text_changed(new_text):
+	Globals.measureAngle = int($MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/HBoxContainer/MeasureAngleLineEdit.text)
