@@ -9,6 +9,9 @@ var current_panel: Panel #rect
 var current_line: Line2D
 var current_rect: ColorRect
 var current_label: Label
+var current_textedit: TextEdit
+var currently_editing_label: Label
+var currently_editing_textedit: TextEdit
 var current_circle: CustomCircle
 var current_ellipse: CustomEllipse
 var current_arc: CustomArc
@@ -99,8 +102,10 @@ func _input(event):
 		current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 		current_line.position = -current_rect.position
 		current_rect = null
+
 	#select box drawing | scaling finished
 	if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
+		#drag finished
 		if mouse_over_selected and !selected_creating:
 			return
 		#scaling selection finished
@@ -355,6 +360,56 @@ func _input(event):
 					current_ellipse.size.x = current_ellipse.size.y
 				current_ellipse.queue_redraw()
 				
+		if Globals.tool == "text":
+			if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				pressed = event.pressed
+				#just pressed - create objects
+				if pressed:
+					#detect if creating new, or editing old
+					var lines_children = lines.get_children()
+					var found = 0 #0 nothing | 1 label | 2 textedit
+					for x in range(lines_children.size()):
+						var child = lines_children[-x-1]
+						if child.is_class("Label") or child.is_class("TextEdit"):
+							if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
+								if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+									if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+										if child.is_class("Label"):
+											found = 1
+											current_label = child
+											break
+										#clicked on existing
+										found = 2
+										break
+										
+					#didn't click on existing
+					if found == 0:
+						current_label = Label.new()
+						current_label.set_position(mouse_pos)
+						if Globals.fontName != "default":
+							current_label.add_theme_font_override(Globals.fontName, Globals.font)
+						current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
+						current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
+						current_label.text = "text"
+						lines.add_child(current_label)
+					#didn't click on existing textedit
+					if found != 2:
+						current_textedit = TextEdit.new()
+						current_textedit.position = current_label.position
+						current_textedit.text = current_label.text
+						current_label.text = ""
+						current_textedit.size = current_textedit.get_theme_font("normal_font").get_multiline_string_size(current_textedit.text)
+						current_textedit.scroll_fit_content_height = true
+						current_textedit.connect("focus_exited", _text_edit_finished)
+						current_textedit.connect("text_changed", _text_edit_text_changed)
+						lines.add_child(current_textedit)
+						current_textedit.grab_focus()
+						currently_editing_textedit = current_textedit
+						currently_editing_label = current_label
+			#moved - modify objects
+			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				return
+				
 		if Globals.tool == "measure":
 			if Globals.measureTool == 1: #measure line
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -476,6 +531,8 @@ func _input(event):
 					selected_creating = true
 			#moved - modify objects
 			if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				if $Select.get_child_count() == 0:
+					return
 				#drag - move objects
 				if mouse_over_selected and !selected_creating and !selected_scaling:
 					var relative_offset = event.relative/get_node("../Camera2D").zoom
@@ -745,3 +802,13 @@ func on_files_dropped(files):
 		lines.add_child(current_panel)
 		
 		
+func _text_edit_finished():
+	selected.clear()
+	currently_editing_label.text = currently_editing_textedit.text
+	lines.remove_child(currently_editing_textedit)
+	if currently_editing_label.text.is_empty():
+		lines.remove_child(currently_editing_label)
+	
+func _text_edit_text_changed():
+	current_textedit.size = current_textedit.get_theme_font("normal_font").get_multiline_string_size(current_textedit.text) + Vector2(20, current_textedit.get_theme_font("normal_font").get_height(Globals.fontSize))
+	

@@ -17,22 +17,6 @@ func _on_draw_item_selected(index):
 	elif index == 2:
 		Globals.tool = "circle"
 
-
-func _on_color_picker_button_popup_closed():
-	Globals.colorLines = $MarginContainer2/VBoxContainer/ColorPickerButton.color
-	get_node("MarginContainer/VBoxContainer/Draw").grab_focus()
-
-
-func _on_color_picker_button_2_popup_closed():
-	Globals.colorBack = $MarginContainer2/VBoxContainer/ColorPickerButton2.color
-	get_node("MarginContainer/VBoxContainer/Draw").grab_focus()
-
-
-func _on_spin_box_value_changed(value):
-	Globals.lineWidth = $MarginContainer2/VBoxContainer/SpinBox.value
-	get_node("MarginContainer/VBoxContainer/Draw").grab_focus()
-
-
 func _on_margin_container_mouse_entered():
 	Globals.mouseOverButton = true
 
@@ -69,15 +53,13 @@ func _on_snap_fraction_option_button_item_selected(index):
 
 
 func _on_measure_options_pressed():
+	Globals.tool = "measure"
 	$MarginContainer/VBoxContainer/MeasurePopupPanel.visible = not $MarginContainer/VBoxContainer/MeasurePopupPanel.visible
 	$MarginContainer/VBoxContainer/HBoxContainer/MeasureOptions.get_popup().visible = false
 
 
 func _on_measure_pressed():
 	Globals.tool = "measure"
-	
-
-
 
 func _on_measure_line_radio_toggled(button_pressed):
 	if button_pressed:
@@ -96,3 +78,31 @@ func _on_measure_angle_radio_toggled(button_pressed):
 
 func _on_line_edit_text_changed(new_text):
 	Globals.measureAngle = int($MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/HBoxContainer/MeasureAngleLineEdit.text)
+
+
+func _on_text_pressed():
+	Globals.tool = "text"
+
+
+func _on_font_option_button_item_selected(index):
+	Globals.font = $VBoxContainer/TextOptions/Panel/VBoxContainer/FontOptionButton.get_item_text(index) # Replace with function body.
+
+
+func _on_font_size_spin_box_value_changed(value):
+	Globals.fontSize = value
+
+
+func _on_font_color_picker_button_popup_closed():
+	Globals.fontColor = $VBoxContainer/TextOptions/Panel/VBoxContainer/FontColorPickerButton.color
+
+
+func _on_line_spin_box_value_changed(value):
+	Globals.lineWidth = value
+
+
+func _on_line_color_picker_button_popup_closed():
+	Globals.colorLines = $VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton.color
+
+
+func _on_fill_color_picker_button_popup_closed():
+	Globals.colorBack = $VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton.color

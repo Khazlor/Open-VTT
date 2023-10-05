@@ -120,7 +120,6 @@ layout_mode = 2
 title = "Snap Settings"
 position = Vector2i(0, 190)
 size = Vector2i(165, 254)
-visible = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MeasurePopupPanel"]
 offset_left = 4.0
@@ -181,40 +180,89 @@ text = "30"
 layout_mode = 2
 text = "°"
 
-[node name="Button3" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="Text" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 mouse_filter = 1
 theme_override_font_sizes/font_size = 25
-text = "▧"
+text = "T"
 
-[node name="MarginContainer2" type="MarginContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -107.0
-offset_right = 89.0
+offset_top = -40.0
+offset_right = 40.0
 grow_vertical = 0
+
+[node name="TextOptions" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/margin_left = 3
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2"]
+[node name="Panel" type="PanelContainer" parent="VBoxContainer/TextOptions"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/TextOptions/Panel"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SpinBox" type="SpinBox" parent="MarginContainer2/VBoxContainer"]
+[node name="Text" type="Label" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Text"
+
+[node name="FontOptionButton" type="OptionButton" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
+layout_mode = 2
+item_count = 1
+selected = 0
+popup/item_0/text = "default"
+popup/item_0/id = 0
+
+[node name="FontSizeSpinBox" type="SpinBox" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
 layout_mode = 2
 value = 10.0
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="MarginContainer2/VBoxContainer"]
+[node name="FontColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
 layout_mode = 2
 text = "C1"
 
-[node name="ColorPickerButton2" type="ColorPickerButton" parent="MarginContainer2/VBoxContainer"]
+[node name="LineOptions" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="Panel" type="PanelContainer" parent="VBoxContainer/LineOptions"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/LineOptions/Panel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LinesLabel" type="Label" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Lines"
+
+[node name="LineSpinBox" type="SpinBox" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
+layout_mode = 2
+value = 10.0
+
+[node name="LineColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
+layout_mode = 2
+text = "C1"
+
+[node name="FillLabel" type="Label" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Fill"
+
+[node name="FillColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
 layout_mode = 2
 text = "C2"
 color = Color(1, 1, 1, 1)
@@ -234,9 +282,15 @@ color = Color(1, 1, 1, 1)
 [connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureCircleRadio" to="." method="_on_measure_circle_radio_toggled"]
 [connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureAngleRadio" to="." method="_on_measure_angle_radio_toggled"]
 [connection signal="text_changed" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/HBoxContainer/MeasureAngleLineEdit" to="." method="_on_line_edit_text_changed"]
-[connection signal="focus_entered" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_focus_entered"]
-[connection signal="value_changed" from="MarginContainer2/VBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
-[connection signal="popup_closed" from="MarginContainer2/VBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_popup_closed"]
-[connection signal="pressed" from="MarginContainer2/VBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_pressed"]
-[connection signal="popup_closed" from="MarginContainer2/VBoxContainer/ColorPickerButton2" to="." method="_on_color_picker_button_2_popup_closed"]
-[connection signal="pressed" from="MarginContainer2/VBoxContainer/ColorPickerButton2" to="." method="_on_color_picker_button_2_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Text" to="." method="_on_text_pressed"]
+[connection signal="item_selected" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontOptionButton" to="." method="_on_font_option_button_item_selected"]
+[connection signal="focus_entered" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontSizeSpinBox" to="." method="_on_spin_box_focus_entered"]
+[connection signal="value_changed" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontSizeSpinBox" to="." method="_on_font_size_spin_box_value_changed"]
+[connection signal="popup_closed" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontColorPickerButton" to="." method="_on_font_color_picker_button_popup_closed"]
+[connection signal="pressed" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontColorPickerButton" to="." method="_on_color_picker_button_pressed"]
+[connection signal="focus_entered" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox" to="." method="_on_spin_box_focus_entered"]
+[connection signal="value_changed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox" to="." method="_on_line_spin_box_value_changed"]
+[connection signal="popup_closed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton" to="." method="_on_line_color_picker_button_popup_closed"]
+[connection signal="pressed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton" to="." method="_on_color_picker_button_pressed"]
+[connection signal="popup_closed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton" to="." method="_on_fill_color_picker_button_popup_closed"]
+[connection signal="pressed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton" to="." method="_on_color_picker_button_2_pressed"]
