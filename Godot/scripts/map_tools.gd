@@ -106,3 +106,16 @@ func _on_line_color_picker_button_popup_closed():
 
 func _on_fill_color_picker_button_popup_closed():
 	Globals.colorBack = $VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton.color
+
+
+func _on_save_pressed():
+	var packed_scene = PackedScene.new()
+	packed_scene.pack(get_tree().get_current_scene())
+	ResourceSaver.save(packed_scene, "res://my_scene.tscn")
+
+
+func _on_load_pressed():
+	var packed_scene = load("res://my_scene.tscn")
+	get_tree().change_scene_to_packed(packed_scene)
+
+
