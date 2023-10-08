@@ -722,8 +722,15 @@ func _input(event):
 							else:
 								select_box.size.y = select_box.size.x
 								
-	
-							
+	else:
+		if event is InputEventKey:
+			if Input.is_action_just_pressed("Delete"):
+				for child in selected:
+					child.queue_free()
+				#remove select box
+				for child in $Select.get_children():
+					child.queue_free()
+					
 #debug
 func _on_select_pressed(event: InputEvent):
 	if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
