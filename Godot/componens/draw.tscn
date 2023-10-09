@@ -7,6 +7,4 @@ script = ExtResource("1_1loxi")
 
 [node name="Lines" type="Node2D" parent="."]
 
-[node name="Tokens" type="Node2D" parent="."]
-
 [node name="Select" type="Node2D" parent="."]

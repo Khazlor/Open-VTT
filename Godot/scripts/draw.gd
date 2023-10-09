@@ -1,7 +1,5 @@
 extends Node2D
 
-@onready var lines = $Lines
-
 #drawing
 var pressed = false
 var draw_enable = true
@@ -154,7 +152,7 @@ func _input(event):
 			selected.clear()
 			if $Select.get_child_count() == 0:
 				return
-			var lines_children = lines.get_children()
+			var lines_children = $Lines.get_children()
 			#max select box size and position based on drawn size
 			var max_x = select_box.position.x
 			var max_y = select_box.position.y
@@ -291,7 +289,8 @@ func _input(event):
 						style.border_color = Globals.colorLines
 						style.set_border_width_all(Globals.lineWidth)
 						current_panel.add_theme_stylebox_override("panel", style)
-						lines.add_child(current_panel)
+						$Lines.add_child(current_panel)
+						current_panel.set_owner($Lines)
 						
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -324,8 +323,10 @@ func _input(event):
 						current_line = Line2D.new()
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
-						lines.add_child(current_rect)
+						$Lines.add_child(current_rect)
+						current_rect.set_owner($Lines)
 						current_rect.add_child(current_line)
+						current_line.set_owner($Lines)
 						var pos = mouse_pos
 						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
 						current_line.add_point(pos)
@@ -351,7 +352,8 @@ func _input(event):
 						begin = mouse_pos
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
-						lines.add_child(current_ellipse)
+						$Lines.add_child(current_ellipse)
+						current_ellipse.set_owner($Lines)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var end = mouse_pos
@@ -377,7 +379,7 @@ func _input(event):
 					#just pressed - create objects
 					if pressed:
 						#detect if creating new, or editing old
-						var lines_children = lines.get_children()
+						var lines_children = $Lines.get_children()
 						var found = 0 #0 nothing | 1 label | 2 textedit
 						for x in range(lines_children.size()):
 							var child = lines_children[-x-1]
@@ -402,7 +404,8 @@ func _input(event):
 							current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
 							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
 							current_label.text = "text"
-							lines.add_child(current_label)
+							$Lines.add_child(current_label)
+							current_label.set_owner($Lines)
 						#didn't click on existing textedit
 						if found != 2:
 							current_textedit = TextEdit.new()
@@ -413,7 +416,8 @@ func _input(event):
 							current_textedit.scroll_fit_content_height = true
 							current_textedit.connect("focus_exited", _text_edit_finished)
 							current_textedit.connect("text_changed", _text_edit_text_changed)
-							lines.add_child(current_textedit)
+							$Lines.add_child(current_textedit)
+							current_textedit.set_owner($Lines)
 							current_textedit.grab_focus()
 							currently_editing_textedit = current_textedit
 							currently_editing_label = current_label
@@ -430,7 +434,8 @@ func _input(event):
 							current_line = Line2D.new()
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
-							lines.add_child(current_line)
+							$Lines.add_child(current_line)
+							current_line.set_owner($Lines)
 							current_measure.append(current_line)
 							current_line.add_point(mouse_pos)
 							current_line.add_point(mouse_pos)
@@ -438,7 +443,9 @@ func _input(event):
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
 							current_line.add_child(current_rect)
+							current_rect.set_owner($Lines)
 							current_rect.add_child(current_label)
+							current_label.set_owner($Lines)
 							current_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -457,14 +464,17 @@ func _input(event):
 							current_circle = CustomCircle.new()
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
-							lines.add_child(current_circle)
+							$Lines.add_child(current_circle)
+							current_circle.set_owner($Lines)
 							current_measure.append(current_circle)
 							current_rect = ColorRect.new()
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
-							lines.add_child(current_rect)
+							$Lines.add_child(current_rect)
+							current_rect.set_owner($Lines)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
+							current_label.set_owner($Lines)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_circle.radius = begin.distance_to(mouse_pos)
@@ -484,14 +494,17 @@ func _input(event):
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
 							current_arc.angle_size = Globals.measureAngle
-							lines.add_child(current_arc)
+							$Lines.add_child(current_arc)
+							current_arc.set_owner($Lines)
 							current_measure.append(current_arc)
 							current_rect = ColorRect.new()
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
-							lines.add_child(current_rect)
+							$Lines.add_child(current_rect)
+							current_rect.set_owner($Lines)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
+							current_label.set_owner($Lines)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_arc.angle_direction = (mouse_pos - begin).angle()
@@ -506,9 +519,12 @@ func _input(event):
 			if Globals.tool == "select":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
+					print("selection pressed")
 					if mouse_over_selected: #drag
+						print("mouse_over_selected")
 						return
 					if mouse_over_tl or mouse_over_tr or mouse_over_bl or mouse_over_br: #scale
+						print("mouse_over_bltlbrtr")
 						selected_scaling = true
 						min_max_x_y = Vector4(select_box.position.x, select_box.position.y, select_box.position.x+select_box.size.x, select_box.position.y+select_box.size.y)
 						select_pos_org = select_box.position
@@ -522,6 +538,7 @@ func _input(event):
 					#just pressed - create objects
 					if pressed:
 						#remove old select
+						print("selection creating")
 						for child in $Select.get_children():
 							child.queue_free()
 							#$Select.remove_child($Select.get_child(0))
@@ -548,6 +565,7 @@ func _input(event):
 						selected_creating = true
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					print("selection drag")
 					if $Select.get_child_count() == 0:
 						return
 					#drag - move objects
@@ -722,14 +740,27 @@ func _input(event):
 							else:
 								select_box.size.y = select_box.size.x
 								
-	else:
-		if event is InputEventKey:
-			if Input.is_action_just_pressed("Delete"):
-				for child in selected:
-					child.queue_free()
-				#remove select box
-				for child in $Select.get_children():
-					child.queue_free()
+	elif event is InputEventKey:
+		if Input.is_action_just_pressed("Delete"):
+			for child in selected:
+				child.queue_free()
+			#remove select box
+			for child in $Select.get_children():
+				child.queue_free()
+				
+			#resetting select box state variables
+			mouse_over_selected = false
+			selected_creating = false
+			selected_scaling = false
+			mouse_over_tl = false
+			mouse_over_bl = false
+			mouse_over_tr = false
+			mouse_over_br = false
+		elif Input.is_action_just_pressed("Escape"):
+			var save = PackedScene.new()
+			save.pack($Lines);
+			Globals.map.save(save)
+			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 					
 #debug
 func _on_select_pressed(event: InputEvent):
@@ -757,6 +788,7 @@ func _on_select_mouse_exited():
 #creates handle for selection box
 #preset - anchor point
 #s - size
+
 func create_handle(preset: Control.LayoutPreset, s: float):
 	current_panel = Panel.new()
 	current_panel.position = Vector2(-s/2,-s/2)
@@ -825,7 +857,8 @@ func on_files_dropped(files):
 		var style = StyleBoxTexture.new()
 		style.texture = tex
 		current_panel.add_theme_stylebox_override("panel", style)
-		lines.add_child(current_panel)
+		$Lines.add_child(current_panel)
+		current_panel.set_owner($Lines)
 		
 		
 func _text_edit_finished():

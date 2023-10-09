@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
@@ -8,7 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
 [ext_resource type="PackedScene" uid="uid://3qgtuhwblt4q" path="res://componens/draw.tscn" id="6_txqn8"]
 [ext_resource type="Texture2D" uid="uid://dk4s6w4hwuvxg" path="res://images/grid_white.png" id="7_uhnxr"]
-[ext_resource type="Script" path="res://componens/CustomCircle.gd" id="8_083qu"]
 [ext_resource type="Shader" path="res://shaders/grid.gdshader" id="9_4m3b1"]
 
 [sub_resource type="TileSet" id="TileSet_xj2wd"]
@@ -60,30 +59,6 @@ grow_horizontal = 0
 
 [node name="Draw" parent="." instance=ExtResource("6_txqn8")]
 texture_repeat = 2
-
-[node name="CustomCircle" type="Control" parent="Draw"]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("8_083qu")
-
-[node name="Control" type="Control" parent="Draw"]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 400.0
-offset_right = 440.0
-offset_bottom = 40.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Node2D" type="Node2D" parent="."]
 material = SubResource("ShaderMaterial_nrof3")

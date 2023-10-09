@@ -6,7 +6,9 @@ const MapCard = preload("res://componens/mapcard.tscn")
 func _ready():
 	print(PersistentData)
 	for map in PersistentData.map_list:
-		$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.add_child(MapCard.instantiate())
+		var mapcard = MapCard.instantiate()
+		mapcard.map = map
+		$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.add_child(mapcard)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -24,5 +26,8 @@ func _on_back_pressed():
 
 
 func _on_new_map_pressed():
-	PersistentData.map_list.append(Map_res.new())
-	$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.add_child(MapCard.instantiate())
+	var map = Map_res.new()
+	PersistentData.map_list.append(map)
+	var mapcard = MapCard.instantiate()
+	mapcard.map = map
+	$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.add_child(mapcard)

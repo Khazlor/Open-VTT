@@ -1,6 +1,8 @@
 class_name Tool
 extends Node
 
+var map: Map_res
+
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
 var measureAngle = 30
