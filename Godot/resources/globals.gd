@@ -1,6 +1,7 @@
 class_name Tool
 extends Node
 
+var campaign: Campaign_res
 var map: Map_res
 
 var snapping = false

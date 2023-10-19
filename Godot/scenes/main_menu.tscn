@@ -122,3 +122,4 @@ grow_horizontal = 0
 text = "O"
 
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/CampaignBrowserBtn" to="." method="_on_campaign_browser_btn_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/MapBrowserBtn" to="." method="_on_map_browser_btn_pressed"]

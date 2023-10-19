@@ -11,4 +11,8 @@ func _process(delta):
 
 
 func _on_campaign_browser_btn_pressed():
+	get_tree().change_scene_to_file("res://scenes/Campaigns.tscn")
+
+
+func _on_map_browser_btn_pressed():
 	get_tree().change_scene_to_file("res://scenes/Maps.tscn")
