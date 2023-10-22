@@ -3,6 +3,7 @@ extends Node
 
 var campaign: Campaign_res
 var map: Map_res
+var new_map: Map_res
 
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle

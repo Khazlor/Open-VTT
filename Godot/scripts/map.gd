@@ -5,16 +5,17 @@ extends Node2D
 func _ready():
 	randomize()
 	#load
-	if Globals.map.saved_scene != null:
+	if Globals.new_map.saved_scene != null:
 		print("load")
-		$Draw/Lines.replace_by(Globals.map.saved_scene.instantiate())
+		$Draw/Lines.replace_by(Globals.new_map.saved_scene.instantiate())
 #		for child in draw.get_children():
 #			if child.name == "Lines":
 #				draw.remove_child(child)
 #		draw.add_child(Globals.map.saved_scene.instantiate())
 	else:
 		print("new map")
-		
+	#changing map to new_map - after map was saved
+	Globals.map = Globals.new_map
 	#changing function on back button in Maps
 	$CanvasLayer/VSplitContainer/Maps/Back.disconnect("pressed", $CanvasLayer/VSplitContainer/Maps/Back.get_signal_connection_list("pressed")[0].callable)
 	$CanvasLayer/VSplitContainer/Maps/Back.connect("pressed", _on_maps_back_button_pressed)

@@ -324,7 +324,6 @@ func _unhandled_input(event):
 						current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_rect.color = Color(0,0,0,0)
 						current_line = Line2D.new()
-						current_line.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
 						$Lines.add_child(current_rect)
@@ -438,7 +437,6 @@ func _unhandled_input(event):
 						#just pressed - create objects
 						if pressed:
 							current_line = Line2D.new()
-							current_line.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
 							$Lines.add_child(current_line)

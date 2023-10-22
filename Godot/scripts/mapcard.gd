@@ -13,8 +13,5 @@ func _process(delta):
 	pass
 
 func _on_button_pressed():
-	if Globals.map != null:
-		print(Globals.map.saved_scene)
-	Globals.map = map
-	print(Globals.map.saved_scene)
+	Globals.new_map = map
 	get_tree().change_scene_to_file("res://scenes/map.tscn")
