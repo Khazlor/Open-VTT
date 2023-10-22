@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/roll_panel_item_Result.gd" id="1_542ih"]
 
 [node name="Roll_panel_item" type="PanelContainer"]
+clip_contents = true
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
@@ -10,11 +11,14 @@ size_flags_horizontal = 3
 size_flags_vertical = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
+clip_contents = true
 layout_mode = 2
 
 [node name="Text" type="Label" parent="VBoxContainer"]
+clip_contents = true
 layout_mode = 2
 text = "Text"
+autowrap_mode = 3
 
 [node name="Result" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2

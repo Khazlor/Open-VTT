@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=13 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://3qgtuhwblt4q" path="res://componens/draw.tscn" id="6_txqn8"]
 [ext_resource type="Texture2D" uid="uid://dk4s6w4hwuvxg" path="res://images/grid_white.png" id="7_uhnxr"]
 [ext_resource type="Shader" path="res://shaders/grid.gdshader" id="9_4m3b1"]
+[ext_resource type="PackedScene" uid="uid://7ynxnxtwfalq" path="res://scenes/Maps.tscn" id="10_q214b"]
 
 [sub_resource type="TileSet" id="TileSet_xj2wd"]
 tile_size = Vector2i(70, 70)
@@ -43,20 +44,6 @@ format = 2
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("1_ihf1l")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="ToolBar" parent="CanvasLayer" instance=ExtResource("4_4e45f")]
-anchors_preset = -1
-offset_right = -1066.0
-
-[node name="RollPanel" parent="CanvasLayer" instance=ExtResource("6_ijfhq")]
-custom_minimum_size = Vector2(50, 0)
-anchors_preset = 11
-anchor_left = 1.0
-offset_left = -196.0
-offset_right = 0.0
-grow_horizontal = 0
-
 [node name="Draw" parent="." instance=ExtResource("6_txqn8")]
 texture_repeat = 2
 
@@ -75,3 +62,64 @@ texture_repeat = 3
 texture = ExtResource("7_uhnxr")
 region_enabled = true
 region_rect = Rect2(0, 0, 70000, 70000)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HSplitContainer" type="HSplitContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+split_offset = -225
+
+[node name="Control" type="Control" parent="CanvasLayer/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="RollPanel" parent="CanvasLayer/HSplitContainer" instance=ExtResource("6_ijfhq")]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 0
+
+[node name="ToolBar" parent="CanvasLayer" instance=ExtResource("4_4e45f")]
+anchors_preset = -1
+offset_right = -1066.0
+
+[node name="MapsButton" type="Button" parent="CanvasLayer"]
+offset_left = 1402.0
+offset_top = -1.0
+offset_right = 1469.0
+offset_bottom = 36.0
+text = "Maps"
+
+[node name="VSplitContainer" type="VSplitContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+split_offset = 485
+
+[node name="Maps" parent="CanvasLayer/VSplitContainer" instance=ExtResource("10_q214b")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+mouse_force_pass_scroll_events = false
+
+[node name="Control" type="Control" parent="CanvasLayer/VSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+
+[connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]
+[connection signal="pressed" from="CanvasLayer/MapsButton" to="." method="_on_maps_button_pressed"]
+[connection signal="mouse_entered" from="CanvasLayer/VSplitContainer/Maps" to="." method="_on_maps_mouse_entered"]
+[connection signal="mouse_exited" from="CanvasLayer/VSplitContainer/Maps" to="." method="_on_maps_mouse_exited"]

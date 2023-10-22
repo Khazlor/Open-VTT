@@ -19,3 +19,4 @@ var fontColor = Color(0,0,0,1)
 var fontSize = 10
 
 var mouseOverButton = false
+var mouseOverMaps = false

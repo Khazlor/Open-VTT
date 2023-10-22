@@ -45,7 +45,7 @@ var last_event_pos = Vector2(-1,-1)
 func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
-func _input(event):
+func _unhandled_input(event):
 	if event is InputEventMouse:
 		var mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
@@ -250,7 +250,6 @@ func _input(event):
 			select_box.set_end(Vector2(max_x, max_y))
 			#control points - handles
 			create_handle(Control.PRESET_TOP_LEFT, 15)
-			current_panel.connect("gui_input", _tl_handle_mouse_pressed)
 			current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
 			current_panel.connect("mouse_exited", _tl_handle_mouse_exited)
 			create_handle(Control.PRESET_BOTTOM_LEFT, 15)
@@ -263,6 +262,8 @@ func _input(event):
 			current_panel.connect("mouse_entered", _br_handle_mouse_entered)
 			current_panel.connect("mouse_exited", _br_handle_mouse_exited)
 			
+			for child in select_box.get_children():
+				print(child.get_signal_connection_list("mouse_entered"))
 			print(select_box.get_begin())
 			print(select_box.get_end())
 		#circle or rect drawing finished
@@ -281,6 +282,7 @@ func _input(event):
 					#just pressed - create objects
 					if pressed:
 						current_panel = Panel.new()
+						current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						current_panel.set_begin(begin)
 						current_panel.set_end(begin)
@@ -319,8 +321,10 @@ func _input(event):
 					#just pressed - create objects
 					if pressed:
 						current_rect = ColorRect.new()
+						current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_rect.color = Color(0,0,0,0)
 						current_line = Line2D.new()
+						current_line.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
 						$Lines.add_child(current_rect)
@@ -349,6 +353,7 @@ func _input(event):
 					#just pressed - create objects
 					if pressed:
 						current_ellipse = CustomEllipse.new()
+						current_ellipse.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
@@ -398,6 +403,7 @@ func _input(event):
 						#didn't click on existing
 						if found == 0:
 							current_label = Label.new()
+							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_label.set_position(mouse_pos)
 							if Globals.fontName != "default":
 								current_label.add_theme_font_override(Globals.fontName, Globals.font)
@@ -432,6 +438,7 @@ func _input(event):
 						#just pressed - create objects
 						if pressed:
 							current_line = Line2D.new()
+							current_line.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
 							$Lines.add_child(current_line)
@@ -440,8 +447,10 @@ func _input(event):
 							current_line.add_point(mouse_pos)
 							current_line.add_point(mouse_pos)
 							current_rect = ColorRect.new()
+							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.add_child(current_rect)
 							current_rect.set_owner($Lines)
 							current_rect.add_child(current_label)
@@ -462,14 +471,17 @@ func _input(event):
 						if pressed:
 							begin = mouse_pos
 							current_circle = CustomCircle.new()
+							current_circle.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
 							$Lines.add_child(current_circle)
 							current_circle.set_owner($Lines)
 							current_measure.append(current_circle)
 							current_rect = ColorRect.new()
+							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							$Lines.add_child(current_rect)
 							current_rect.set_owner($Lines)
 							current_measure.append(current_rect)
@@ -491,6 +503,7 @@ func _input(event):
 						if pressed:
 							begin = mouse_pos
 							current_arc = CustomArc.new()
+							current_arc.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
 							current_arc.angle_size = Globals.measureAngle
@@ -498,8 +511,10 @@ func _input(event):
 							current_arc.set_owner($Lines)
 							current_measure.append(current_arc)
 							current_rect = ColorRect.new()
+							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							$Lines.add_child(current_rect)
 							current_rect.set_owner($Lines)
 							current_measure.append(current_rect)
@@ -544,6 +559,7 @@ func _input(event):
 							#$Select.remove_child($Select.get_child(0))
 	#					if $Select.get_child_count() != 0:
 						select_box = Panel.new()
+						select_box.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						select_box.set_begin(begin)
 						select_box.set_end(begin)
@@ -552,7 +568,6 @@ func _input(event):
 						style.border_color = Color.CORNSILK
 						style.set_border_width_all(2)
 						select_box.add_theme_stylebox_override("panel", style)
-						select_box.connect("gui_input", _on_select_pressed)
 						select_box.connect("mouse_entered", _on_select_mouse_entered)
 						select_box.connect("mouse_exited", _on_select_mouse_exited)
 						$Select.add_child(select_box)
@@ -757,17 +772,11 @@ func _input(event):
 			mouse_over_tr = false
 			mouse_over_br = false
 		elif Input.is_action_just_pressed("Escape"):
-			var save = PackedScene.new()
-			save.pack($Lines);
-			Globals.map.save(save)
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 					
-#debug
-func _on_select_pressed(event: InputEvent):
-	if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		print("selected: ", selected)
 		
 func _on_select_mouse_entered():
+	print("mouse over selected")
 	mouse_over_selected = true
 	
 func _on_select_mouse_exited():
@@ -791,9 +800,12 @@ func _on_select_mouse_exited():
 
 func create_handle(preset: Control.LayoutPreset, s: float):
 	current_panel = Panel.new()
+	current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 	current_panel.position = Vector2(-s/2,-s/2)
 	current_panel.size = Vector2(s,s)
+	current_panel.pivot_offset = Vector2(s/2,s/2)
 	current_panel.set_anchors_preset(preset)
+	current_panel.scale = Vector2(1/$"../Camera2D".zoom.x, 1/$"../Camera2D".zoom.y)
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color.WHITE
 	style.border_color = Color.BLACK
@@ -802,10 +814,8 @@ func create_handle(preset: Control.LayoutPreset, s: float):
 	current_panel.add_theme_stylebox_override("panel", style)
 	$Select.get_child(0).add_child(current_panel)
 	
-func _tl_handle_mouse_pressed():
-	pass
-	
 func _tl_handle_mouse_entered():
+	print("mouse over TL")
 	if !selected_scaling:
 		mouse_over_tl = true
 
@@ -851,6 +861,7 @@ func on_files_dropped(files):
 			print(img.get_size())
 		tex.set_image(img)
 		current_panel = Panel.new()
+		current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 		var begin = get_viewport().get_mouse_position()
 		current_panel.set_begin(begin)
 		current_panel.set_end(begin + Vector2(50,50))
