@@ -1,11 +1,13 @@
 class_name Map_res
 extends Resource
 
-var map_name = "Map Name"
-var map_desc = "Description"
-var grid_size = 70
-var image = "res://images/Placeholder-1479066.png"
-var saved_scene: PackedScene = null
+@export var map_name = "Map Name"
+@export var map_desc = "Description"
+@export var grid_size = 70
+@export var unit_size = 5
+@export var unit = "ft"
+@export var image = "res://images/Placeholder-1479066.png"
+@export var saved_scene: PackedScene = null
 
 func save(packed_scene: PackedScene):
 	print("saving")

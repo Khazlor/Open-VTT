@@ -18,6 +18,7 @@ script = ExtResource("1_g1iyn")
 layout_mode = 0
 offset_right = 384.0
 offset_bottom = 256.0
+mouse_filter = 1
 
 [node name="Name" type="Label" parent="PanelContainer"]
 layout_mode = 2
@@ -56,6 +57,6 @@ text = "Description:"
 
 [node name="Button" type="Button" parent="PanelContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
-[connection signal="pressed" from="PanelContainer/Button" to="." method="_on_button_pressed"]

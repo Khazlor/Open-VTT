@@ -3,7 +3,7 @@
 [ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="1_65ntf"]
 [ext_resource type="Script" path="res://scripts/Maps.gd" id="1_wdgyu"]
 
-[node name="Control" type="Control"]
+[node name="Maps" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -61,6 +61,68 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
 
+[node name="PopupPanel" type="PopupPanel" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+size = Vector2i(250, 248)
+mouse_passthrough = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 246.0
+offset_bottom = 330.0
+
+[node name="EditLabel" type="Label" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Edit:"
+
+[node name="MapName" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Map name"
+
+[node name="MapDesc" type="TextEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Map description"
+scroll_fit_content_height = true
+
+[node name="GridSizePx" type="SpinBox" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "number of pixels per grid cell"
+
+[node name="UnitSize" type="SpinBox" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Numerical size of grid cell"
+
+[node name="Unit" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Unit of grid cell (ft, km, miles, etc.)"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply"
+
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DuplicateButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Duplicate"
+
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DeleteButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Delete"
+
 [node name="Back" type="Button" parent="."]
 layout_mode = 1
 offset_left = 56.0
@@ -85,5 +147,9 @@ theme_override_font_sizes/font_size = 20
 text = "+"
 
 [connection signal="resized" from="." to="." method="_on_resized"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer/ApplyButton" to="." method="_on_apply_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/DuplicateButton" to="." method="_on_duplicate_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/DeleteButton" to="." method="_on_delete_button_pressed"]
 [connection signal="pressed" from="Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="NewMap" to="." method="_on_new_map_pressed"]
