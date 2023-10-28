@@ -10,6 +10,8 @@ var mapcard
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	popup.transient = true
+	popup.exclusive = true
 	var map_dir = DirAccess.open("res://saves/" + Globals.campaign.campaign_name + "/maps")
 	if map_dir == null:
 		print("no maps")
@@ -109,6 +111,8 @@ func _on_apply_button_pressed():
 
 func _on_cancel_button_pressed():
 	popup.hide()
+	print(popup.is_transient())
+	print(popup.is_exclusive())
 	
 
 

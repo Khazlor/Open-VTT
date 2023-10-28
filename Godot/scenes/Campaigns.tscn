@@ -61,6 +61,57 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
 
+[node name="PopupPanel" type="PopupPanel" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+handle_input_locally = false
+size = Vector2i(250, 229)
+mouse_passthrough = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 246.0
+offset_bottom = 225.0
+
+[node name="EditLabel" type="Label" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Edit:"
+
+[node name="CampaignName" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Map name"
+
+[node name="CampaignDesc" type="TextEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Map description"
+scroll_fit_content_height = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply"
+
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DuplicateButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Duplicate"
+
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DeleteButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Delete"
+
 [node name="Back" type="Button" parent="."]
 layout_mode = 1
 offset_left = 56.0

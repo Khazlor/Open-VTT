@@ -1,7 +1,6 @@
 extends Control
 var map: Map_res
-signal mapcard_right_click(map)
-signal mapcard_duplicate(map)
+signal mapcard_right_click(map, mapcard)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

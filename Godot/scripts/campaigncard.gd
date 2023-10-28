@@ -1,5 +1,6 @@
 extends Control
 var campaign: Campaign_res
+signal campaigncard_right_click(campaign, campaigncard)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -15,6 +16,11 @@ func _ready():
 func _process(delta):
 	pass
 
-func _on_button_pressed():
-	Globals.campaign = campaign
-	get_tree().change_scene_to_file("res://scenes/Maps.tscn")
+func _on_gui_input(event):
+	if event.is_action_pressed("mouseleft"):
+		Globals.campaign = campaign
+		get_tree().change_scene_to_file("res://scenes/Maps.tscn")
+	elif event.is_action_pressed("mouseright"):
+		Globals.campaign = campaign
+		print("right")
+		emit_signal("campaigncard_right_click", campaign, self)
