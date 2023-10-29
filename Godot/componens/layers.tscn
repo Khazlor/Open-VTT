@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://h5xb4t4cm47n"]
+
+[ext_resource type="Script" path="res://scripts/Layers.gd" id="1_5oi25"]
+
+[node name="Layers" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_5oi25")
+
+[node name="Tree" type="Tree" parent="."]
+layout_mode = 0
+offset_right = 250.0
+offset_bottom = 250.0
