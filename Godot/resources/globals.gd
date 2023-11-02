@@ -5,6 +5,8 @@ var campaign: Campaign_res
 var map: Map_res
 var new_map: Map_res
 
+var draw_layer: Node2D
+
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
 var measureAngle = 30

@@ -46,6 +46,7 @@ func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _unhandled_input(event):
+#	print_tree_pretty() #DEBUG TODO remove
 	if event is InputEventMouse:
 		var mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
@@ -152,7 +153,7 @@ func _unhandled_input(event):
 			selected.clear()
 			if $Select.get_child_count() == 0:
 				return
-			var lines_children = $Lines.get_children()
+			var lines_children = Globals.draw_layer.get_children()
 			#max select box size and position based on drawn size
 			var max_x = select_box.position.x
 			var max_y = select_box.position.y
@@ -270,6 +271,11 @@ func _unhandled_input(event):
 		if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
 			if current_panel == null:
 				return
+			print_tree_pretty()
+			print("rect finished")
+			print(current_panel.size)
+			print(current_panel.position)
+			print(get_global_mouse_position())
 			if current_panel.size.x == 0 or current_panel.size.y == 0:
 				#lines.remove_child(current_panel)
 				current_panel.queue_free()
@@ -291,8 +297,8 @@ func _unhandled_input(event):
 						style.border_color = Globals.colorLines
 						style.set_border_width_all(Globals.lineWidth)
 						current_panel.add_theme_stylebox_override("panel", style)
-						$Lines.add_child(current_panel)
-						current_panel.set_owner($Lines)
+						Globals.draw_layer.add_child(current_panel)
+						current_panel.set_owner(Globals.draw_layer)
 						
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -326,10 +332,10 @@ func _unhandled_input(event):
 						current_line = Line2D.new()
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
-						$Lines.add_child(current_rect)
-						current_rect.set_owner($Lines)
+						Globals.draw_layer.add_child(current_rect)
+						current_rect.set_owner(Globals.draw_layer)
 						current_rect.add_child(current_line)
-						current_line.set_owner($Lines)
+						current_line.set_owner(Globals.draw_layer)
 						var pos = mouse_pos
 						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
 						current_line.add_point(pos)
@@ -356,8 +362,8 @@ func _unhandled_input(event):
 						begin = mouse_pos
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
-						$Lines.add_child(current_ellipse)
-						current_ellipse.set_owner($Lines)
+						Globals.draw_layer.add_child(current_ellipse)
+						current_ellipse.set_owner(Globals.draw_layer)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var end = mouse_pos
@@ -383,7 +389,7 @@ func _unhandled_input(event):
 					#just pressed - create objects
 					if pressed:
 						#detect if creating new, or editing old
-						var lines_children = $Lines.get_children()
+						var lines_children = Globals.draw_layer.get_children()
 						var found = 0 #0 nothing | 1 label | 2 textedit
 						for x in range(lines_children.size()):
 							var child = lines_children[-x-1]
@@ -409,8 +415,8 @@ func _unhandled_input(event):
 							current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
 							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
 							current_label.text = "text"
-							$Lines.add_child(current_label)
-							current_label.set_owner($Lines)
+							Globals.draw_layer.add_child(current_label)
+							current_label.set_owner(Globals.draw_layer)
 						#didn't click on existing textedit
 						if found != 2:
 							current_textedit = TextEdit.new()
@@ -421,8 +427,8 @@ func _unhandled_input(event):
 							current_textedit.scroll_fit_content_height = true
 							current_textedit.connect("focus_exited", _text_edit_finished)
 							current_textedit.connect("text_changed", _text_edit_text_changed)
-							$Lines.add_child(current_textedit)
-							current_textedit.set_owner($Lines)
+							Globals.draw_layer.add_child(current_textedit)
+							current_textedit.set_owner(Globals.draw_layer)
 							current_textedit.grab_focus()
 							currently_editing_textedit = current_textedit
 							currently_editing_label = current_label
@@ -439,8 +445,8 @@ func _unhandled_input(event):
 							current_line = Line2D.new()
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
-							$Lines.add_child(current_line)
-							current_line.set_owner($Lines)
+							Globals.draw_layer.add_child(current_line)
+							current_line.set_owner(Globals.draw_layer)
 							current_measure.append(current_line)
 							current_line.add_point(mouse_pos)
 							current_line.add_point(mouse_pos)
@@ -450,9 +456,9 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.add_child(current_rect)
-							current_rect.set_owner($Lines)
+							current_rect.set_owner(Globals.draw_layer)
 							current_rect.add_child(current_label)
-							current_label.set_owner($Lines)
+							current_label.set_owner(Globals.draw_layer)
 							current_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -472,19 +478,19 @@ func _unhandled_input(event):
 							current_circle.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
-							$Lines.add_child(current_circle)
-							current_circle.set_owner($Lines)
+							Globals.draw_layer.add_child(current_circle)
+							current_circle.set_owner(Globals.draw_layer)
 							current_measure.append(current_circle)
 							current_rect = ColorRect.new()
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
-							$Lines.add_child(current_rect)
-							current_rect.set_owner($Lines)
+							Globals.draw_layer.add_child(current_rect)
+							current_rect.set_owner(Globals.draw_layer)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
-							current_label.set_owner($Lines)
+							current_label.set_owner(Globals.draw_layer)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_circle.radius = begin.distance_to(mouse_pos)
@@ -505,19 +511,19 @@ func _unhandled_input(event):
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
 							current_arc.angle_size = Globals.measureAngle
-							$Lines.add_child(current_arc)
-							current_arc.set_owner($Lines)
+							Globals.draw_layer.add_child(current_arc)
+							current_arc.set_owner(Globals.draw_layer)
 							current_measure.append(current_arc)
 							current_rect = ColorRect.new()
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
-							$Lines.add_child(current_rect)
-							current_rect.set_owner($Lines)
+							Globals.draw_layer.add_child(current_rect)
+							current_rect.set_owner(Globals.draw_layer)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
-							current_label.set_owner($Lines)
+							current_label.set_owner(Globals.draw_layer)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_arc.angle_direction = (mouse_pos - begin).angle()
@@ -866,8 +872,8 @@ func on_files_dropped(files):
 		var style = StyleBoxTexture.new()
 		style.texture = tex
 		current_panel.add_theme_stylebox_override("panel", style)
-		$Lines.add_child(current_panel)
-		current_panel.set_owner($Lines)
+		Globals.draw_layer.add_child(current_panel)
+		current_panel.set_owner(Globals.draw_layer)
 		
 		
 func _text_edit_finished():

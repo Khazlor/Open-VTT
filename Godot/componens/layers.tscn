@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://h5xb4t4cm47n"]
+[gd_scene load_steps=3 format=3 uid="uid://h5xb4t4cm47n"]
 
 [ext_resource type="Script" path="res://scripts/Layers.gd" id="1_5oi25"]
+[ext_resource type="Script" path="res://scripts/my_tree.gd" id="2_8qj7w"]
 
 [node name="Layers" type="Control"]
 layout_mode = 3
@@ -13,3 +14,7 @@ script = ExtResource("1_5oi25")
 layout_mode = 0
 offset_right = 250.0
 offset_bottom = 250.0
+script = ExtResource("2_8qj7w")
+
+[connection signal="item_activated" from="Tree" to="." method="_on_tree_item_activated"]
+[connection signal="item_mouse_selected" from="Tree" to="." method="_on_tree_item_mouse_selected"]

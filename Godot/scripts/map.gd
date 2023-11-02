@@ -7,7 +7,8 @@ func _ready():
 	#load
 	if Globals.new_map.saved_scene != null:
 		print("load")
-		$Draw/Lines.replace_by(Globals.new_map.saved_scene.instantiate())
+#		$Draw/Lines.replace_by(Globals.new_map.saved_scene.instantiate())
+		
 #		for child in draw.get_children():
 #			if child.name == "Lines":
 #				draw.remove_child(child)
@@ -16,6 +17,7 @@ func _ready():
 		print("new map")
 	#changing map to new_map - after map was saved
 	Globals.map = Globals.new_map
+	Globals.draw_layer = $Draw/Lines
 	#changing function on back button in Maps
 	$CanvasLayer/VSplitContainer/Maps/Back.disconnect("pressed", $CanvasLayer/VSplitContainer/Maps/Back.get_signal_connection_list("pressed")[0].callable)
 	$CanvasLayer/VSplitContainer/Maps/Back.connect("pressed", _on_maps_back_button_pressed)
