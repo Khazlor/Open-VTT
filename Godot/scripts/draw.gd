@@ -159,6 +159,7 @@ func _unhandled_input(event):
 			var max_y = select_box.position.y
 			var min_x = select_box.size.x + select_box.position.x
 			var min_y = select_box.size.y + select_box.position.y
+			print_tree_pretty()
 			#snap selection size to children
 			for child in lines_children:
 	#			if child.is_class("Panel"):

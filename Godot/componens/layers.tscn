@@ -16,5 +16,6 @@ offset_right = 250.0
 offset_bottom = 250.0
 script = ExtResource("2_8qj7w")
 
+[connection signal="button_clicked" from="Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="item_activated" from="Tree" to="." method="_on_tree_item_activated"]
 [connection signal="item_mouse_selected" from="Tree" to="." method="_on_tree_item_mouse_selected"]

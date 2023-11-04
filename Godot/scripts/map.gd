@@ -17,19 +17,21 @@ func _ready():
 		print("new map")
 	#changing map to new_map - after map was saved
 	Globals.map = Globals.new_map
-	Globals.draw_layer = $Draw/Lines
+	Globals.draw_layer = $Draw/Layers
 	#changing function on back button in Maps
 	$CanvasLayer/VSplitContainer/Maps/Back.disconnect("pressed", $CanvasLayer/VSplitContainer/Maps/Back.get_signal_connection_list("pressed")[0].callable)
 	$CanvasLayer/VSplitContainer/Maps/Back.connect("pressed", _on_maps_back_button_pressed)
 #	$CanvasLayer/Maps.connect("mouse_entered", _on_maps_mouse_entered)
 #	$CanvasLayer/Maps.connect("mouse_exited", _on_maps_mouse_exited)
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.+
 func _process(delta):
 	pass
 	
 func _on_tree_exiting():
 	var save = PackedScene.new()
-	save.pack($Draw/Lines);
+	save.pack($Draw/Layers);
 	Globals.map.save(save)
 
 
