@@ -12,30 +12,34 @@ signal moved(item, to_item, shift)
 
 
 func _ready():
-	var item = create_item() #root
 	hide_root = true
-	
-	#set root of draw_layers
-	item.set_meta("draw_layer", draw_root) 
-	
-	item = add_new_item("layer_group_1")
-	item = add_new_item("layer_1", item)
-	item = add_new_item("layer_2", item)
-	item = add_new_item("layer_3", item)
-	item = add_new_item("layer_4", item)
-	item = add_new_item("layer_5", item)
-	item = add_new_item("layer_group_2")
-	add_new_item("layer_6", item)
-	add_new_item("layer_7", item)
-	add_new_item("layer_8", item)
-	add_new_item("layer_9", item)
-	add_new_item("layer_10", item)
-	
 	connect("moved", _move_item)
-
+	if Globals.new_map.saved_layers == null:
+		var item = create_item() #root
+		
+		#set root of draw_layers
+		item.set_meta("draw_layer", draw_root) 
+	
+		print("tree not loaded")
+		item = add_new_item("layer_group_1")
+		item = add_new_item("layer_1", item)
+		item = add_new_item("layer_2", item)
+		item = add_new_item("layer_3", item)
+		item = add_new_item("layer_4", item)
+		item = add_new_item("layer_5", item)
+		item = add_new_item("layer_group_2")
+		add_new_item("layer_6", item)
+		add_new_item("layer_7", item)
+		add_new_item("layer_8", item)
+		add_new_item("layer_9", item)
+		add_new_item("layer_10", item)
+		
+	else:
+		print("tree loaded")
 
 func add_new_item(item_name: String, parent: TreeItem = null):
 #	var selected = get_selected()
+	print("creating item: " + item_name)
 	var item
 	if parent == null: 
 		item = create_item(null, 0)
@@ -45,15 +49,22 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 	item.add_button(0, button_visible)
 	
 	var draw_layer = Node2D.new()
+	#set meta for recreation after loading
+	draw_layer.set_meta("item_name", item_name)
+	draw_layer.set_meta("visibility", 0)
+	
 	draw_layer.z_as_relative = false
 	item.set_meta("draw_layer", draw_layer)
 	if parent == null:
 		draw_root.add_child(draw_layer, false, INTERNAL_MODE_FRONT)
 		draw_root.move_child(draw_layer, 0)
 	else:
-		parent.get_meta("draw_layer").add_child(draw_layer)
+		parent.get_meta("draw_layer").add_child(draw_layer, false, INTERNAL_MODE_FRONT)
 		parent.get_meta("draw_layer").move_child(draw_layer, 0)
-		
+	
+	draw_layer.set_owner(draw_root)
+
+	
 	change_z_indexes()
 	
 #	var draw_layer = Node2D.new()
@@ -96,36 +107,44 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 	if item == to_item:
 		return
 		
-	var prev_item = item.get_prev_in_tree() # to check if items were moved
+#	var prev_item = item.get_prev_in_tree() # to check if items were moved
 	var to_layer = to_item.get_meta("draw_layer")
 	var layer = item.get_meta("draw_layer")
 	print_indexes()
 	match(shift):	
 		BEFORE:
 			item.move_before(to_item)
-			#check if moved
-			if prev_item != item.get_prev_in_tree():
-				layer.reparent(to_layer.get_parent())
-				to_layer.get_parent().move_child(layer, to_layer.get_index())
+#			#check if moved
+#			if prev_item != item.get_prev_in_tree():
+#			layer.reparent(to_layer.get_parent()) #using disables internal
+			layer.get_parent().remove_child(layer)
+			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.get_parent().move_child(layer, to_layer.get_index()) #not needed - sorted by z_index - only for saving and loading
 		ON:
 			if to_item.get_child_count() == 0:
 				var dummy = create_item(to_item)
 				item.move_before(dummy)
 				to_item.remove_child(dummy)
+				dummy.free()
 			else:
 				item.move_before(to_item.get_first_child())
 				
-			#check if moved
-			if prev_item != item.get_prev_in_tree():
-				layer.reparent(to_layer)
+#			#check if moved
+#			if prev_item != item.get_prev_in_tree():
+#			layer.reparent(to_layer)
+			layer.get_parent().remove_child(layer)
+			to_layer.add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.move_child(layer, 0)
 		AFTER:
 			var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
 			
-			#check if moved
-			if prev_item != item.get_prev_in_tree():
-				layer.reparent(to_layer.get_parent())
-				to_layer.get_parent().move_child(layer, to_layer.get_index()+1)
+#			#check if moved
+#			if prev_item != item.get_prev_in_tree():
+#			layer.reparent(to_layer.get_parent())
+			layer.get_parent().remove_child(layer)
+			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.get_parent().move_child(layer, to_layer.get_index()+1) #not needed - sorted by z_index - only for saving and loading
 		
 #	var prev_item = item.get_prev_in_tree() # to check if items were moved
 #	var to_layer = to_item.get_meta("draw_layer")
@@ -192,7 +211,6 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 #							break
 #						layer = item.get_meta("draw_layer")
 #						draw_root.move_child(layer, 1)
-	
 	change_z_indexes()
 	print_indexes()
 	return true
@@ -212,4 +230,20 @@ func change_z_indexes():
 		item.get_meta("draw_layer").set_z_index(z)
 		z -= 1
 		item = item.get_next_in_tree()
+		
+func load_self_and_children(node: Node2D, parent: TreeItem):
+	var item = create_item(parent)
+	item.set_meta("draw_layer", node)
+	var meta = node.get_meta("item_name")
+	if meta != null:
+		item.set_text(0, node.get_meta("item_name"))
+	item.add_button(0, button_visible)
+	if not node.visible:
+		item.set_button(0, 0, button_hidden)
+	
+	for child in node.get_children(true):
+		if child.is_class("Node2D"):
+			load_self_and_children(child, item)
+	
+
 

@@ -42,10 +42,14 @@ var mouse_pos = Vector2(0,0)
 
 var last_event_pos = Vector2(-1,-1)
 
+@export var layers_root: Node2D = null
+
 func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _unhandled_input(event):
+	if Globals.draw_layer == null: #check if layer is selected
+		return
 #	print_tree_pretty() #DEBUG TODO remove
 	if event is InputEventMouse:
 		var mouse_pos = get_global_mouse_position()
@@ -159,10 +163,10 @@ func _unhandled_input(event):
 			var max_y = select_box.position.y
 			var min_x = select_box.size.x + select_box.position.x
 			var min_y = select_box.size.y + select_box.position.y
-			print_tree_pretty()
 			#snap selection size to children
 			for child in lines_children:
-	#			if child.is_class("Panel"):
+				if child.is_class("Node2D"):
+					continue
 				if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
 					if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
 						if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
@@ -214,6 +218,8 @@ func _unhandled_input(event):
 			if selected.is_empty():
 				for x in range(lines_children.size()):
 					var child = lines_children[-x-1]
+					if child.is_class("Node2D"):
+						continue
 					print("mouse pos: ", mouse_pos)
 					print("pos: ", child.position)
 					print("size: ", child.size)
@@ -299,7 +305,7 @@ func _unhandled_input(event):
 						style.set_border_width_all(Globals.lineWidth)
 						current_panel.add_theme_stylebox_override("panel", style)
 						Globals.draw_layer.add_child(current_panel)
-						current_panel.set_owner(Globals.draw_layer)
+						current_panel.set_owner(layers_root)
 						
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -334,9 +340,9 @@ func _unhandled_input(event):
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
 						Globals.draw_layer.add_child(current_rect)
-						current_rect.set_owner(Globals.draw_layer)
+						current_rect.set_owner(layers_root)
 						current_rect.add_child(current_line)
-						current_line.set_owner(Globals.draw_layer)
+						current_line.set_owner(layers_root)
 						var pos = mouse_pos
 						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
 						current_line.add_point(pos)
@@ -364,7 +370,7 @@ func _unhandled_input(event):
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
 						Globals.draw_layer.add_child(current_ellipse)
-						current_ellipse.set_owner(Globals.draw_layer)
+						current_ellipse.set_owner(layers_root)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var end = mouse_pos
@@ -417,7 +423,7 @@ func _unhandled_input(event):
 							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
 							current_label.text = "text"
 							Globals.draw_layer.add_child(current_label)
-							current_label.set_owner(Globals.draw_layer)
+							current_label.set_owner(layers_root)
 						#didn't click on existing textedit
 						if found != 2:
 							current_textedit = TextEdit.new()
@@ -429,7 +435,7 @@ func _unhandled_input(event):
 							current_textedit.connect("focus_exited", _text_edit_finished)
 							current_textedit.connect("text_changed", _text_edit_text_changed)
 							Globals.draw_layer.add_child(current_textedit)
-							current_textedit.set_owner(Globals.draw_layer)
+							current_textedit.set_owner(layers_root)
 							current_textedit.grab_focus()
 							currently_editing_textedit = current_textedit
 							currently_editing_label = current_label
@@ -447,7 +453,7 @@ func _unhandled_input(event):
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
 							Globals.draw_layer.add_child(current_line)
-							current_line.set_owner(Globals.draw_layer)
+							current_line.set_owner(layers_root)
 							current_measure.append(current_line)
 							current_line.add_point(mouse_pos)
 							current_line.add_point(mouse_pos)
@@ -457,9 +463,9 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.add_child(current_rect)
-							current_rect.set_owner(Globals.draw_layer)
+							current_rect.set_owner(layers_root)
 							current_rect.add_child(current_label)
-							current_label.set_owner(Globals.draw_layer)
+							current_label.set_owner(layers_root)
 							current_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -480,7 +486,7 @@ func _unhandled_input(event):
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
 							Globals.draw_layer.add_child(current_circle)
-							current_circle.set_owner(Globals.draw_layer)
+							current_circle.set_owner(layers_root)
 							current_measure.append(current_circle)
 							current_rect = ColorRect.new()
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -488,10 +494,10 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
-							current_rect.set_owner(Globals.draw_layer)
+							current_rect.set_owner(layers_root)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
-							current_label.set_owner(Globals.draw_layer)
+							current_label.set_owner(layers_root)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_circle.radius = begin.distance_to(mouse_pos)
@@ -513,7 +519,7 @@ func _unhandled_input(event):
 							current_arc.center = begin
 							current_arc.angle_size = Globals.measureAngle
 							Globals.draw_layer.add_child(current_arc)
-							current_arc.set_owner(Globals.draw_layer)
+							current_arc.set_owner(layers_root)
 							current_measure.append(current_arc)
 							current_rect = ColorRect.new()
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -521,10 +527,10 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
-							current_rect.set_owner(Globals.draw_layer)
+							current_rect.set_owner(layers_root)
 							current_measure.append(current_rect)
 							current_rect.add_child(current_label)
-							current_label.set_owner(Globals.draw_layer)
+							current_label.set_owner(layers_root)
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_arc.angle_direction = (mouse_pos - begin).angle()
@@ -874,7 +880,7 @@ func on_files_dropped(files):
 		style.texture = tex
 		current_panel.add_theme_stylebox_override("panel", style)
 		Globals.draw_layer.add_child(current_panel)
-		current_panel.set_owner(Globals.draw_layer)
+		current_panel.set_owner(layers_root)
 		
 		
 func _text_edit_finished():

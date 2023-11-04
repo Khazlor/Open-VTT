@@ -122,7 +122,8 @@ func _on_duplicate_button_pressed():
 
 
 func _on_delete_button_pressed():
-	DirAccess.remove_absolute("res://saves/" + campaign.campaign_name)
+	OS.move_to_trash(ProjectSettings.globalize_path("res://saves/" + campaign.campaign_name))
+#	DirAccess.remove_absolute("res://saves/" + campaign.campaign_name)
 	campaigncard.queue_free()
 	campaign = null
 	popup.hide()
