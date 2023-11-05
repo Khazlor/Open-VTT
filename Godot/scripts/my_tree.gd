@@ -2,6 +2,8 @@ extends Tree
 
 var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
 var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
+var button_add: Texture2D = load("res://icons/Add.svg")
+var button_remove: Texture2D = load("res://icons/Remove.svg")
 var layer = preload("res://componens/draw.tscn")
 
 @onready var draw_root = $"../../../Draw/Layers"
@@ -16,9 +18,10 @@ func _ready():
 	connect("moved", _move_item)
 	if Globals.new_map.saved_layers == null:
 		var item = create_item() #root
-		
-		#set root of draw_layers
+		item.set_selectable(0, false)
+		#set root of draw_layers - might no longer be needed
 		item.set_meta("draw_layer", draw_root) 
+		item.add_button(0, button_add, 1)
 	
 		print("tree not loaded")
 		item = add_new_item("layer_group_1")
@@ -38,7 +41,9 @@ func _ready():
 		print("tree loaded")
 
 func add_new_item(item_name: String, parent: TreeItem = null):
-#	var selected = get_selected()
+	#if tree was empty, hide root
+	if hide_root == false:
+		hide_root = true
 	print("creating item: " + item_name)
 	var item
 	if parent == null: 
@@ -47,6 +52,8 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 		item = create_item(parent, 0)
 	item.set_text(0, item_name)
 	item.add_button(0, button_visible)
+	item.add_button(0, button_add)
+	item.add_button(0, button_remove)
 	
 	var draw_layer = Node2D.new()
 	#set meta for recreation after loading
@@ -63,7 +70,6 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 		parent.get_meta("draw_layer").move_child(draw_layer, 0)
 	
 	draw_layer.set_owner(draw_root)
-
 	
 	change_z_indexes()
 	
@@ -231,15 +237,23 @@ func change_z_indexes():
 		z -= 1
 		item = item.get_next_in_tree()
 		
+		
+#add child based on existing layer
 func load_self_and_children(node: Node2D, parent: TreeItem):
 	var item = create_item(parent)
 	item.set_meta("draw_layer", node)
 	var meta = node.get_meta("item_name")
 	if meta != null:
 		item.set_text(0, node.get_meta("item_name"))
-	item.add_button(0, button_visible)
-	if not node.visible:
-		item.set_button(0, 0, button_hidden)
+	if parent != null: #non root have multiple buttons
+		item.add_button(0, button_visible)
+		if not node.visible:
+			item.set_button(0, 0, button_hidden)
+		item.add_button(0, button_add)
+		item.add_button(0, button_remove)
+	else: #root has only one button
+		item.add_button(0, button_add, 1)
+		item.set_selectable(0, false)
 	
 	for child in node.get_children(true):
 		if child.is_class("Node2D"):

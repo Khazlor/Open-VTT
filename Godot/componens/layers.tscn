@@ -16,6 +16,23 @@ offset_right = 250.0
 offset_bottom = 250.0
 script = ExtResource("2_8qj7w")
 
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+title = "Warning"
+initial_position = 1
+size = Vector2i(300, 110)
+ok_button_text = "Remove"
+
+[node name="Label" type="Label" parent="ConfirmationDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 292.0
+offset_bottom = 61.0
+text = "Layer not empty,
+are you sure you want to remove it?"
+horizontal_alignment = 1
+
 [connection signal="button_clicked" from="Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="item_activated" from="Tree" to="." method="_on_tree_item_activated"]
-[connection signal="item_mouse_selected" from="Tree" to="." method="_on_tree_item_mouse_selected"]
+[connection signal="item_edited" from="Tree" to="." method="_on_tree_item_edited"]
+[connection signal="item_selected" from="Tree" to="." method="_on_tree_item_selected"]
+[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

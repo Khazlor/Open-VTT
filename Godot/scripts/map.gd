@@ -31,9 +31,10 @@ func _ready():
 	Globals.map = Globals.new_map
 	if tree.get_root().get_first_child() != null:
 		tree.set_selected(tree.get_root().get_first_child(), 0)
-		Globals.draw_layer = tree.get_selected().get_meta("draw_layer")
 	else:
 		Globals.draw_layer = null
+		tree.hide_root = false
+		tree.set_selected(tree.get_root(), 0)
 	#changing function on back button in Maps
 	$CanvasLayer/VSplitContainer/Maps/Back.disconnect("pressed", $CanvasLayer/VSplitContainer/Maps/Back.get_signal_connection_list("pressed")[0].callable)
 	$CanvasLayer/VSplitContainer/Maps/Back.connect("pressed", _on_maps_back_button_pressed)

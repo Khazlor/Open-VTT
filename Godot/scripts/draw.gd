@@ -48,10 +48,10 @@ func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 
 func _unhandled_input(event):
-	if Globals.draw_layer == null: #check if layer is selected
-		return
 #	print_tree_pretty() #DEBUG TODO remove
 	if event is InputEventMouse:
+		if Globals.draw_layer == null: #check if layer is selected
+			return
 		var mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
 	#		var snapping_camera_adjusted = get_node("../Camera2D").zoom
