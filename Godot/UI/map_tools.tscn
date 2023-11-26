@@ -290,6 +290,7 @@ color = Color(1, 1, 1, 1)
 [connection signal="pressed" from="VBoxContainer/TextOptions/Panel/VBoxContainer/FontColorPickerButton" to="." method="_on_color_picker_button_pressed"]
 [connection signal="focus_entered" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox" to="." method="_on_spin_box_focus_entered"]
 [connection signal="value_changed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox" to="." method="_on_line_spin_box_value_changed"]
+[connection signal="focus_exited" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton" to="." method="_on_line_color_picker_button_focus_exited"]
 [connection signal="popup_closed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton" to="." method="_on_line_color_picker_button_popup_closed"]
 [connection signal="pressed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton" to="." method="_on_color_picker_button_pressed"]
 [connection signal="popup_closed" from="VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton" to="." method="_on_fill_color_picker_button_popup_closed"]

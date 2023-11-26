@@ -12,7 +12,7 @@ var mapcard
 func _ready():
 	popup.transient = true
 	popup.exclusive = true
-	var map_dir = DirAccess.open("res://saves/" + Globals.campaign.campaign_name + "/maps")
+	var map_dir = DirAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps")
 	if map_dir == null:
 		print("no maps")
 		return
@@ -47,11 +47,11 @@ func _on_back_pressed():
 func _on_new_map_pressed():
 	map = Map_res.new()
 	
-	if not DirAccess.dir_exists_absolute("res://saves/" + Globals.campaign.campaign_name + "/maps"):
-		DirAccess.make_dir_recursive_absolute("res://saves/" + Globals.campaign.campaign_name + "/maps")
+	if not DirAccess.dir_exists_absolute("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps"):
+		DirAccess.make_dir_recursive_absolute("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps")
 	var i = 0
 	var oldname = map.map_name
-	while FileAccess.file_exists("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
+	while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
 		i += 1
 		map.map_name = oldname + "_" + str(i)
 	map.save_map()
@@ -90,10 +90,10 @@ func _on_apply_button_pressed():
 		var oldname = map.map_name
 		map.map_name = newname
 		var i = 0
-		while FileAccess.file_exists("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
+		while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
 			i += 1
 			map.map_name = newname + "_" + str(i)
-		if DirAccess.rename_absolute("res://saves/" + Globals.campaign.campaign_name + "/maps/" + oldname, "res://saves/" + Globals.campaign.campaign_name + "/maps/" + map.map_name) != Error.OK:
+		if DirAccess.rename_absolute("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + oldname, "res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name) != Error.OK:
 			map.map_name = oldname
 	map.map_desc = popup.get_node("VBoxContainer/MapDesc").text
 	map.grid_size = popup.get_node("VBoxContainer/GridSizePx").value
@@ -120,7 +120,7 @@ func _on_duplicate_button_pressed():
 	var newmap = map.duplicate(true)
 	var i = 0
 	var oldname = newmap.map_name
-	while FileAccess.file_exists("res://saves/" + Globals.campaign.campaign_name + "/maps/" + newmap.map_name):
+	while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + newmap.map_name):
 		i += 1
 		newmap.map_name = oldname + "_" + str(i)
 	newmap.save_map()
@@ -130,7 +130,7 @@ func _on_duplicate_button_pressed():
 
 
 func _on_delete_button_pressed():
-	DirAccess.remove_absolute("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map.map_name)
+	DirAccess.remove_absolute("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name)
 	mapcard.queue_free()
 	map = null
 	popup.hide()

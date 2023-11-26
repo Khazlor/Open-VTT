@@ -18,7 +18,7 @@ func save(packed_layers: PackedScene):
 	save_map()
 
 func save_map():
-	var map_save = FileAccess.open("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
+	var map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
 	if map_save == null:
 		print("file open error - aborting")
 		return
@@ -36,10 +36,10 @@ func save_map():
 func load_map(map_name):
 	print("map loading")
 	self.map_name = map_name
-	if not FileAccess.file_exists("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map_name):
+	if not FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
 		return #no save to load
 	
-	var map_save = FileAccess.open("res://saves/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
+	var map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
 	if map_save == null:
 		print("file open error - aborting")
 		return

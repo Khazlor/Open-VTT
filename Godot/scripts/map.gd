@@ -1,8 +1,10 @@
 extends Node2D
 
+var char_sheet = preload("res://UI/character_sheet.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	
 	randomize()
 	var layers = $Draw/Layers
 	var tree = $CanvasLayer/Layers/Tree
@@ -47,6 +49,8 @@ func _process(delta):
 	pass
 	
 func _on_tree_exiting():
+	#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
+	get_viewport().set_embedding_subwindows(true)
 	#set ownership of all nodes (might have been deleted when moving layers around)
 	set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
 	var saved_layers = PackedScene.new()

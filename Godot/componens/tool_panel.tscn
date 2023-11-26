@@ -1,0 +1,90 @@
+[gd_scene load_steps=5 format=3 uid="uid://shwkx1k388tb"]
+
+[ext_resource type="Script" path="res://scripts/ToolPanel.gd" id="1_57fim"]
+[ext_resource type="Script" path="res://scripts/character_tree.gd" id="2_nt2nq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_atfvi"]
+bg_color = Color(0.160784, 0.152941, 0.14902, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.65098, 0.67451, 0.654902, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o68u3"]
+
+[node name="ToolPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1608.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_57fim")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.333333, 0.384314, 0.431373, 1)
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
+
+[node name="Characters" type="MarginContainer" parent="TabContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Characters"]
+clip_contents = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Tree" type="Tree" parent="TabContainer/Characters/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_nt2nq")
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+title = "Warning"
+initial_position = 1
+size = Vector2i(300, 110)
+ok_button_text = "Remove"
+
+[node name="Label" type="Label" parent="ConfirmationDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 292.0
+offset_bottom = 61.0
+text = "Layer not empty,
+are you sure you want to remove it?"
+horizontal_alignment = 1
+
+[connection signal="button_clicked" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_button_clicked"]
+[connection signal="item_activated" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_activated"]
+[connection signal="item_edited" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_edited"]
+[connection signal="item_selected" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_selected"]

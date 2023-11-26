@@ -1,5 +1,7 @@
 extends Node2D
 
+var char_sheet = preload("res://UI/character_sheet.tscn")
+
 #drawing
 var pressed = false
 var draw_enable = true
@@ -94,7 +96,13 @@ func _unhandled_input(event):
 			return
 		#pressed (not button)
 		if Input.is_action_just_pressed("mouseleft"):
+			print("mouse pressed")
+			$"../CanvasLayer/ToolBar/MarginContainer/VBoxContainer/Draw".grab_focus()
 			draw_enable = true
+		#end any dragging
+		if Input.is_action_just_released("mouseleft"):
+			print("mouse released")
+			pressed = false
 		#line drawing finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "lines":
 			if current_rect == null:
@@ -784,7 +792,10 @@ func _unhandled_input(event):
 			mouse_over_br = false
 		elif Input.is_action_just_pressed("Escape"):
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
-					
+		elif Input.is_action_just_pressed("I-pressed"):
+			var ch_sh = char_sheet.instantiate()
+			ch_sh.position = get_viewport().get_mouse_position()
+			add_child(ch_sh)
 		
 func _on_select_mouse_entered():
 	print("mouse over selected")

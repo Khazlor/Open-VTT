@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://h5xb4t4cm47n"]
 
 [ext_resource type="Script" path="res://scripts/Layers.gd" id="1_5oi25"]
-[ext_resource type="Script" path="res://scripts/my_tree.gd" id="2_8qj7w"]
+[ext_resource type="Script" path="res://scripts/layer_tree.gd" id="2_v7jm0"]
 
 [node name="Layers" type="Control"]
 layout_mode = 3
@@ -14,7 +14,7 @@ script = ExtResource("1_5oi25")
 layout_mode = 0
 offset_right = 250.0
 offset_bottom = 250.0
-script = ExtResource("2_8qj7w")
+script = ExtResource("2_v7jm0")
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 title = "Warning"

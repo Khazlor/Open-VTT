@@ -106,3 +106,7 @@ func _on_line_color_picker_button_popup_closed():
 
 func _on_fill_color_picker_button_popup_closed():
 	Globals.colorBack = $VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton.color
+
+
+func _on_line_color_picker_button_focus_exited():
+	$VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton.get_popup().hide()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
@@ -8,19 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
 [ext_resource type="PackedScene" uid="uid://3qgtuhwblt4q" path="res://componens/draw.tscn" id="6_txqn8"]
 [ext_resource type="Texture2D" uid="uid://dk4s6w4hwuvxg" path="res://images/grid_white.png" id="7_uhnxr"]
-[ext_resource type="Shader" path="res://shaders/grid.gdshader" id="9_4m3b1"]
+[ext_resource type="PackedScene" uid="uid://shwkx1k388tb" path="res://componens/tool_panel.tscn" id="9_61n3b"]
 [ext_resource type="PackedScene" uid="uid://7ynxnxtwfalq" path="res://scenes/Maps.tscn" id="10_q214b"]
 [ext_resource type="PackedScene" uid="uid://h5xb4t4cm47n" path="res://componens/layers.tscn" id="11_1618w"]
-
-[sub_resource type="TileSet" id="TileSet_xj2wd"]
-tile_size = Vector2i(70, 70)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nrof3"]
-shader = ExtResource("9_4m3b1")
-shader_parameter/size = Vector2(1280, 720)
-shader_parameter/line_width = 0.1
-shader_parameter/offset = Vector2(0, 0)
-shader_parameter/grid_size = 50.0
 
 [node name="Map" type="Node2D"]
 texture_repeat = 2
@@ -36,22 +26,14 @@ visible = false
 position = Vector2(320, 352)
 texture = ExtResource("3_5u0ia")
 
-[node name="TileMap" type="TileMap" parent="."]
-texture_repeat = 2
-tile_set = SubResource("TileSet_xj2wd")
-cell_quadrant_size = 70
-format = 2
-
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("1_ihf1l")
 
 [node name="Draw" parent="." instance=ExtResource("6_txqn8")]
 texture_repeat = 2
 
-[node name="Node2D" type="Node2D" parent="."]
-material = SubResource("ShaderMaterial_nrof3")
-
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+layer = 0
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
 motion_mirroring = Vector2(70000, 70000)
@@ -86,7 +68,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="RollPanel" parent="CanvasLayer/HSplitContainer" instance=ExtResource("6_ijfhq")]
+[node name="VSplitContainer" type="VSplitContainer" parent="CanvasLayer/HSplitContainer"]
+layout_mode = 2
+split_offset = 470
+
+[node name="ToolPanel" parent="CanvasLayer/HSplitContainer/VSplitContainer" instance=ExtResource("9_61n3b")]
+layout_mode = 2
+
+[node name="RollPanel" parent="CanvasLayer/HSplitContainer/VSplitContainer" instance=ExtResource("6_ijfhq")]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 mouse_filter = 0
@@ -125,6 +114,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
+
+[node name="Embed_Window" type="Window" parent="."]
+size = Vector2i(1, 1)
+unresizable = true
+borderless = true
+mouse_passthrough = true
 
 [connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]
 [connection signal="pressed" from="CanvasLayer/MapsButton" to="." method="_on_maps_button_pressed"]

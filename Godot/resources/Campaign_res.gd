@@ -16,7 +16,7 @@ func save_campaign():
 		"players" : players,
 		"image" : image
 	}
-	var campaign_save = FileAccess.open("res://saves/" + campaign_name + "/campaign.json", FileAccess.WRITE)
+	var campaign_save = FileAccess.open("res://saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.WRITE)
 	if campaign_save == null:
 		print("file open error - aborting")
 		return
@@ -25,10 +25,10 @@ func save_campaign():
 	
 func load_campaign(campaign_name):
 	self.campaign_name = campaign_name
-	if not FileAccess.file_exists("res://saves/" + campaign_name + "/campaign.json"):
+	if not FileAccess.file_exists("res://saves/Campaigns/" + campaign_name + "/campaign.json"):
 		return #no save to load
 	
-	var campaign_save = FileAccess.open("res://saves/" + campaign_name + "/campaign.json", FileAccess.READ)
+	var campaign_save = FileAccess.open("res://saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.READ)
 	if campaign_save == null:
 		print("file open error - aborting")
 		return
