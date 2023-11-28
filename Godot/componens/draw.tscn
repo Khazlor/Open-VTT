@@ -7,5 +7,10 @@ script = ExtResource("1_1loxi")
 
 [node name="Layers" type="Node2D" parent="."]
 
+[node name="ColorRect" type="ColorRect" parent="Layers"]
+offset_right = 200.0
+offset_bottom = 150.0
+rotation = -0.267035
+
 [node name="Select" type="Node2D" parent="."]
 z_index = 4096

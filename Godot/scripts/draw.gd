@@ -25,18 +25,23 @@ var selected = [] #list of selected items
 var mouse_over_selected = false
 var selected_creating = false
 var selected_scaling = false
+var selected_rotating = false
 #hadles around selection - top bottom left right
 var mouse_over_tl = false
 var mouse_over_bl = false
 var mouse_over_tr = false
 var mouse_over_br = false
+var mouse_over_rotate = false
 
 var select_size: Vector2
 var select_pos: Vector2
+var select_center_pos: Vector2
 var select_size_org: Vector2
 var select_pos_org: Vector2
+var select_rot_org: float
 var selected_org_scales = []
 var selected_org_pos = []
+var selected_org_rots = []
 var flip_x = false
 var flip_y = false
 
@@ -97,7 +102,6 @@ func _unhandled_input(event):
 		#pressed (not button)
 		if Input.is_action_just_pressed("mouseleft"):
 			print("mouse pressed")
-			$"../CanvasLayer/ToolBar/MarginContainer/VBoxContainer/Draw".grab_focus()
 			draw_enable = true
 		#end any dragging
 		if Input.is_action_just_released("mouseleft"):
@@ -125,11 +129,16 @@ func _unhandled_input(event):
 
 		#select box drawing | scaling finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
+			print("mouse released with select - scaling: " + str(selected_scaling))
 			#drag finished
-			if mouse_over_selected and !selected_creating:
+			if mouse_over_selected and !selected_creating and !selected_scaling:
 				return
+			#rotating selection finished
+			if selected_rotating:
+				selected_rotating = false
 			#scaling selection finished
 			if selected_scaling:
+				print("scaling end")
 				selected_scaling = false
 				flip_x = false
 				flip_y = false
@@ -175,66 +184,10 @@ func _unhandled_input(event):
 			for child in lines_children:
 				if child.is_class("Node2D"):
 					continue
-				if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
-					if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
-						if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
-							selected.append(child)
-							if child.scale.x > 0:
-								if child.position.x < min_x:
-									min_x = child.position.x
-								if child.position.x + child.size.x*child.scale.x > max_x:
-									max_x = child.position.x + child.size.x*child.scale.x
-							else:
-								if child.position.x + child.size.x*child.scale.x < min_x:
-									min_x = child.position.x + child.size.x*child.scale.x
-								if child.position.x > max_x:
-									max_x = child.position.x
-							if child.scale.y > 0:
-								if child.position.y < min_y:
-									min_y = child.position.y
-								if child.position.y + child.size.y*child.scale.y > max_y:
-									max_y = child.position.y + child.size.y*child.scale.y
-							else:
-								if child.position.y + child.size.y*child.scale.y < min_y:
-									min_y = child.position.y + child.size.y*child.scale.y
-							if child.position.y > max_y:
-									max_y = child.position.y
-	#			elif child.is_class("Line2D"):
-	#				if child.get_point_position(0).x >= select_box.position.x and child.get_point_position(0).y >= select_box.position.y:
-		#					if child.get_point_position(child.get_point_count()-1).x <= select_box.position.x + select_box.size.x:
-		#						if child.get_point_position(child.get_point_count()-1).y <= select_box.position.y + select_box.size.y:
-		#							selected.append(child)
-		#							#min
-		#							if child.get_point_position(0).x < min_x:
-		#								min_x = child.get_point_position(0).x
-		#							if child.get_point_position(child.get_point_count()-1).x < min_x:
-		#								min_x = child.get_point_position(child.get_point_count()-1).x
-		#							if child.get_point_position(0).y < min_y:
-		#								min_y = child.get_point_position(0).y
-		#							if child.get_point_position(child.get_point_count()-1).y < min_y:
-		#								min_y = child.get_point_position(child.get_point_count()-1).y
-		#							#max
-		#							if child.get_point_position(0).x > max_x:
-
-	#							if child.get_point_position(child.get_point_count()-1).x > max_x:
-	#								max_x = child.get_point_position(child.get_point_count()-1).x
-	#							if child.get_point_position(0).y > max_y:
-	#								max_y = child.get_point_position(0).y
-	#							if child.get_point_position(child.get_point_count()-1).y > max_y:
-	#								max_y = child.get_point_position(child.get_point_count()-1).y
-			print(selected)
-			if selected.is_empty():
-				for x in range(lines_children.size()):
-					var child = lines_children[-x-1]
-					if child.is_class("Node2D"):
-						continue
-					print("mouse pos: ", mouse_pos)
-					print("pos: ", child.position)
-					print("size: ", child.size)
-					print("scale: ", child.scale)
-					if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
-						if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-							if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+				if child.rotation == 0:
+					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
+						if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
+							if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
 								selected.append(child)
 								if child.scale.x > 0:
 									if child.position.x < min_x:
@@ -256,14 +209,103 @@ func _unhandled_input(event):
 										min_y = child.position.y + child.size.y*child.scale.y
 								if child.position.y > max_y:
 										max_y = child.position.y
-								break
+				else: #rotated object - locate corners then decide
+					var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+					var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+					var top_left = child.position
+					var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+					var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+					var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+					var max = Vector2()#max x,y of rotated polygon
+					var min = Vector2()#min x,y of rotated polygon
+					max.x = top_left.x
+					max.x = top_left.y
+					if top_right.x > max.x:
+						max.x = top_right.x
+					if top_right.y > max.y:
+						max.y = top_right.y
+					if bottom_right.x > max.x:
+						max.x = bottom_right.x
+					if bottom_right.y > max.y:
+						max.y = bottom_right.y
+					if bottom_left.x > max.x:
+						max.x = bottom_left.x
+					if bottom_left.y > max.y:
+						max.y = bottom_left.y
+					#get min
+					min.x = top_left.x
+					min.y = top_left.y
+					if top_right.x < min.x:
+						min.x = top_right.x
+					if top_right.y < min.y:
+						min.y = top_right.y
+					if bottom_right.x < min.x:
+						min.x = bottom_right.x
+					if bottom_right.y < min.y:
+						min.y = bottom_right.y
+					if bottom_left.x < min.x:
+						min.x = bottom_left.x
+					if bottom_left.y < min.y:
+						min.y = bottom_left.y
+					if min.x >= select_box.position.x and min.y >= select_box.position.y:
+						if max.x <= select_box.position.x + select_box.size.x:
+							if max.y <= select_box.position.y + select_box.size.y:
+								selected.append(child)
+								if max.x > max_x:
+									max_x = max.x
+								if max.y > max_y:
+									max_y = max.y
+								if min.x < min_x:
+									min_x = min.x
+								if min.y < min_y:
+									min_y = min.y
+			print(selected)
+			#if nothing in dragged square -> get clicked
+			if selected.is_empty():
+				for x in range(lines_children.size()):
+					var child = lines_children[-x-1]
+					if child.is_class("Node2D"):
+						continue
+					print("mouse pos: ", mouse_pos)
+					print("pos: ", child.position)
+					print("size: ", child.size)
+					print("scale: ", child.scale)
+					if child.rotation == 0:
+						if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
+							if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+								if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+									selected.append(child)
+									break
+					else: #calculate with rotation
+						var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+						var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+						var top_left = child.position
+						var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+						var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+						var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+						if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
+							selected.append(child)
+							break
 				if selected.is_empty():
 					select_box.set_begin(Vector2(0,0))
 					select_box.set_end(Vector2(0,0))
 					return
+			
+			
+			#if only single item selected - affect select box by item rotation
+			if selected.size() == 1:
+				print("one item")
+				var s = selected[0]
+				select_box.rotation = s.rotation
+				select_box.pivot_offset = s.pivot_offset
+				select_box.position = s.position
+				select_box.size = s.size*s.scale
+			else:
+				select_box.set_begin(Vector2(min_x, min_y))
+				select_box.set_end(Vector2(max_x, max_y))
+				select_box.rotation = 0
+				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
 			print(selected)
-			select_box.set_begin(Vector2(min_x, min_y))
-			select_box.set_end(Vector2(max_x, max_y))
 			#control points - handles
 			create_handle(Control.PRESET_TOP_LEFT, 15)
 			current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
@@ -277,6 +319,9 @@ func _unhandled_input(event):
 			create_handle(Control.PRESET_BOTTOM_RIGHT, 15)
 			current_panel.connect("mouse_entered", _br_handle_mouse_entered)
 			current_panel.connect("mouse_exited", _br_handle_mouse_exited)
+			create_handle(Control.PRESET_CENTER_TOP, 20)
+			current_panel.connect("mouse_entered", _rotate_handle_mouse_entered)
+			current_panel.connect("mouse_exited", _rotate_handle_mouse_exited)
 			
 			for child in select_box.get_children():
 				print(child.get_signal_connection_list("mouse_entered"))
@@ -287,6 +332,7 @@ func _unhandled_input(event):
 			if current_panel == null:
 				return
 			print_tree_pretty()
+			#current_panel.rotation_degrees = 30
 			print("rect finished")
 			print(current_panel.size)
 			print(current_panel.position)
@@ -554,9 +600,6 @@ func _unhandled_input(event):
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
 					print("selection pressed")
-					if mouse_over_selected: #drag
-						print("mouse_over_selected")
-						return
 					if mouse_over_tl or mouse_over_tr or mouse_over_bl or mouse_over_br: #scale
 						print("mouse_over_bltlbrtr")
 						selected_scaling = true
@@ -568,6 +611,22 @@ func _unhandled_input(event):
 						for object in selected:
 							selected_org_scales.append(object.scale)
 							selected_org_pos.append(object.position)
+						return
+					if mouse_over_rotate: #rotate
+						print("mouse_over_rotate")
+						selected_rotating = true
+						select_center_pos = select_box.position + select_box.size/2
+						select_pos_org = select_box.position
+						select_rot_org = select_box.rotation
+						selected_org_rots.clear()
+						selected_org_pos.clear()
+						for object in selected:
+							print(object.position)
+							selected_org_rots.append(object.rotation)
+							selected_org_pos.append(object.position)
+						return
+					if mouse_over_selected: #drag
+						print("mouse_over_selected")
 						return
 					#just pressed - create objects
 					if pressed:
@@ -599,18 +658,39 @@ func _unhandled_input(event):
 						selected_creating = true
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-					print("selection drag")
+					print("selection drag - scaling: " + str(selected_scaling))
+					if mouse_over_bl: print("bl")
+					if mouse_over_tl: print("tl")
+					if mouse_over_br: print("br")
+					if mouse_over_tr: print("tr")
+					if mouse_over_rotate: print("rotate")
 					if $Select.get_child_count() == 0:
 						return
 					#drag - move objects
-					if mouse_over_selected and !selected_creating and !selected_scaling:
+					if mouse_over_selected and !selected_creating and !selected_scaling and !selected_rotating:
+						print("drag")
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
 						for object in selected:
 							object.position += relative_offset
 						$Select.get_child(0).position += relative_offset
 						return
+					#rotate objects
+					elif selected_rotating:
+						print("rotate")
+						var angle = select_center_pos.angle_to_point(get_global_mouse_position()) + deg_to_rad(90)
+						select_box.pivot_offset = select_box.size/2
+						select_box.rotation = angle
+						var i = 0
+						for object in selected:
+							print(rad_to_deg(angle), angle)
+							var distance = select_center_pos.distance_to(object.position)
+							var angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
+							object.position = Vector2(select_center_pos.x + cos(angle_org + angle) * distance, select_center_pos.y + sin(angle_org + angle) * distance)
+							object.rotation = selected_org_rots[i] + angle
+							i += 1
 					#scale objects
 					elif selected_scaling:
+						print("scale")
 						select_pos = select_box.position
 						select_size = select_box.size
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
@@ -753,7 +833,7 @@ func _unhandled_input(event):
 								mouse_over_tl = true
 								mouse_over_br = false
 						return
-					#drawing selection bow - update size
+					#drawing selection box - update size
 					else:
 						var end = mouse_pos
 						if begin.x > end.x and begin.y > end.y:
@@ -786,6 +866,7 @@ func _unhandled_input(event):
 			mouse_over_selected = false
 			selected_creating = false
 			selected_scaling = false
+			selected_rotating = false
 			mouse_over_tl = false
 			mouse_over_bl = false
 			mouse_over_tr = false
@@ -837,7 +918,6 @@ func create_handle(preset: Control.LayoutPreset, s: float):
 	$Select.get_child(0).add_child(current_panel)
 	
 func _tl_handle_mouse_entered():
-	print("mouse over TL")
 	if !selected_scaling:
 		mouse_over_tl = true
 
@@ -868,6 +948,14 @@ func _br_handle_mouse_entered():
 func _br_handle_mouse_exited():
 	if !selected_scaling:
 		mouse_over_br = false
+		
+func _rotate_handle_mouse_entered():
+	if !selected_scaling:
+		mouse_over_rotate = true
+
+func _rotate_handle_mouse_exited():
+	if !selected_scaling:
+		mouse_over_rotate = false
 
 #drag and drop images
 func on_files_dropped(files):
