@@ -18,40 +18,23 @@ func _process(delta):
 #save character resource to file
 func save(resolve_conflict: bool = false):
 	print("saving char: " + name)
-	var base_path: String
-	if global:
-		base_path = "res://saves/Characters"
-	else:
-		base_path = "res://saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters"
-	if not DirAccess.dir_exists_absolute(base_path):
-		DirAccess.make_dir_recursive_absolute(base_path)
 	#get full path to save
-	var path = name
-	var item = tree_item.get_parent()
-	var root = tree_item.get_tree().get_root()
-	while item != root:
-		print("path =======> " + item.get_text(0))
-		path = item.get_text(0) + "/" + path
-		item = item.get_parent()
-		if global:
-			if item.get_parent() == root: #first folder Global - not actual folder
-				break
-	print("found path: " + path)
+	var path = get_path_to_save()
 	if resolve_conflict:
 		var path_old = path
 		var i = 0
-		while DirAccess.dir_exists_absolute(base_path + "/" + path):
+		while DirAccess.dir_exists_absolute(path):
 			i += 1
 			path = path_old + "_" + str(i)
 		if i != 0:
 			name = name + "_" + str(i)
 		print("modified path: " + path)
-	if not DirAccess.dir_exists_absolute(base_path + "/" + path):
-		DirAccess.make_dir_recursive_absolute(base_path + "/" + path)
-	print("trying to open file: " + base_path + "/" + path + "/" + name)
-	if not DirAccess.dir_exists_absolute(base_path + "/" + path):
-		print("folder does not exist: " + base_path + "/" + path)
-	var save = FileAccess.open(base_path + "/" + path + "/" + name, FileAccess.WRITE)
+	if not DirAccess.dir_exists_absolute(path):
+		DirAccess.make_dir_recursive_absolute(path)
+	print("trying to open file: " + path + "/" + name)
+	if not DirAccess.dir_exists_absolute(path):
+		print("folder does not exist: " + path)
+	var save = FileAccess.open(path + "/" + name, FileAccess.WRITE)
 	if save == null:
 		print("file open error - aborting")
 		print(error_string(FileAccess.get_open_error()))
@@ -79,3 +62,28 @@ func load_char(path: String, char_name: String, global: bool, tree_item: TreeIte
 	
 	tree_item.set_meta("character", self)
 	print("char loaded --- name: " + self.name + ", global: " + str(self.global) + ", attributes: " + str(attributes.size()))
+	
+func get_path_to_save(include_name: bool = true):
+	var base_path: String #character folder
+	if global:
+		base_path = "res://saves/Characters"
+	else:
+		base_path = "res://saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters"
+	if not DirAccess.dir_exists_absolute(base_path):
+		DirAccess.make_dir_recursive_absolute(base_path)
+	var path: String #path to character inside character folder
+	if include_name:
+		path = name
+	else:
+		path = ""
+	var item = tree_item.get_parent()
+	var root = tree_item.get_tree().get_root()
+	while item != root:
+		print("path =======> " + item.get_text(0))
+		path = item.get_text(0) + "/" + path
+		item = item.get_parent()
+		if global:
+			if item.get_parent() == root: #first folder Global - not actual folder
+				break
+	print("found path: " + path)
+	return base_path + "/" + path

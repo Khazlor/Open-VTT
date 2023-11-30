@@ -13,12 +13,12 @@ func _ready():
 		print("load")
 		layers.replace_by(Globals.new_map.saved_layers.instantiate())
 		layers = $Draw/Layers
-		#recursively create treeitem for each layer
 		
+		#recursively create treeitem for each layer
 		tree.load_self_and_children(layers, null)
 		
 		$Draw.layers_root = layers
-		
+
 #		var item = $CanvasLayer/Layers/Tree.create_item()
 #		item.add_child(Globals.new_map.saved_layer_tree)
 #		print_tree_pretty()

@@ -1,16 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://3qgtuhwblt4q"]
+[gd_scene load_steps=3 format=3 uid="uid://3qgtuhwblt4q"]
 
 [ext_resource type="Script" path="res://scripts/draw.gd" id="1_1loxi"]
+[ext_resource type="Script" path="res://scripts/Drag_Drop_data.gd" id="2_vd87b"]
 
 [node name="Draw" type="Node2D"]
 script = ExtResource("1_1loxi")
 
-[node name="Layers" type="Node2D" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -1
 
-[node name="ColorRect" type="ColorRect" parent="Layers"]
-offset_right = 200.0
-offset_bottom = 150.0
-rotation = -0.267035
+[node name="Drag_Drop_data" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+script = ExtResource("2_vd87b")
+
+[node name="Layers" type="Node2D" parent="."]
 
 [node name="Select" type="Node2D" parent="."]
 z_index = 4096

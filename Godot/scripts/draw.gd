@@ -131,11 +131,12 @@ func _unhandled_input(event):
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
 			print("mouse released with select - scaling: " + str(selected_scaling))
 			#drag finished
-			if mouse_over_selected and !selected_creating and !selected_scaling:
+			if mouse_over_selected and !selected_creating and !selected_scaling and !selected_rotating:
 				return
 			#rotating selection finished
 			if selected_rotating:
 				selected_rotating = false
+				return
 			#scaling selection finished
 			if selected_scaling:
 				print("scaling end")
@@ -172,7 +173,7 @@ func _unhandled_input(event):
 			#selection box finished drawing
 			selected_creating = false
 			selected.clear()
-			if $Select.get_child_count() == 0:
+			if select_box == null:
 				return
 			var lines_children = Globals.draw_layer.get_children()
 			#max select box size and position based on drawn size
@@ -216,10 +217,12 @@ func _unhandled_input(event):
 					var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
 					var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
 					var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+					print("located corners: ", top_left, top_right, bottom_left, bottom_right)
+					print ("bounds: ", select_box.get_begin(), select_box.get_end())
 					var max = Vector2()#max x,y of rotated polygon
 					var min = Vector2()#min x,y of rotated polygon
 					max.x = top_left.x
-					max.x = top_left.y
+					max.y = top_left.y
 					if top_right.x > max.x:
 						max.x = top_right.x
 					if top_right.y > max.y:
@@ -247,9 +250,12 @@ func _unhandled_input(event):
 						min.x = bottom_left.x
 					if bottom_left.y < min.y:
 						min.y = bottom_left.y
-					if min.x >= select_box.position.x and min.y >= select_box.position.y:
-						if max.x <= select_box.position.x + select_box.size.x:
-							if max.y <= select_box.position.y + select_box.size.y:
+					var b = select_box.get_begin()
+					var e = select_box.get_end()
+					print(b, min, e, max)
+					if min.x >= b.x and min.y >= b.y:
+						if max.x <= e.x:
+							if max.y <= e.y:
 								selected.append(child)
 								if max.x > max_x:
 									max_x = max.x
@@ -297,14 +303,14 @@ func _unhandled_input(event):
 				print("one item")
 				var s = selected[0]
 				select_box.rotation = s.rotation
-				select_box.pivot_offset = s.pivot_offset
+#				select_box.pivot_offset = s.pivot_offset
 				select_box.position = s.position
 				select_box.size = s.size*s.scale
 			else:
 				select_box.set_begin(Vector2(min_x, min_y))
 				select_box.set_end(Vector2(max_x, max_y))
 				select_box.rotation = 0
-				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
+#				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
 			print(selected)
 			#control points - handles
 			create_handle(Control.PRESET_TOP_LEFT, 15)
@@ -615,13 +621,17 @@ func _unhandled_input(event):
 					if mouse_over_rotate: #rotate
 						print("mouse_over_rotate")
 						selected_rotating = true
-						select_center_pos = select_box.position + select_box.size/2
+						if select_box.rotation == 0:
+							select_center_pos = select_box.position + select_box.size/2
+						else:
+							var dis = Vector2(0,0).distance_to(select_box.size/2)
+							var ang = Vector2(0,0).angle_to_point(select_box.size)
+							select_center_pos = select_box.position + Vector2(dis * cos(ang + select_box.rotation), dis * sin(ang + select_box.rotation))
 						select_pos_org = select_box.position
 						select_rot_org = select_box.rotation
 						selected_org_rots.clear()
 						selected_org_pos.clear()
 						for object in selected:
-							print(object.position)
 							selected_org_rots.append(object.rotation)
 							selected_org_pos.append(object.position)
 						return
@@ -630,12 +640,10 @@ func _unhandled_input(event):
 						return
 					#just pressed - create objects
 					if pressed:
-						#remove old select
 						print("selection creating")
-						for child in $Select.get_children():
-							child.queue_free()
-							#$Select.remove_child($Select.get_child(0))
-	#					if $Select.get_child_count() != 0:
+						#remove old select
+						if select_box != null:
+							select_box.queue_free()
 						select_box = Panel.new()
 						select_box.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
@@ -664,7 +672,7 @@ func _unhandled_input(event):
 					if mouse_over_br: print("br")
 					if mouse_over_tr: print("tr")
 					if mouse_over_rotate: print("rotate")
-					if $Select.get_child_count() == 0:
+					if select_box == null:
 						return
 					#drag - move objects
 					if mouse_over_selected and !selected_creating and !selected_scaling and !selected_rotating:
@@ -672,21 +680,33 @@ func _unhandled_input(event):
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
 						for object in selected:
 							object.position += relative_offset
-						$Select.get_child(0).position += relative_offset
+						select_box.position += relative_offset
 						return
 					#rotate objects
 					elif selected_rotating:
 						print("rotate")
-						var angle = select_center_pos.angle_to_point(get_global_mouse_position()) + deg_to_rad(90)
-						select_box.pivot_offset = select_box.size/2
+						var angle = fmod(select_center_pos.angle_to_point(get_global_mouse_position()) + deg_to_rad(90), 2*PI) #angle between pivot and mouse
+						print(rad_to_deg(angle))
 						select_box.rotation = angle
+#						var dis = Vector2(0,0).distance_to(select_box.size/2)
+#						var ang = Vector2(0,0).angle_to_point(select_box.size)
+#						select_box.pivot_offset = Vector2(dis * cos(select_box.rotation + ang), dis * sin(select_box.rotation + ang))
+						var distance = select_center_pos.distance_to(select_box.position)
+						var angle_org = select_box.size.angle_to_point(Vector2(0,0))
+						print(select_center_pos)
+						print("---=====|||||||||||||||||||||||>>>>>>>>>>>>>>>>>>>>>>>>>>>>", select_box.position, rad_to_deg(angle_org), " ", rad_to_deg(angle))
+						select_box.position = Vector2(select_center_pos.x + cos(angle_org + angle) * distance, select_center_pos.y + sin(angle_org + angle) * distance)
 						var i = 0
+						print(select_box.position)
 						for object in selected:
-							print(rad_to_deg(angle), angle)
-							var distance = select_center_pos.distance_to(object.position)
-							var angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
-							object.position = Vector2(select_center_pos.x + cos(angle_org + angle) * distance, select_center_pos.y + sin(angle_org + angle) * distance)
-							object.rotation = selected_org_rots[i] + angle
+							print(rad_to_deg(angle), " ",angle)
+							distance = select_center_pos.distance_to(selected_org_pos[i])
+							angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
+							object.position = Vector2(select_center_pos.x + cos(angle_org + angle - select_rot_org) * distance, select_center_pos.y + sin(angle_org + angle - select_rot_org) * distance)
+							object.rotation = fmod(selected_org_rots[i] + angle - select_rot_org, 2*PI)
+							print(object.position, select_box.position)
+							print(rad_to_deg(angle_org), " ", rad_to_deg(angle))
+							print(rad_to_deg(object.rotation), " ", rad_to_deg(selected_org_rots[i]), " ", rad_to_deg(object.rotation))
 							i += 1
 					#scale objects
 					elif selected_scaling:
@@ -694,6 +714,7 @@ func _unhandled_input(event):
 						select_pos = select_box.position
 						select_size = select_box.size
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
+						
 						if mouse_over_tl: #scale
 							if select_box.size.x-relative_offset.x > 0 and select_box.size.y-relative_offset.y > 0: #tl
 								var scal = (select_box.size-relative_offset)/select_box.size
@@ -859,8 +880,8 @@ func _unhandled_input(event):
 			for child in selected:
 				child.queue_free()
 			#remove select box
-			for child in $Select.get_children():
-				child.queue_free()
+			if select_box != null:
+				select_box.queue_free()
 				
 			#resetting select box state variables
 			mouse_over_selected = false
@@ -915,7 +936,7 @@ func create_handle(preset: Control.LayoutPreset, s: float):
 	style.set_border_width_all(s/5)
 	style.set_corner_radius_all(s)
 	current_panel.add_theme_stylebox_override("panel", style)
-	$Select.get_child(0).add_child(current_panel)
+	select_box.add_child(current_panel)
 	
 func _tl_handle_mouse_entered():
 	if !selected_scaling:
@@ -966,6 +987,7 @@ func on_files_dropped(files):
 		var err = img.load(file)
 		if err != OK:
 			print("import failed")
+			return
 		else:
 			print("import done")
 			print(img.get_size())

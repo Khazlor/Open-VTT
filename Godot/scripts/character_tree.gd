@@ -96,7 +96,7 @@ func _get_drag_data(_item_position):
 
 
 func _can_drop_data(_item_position, data):
-	return data is TreeItem
+	print(data is TreeItem)
 
 
 func _drop_data(item_position, item):
@@ -112,19 +112,53 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 	if item == to_item:
 		return
 		
-#	var prev_item = item.get_prev_in_tree() # to check if items were moved
-	var to_layer = to_item.get_meta("draw_layer")
-	var layer = item.get_meta("draw_layer")
+	var to_character = to_item.get_meta("character")
+	var character = item.get_meta("character")
 	match(shift):	
 		BEFORE:
+			#move in folder
+			var path = character.get_path_to_save()
+			var to_path = to_character.get_path_to_save(false) + character.name
+			if path == to_path:
+				return
+			#resolve file conflict
+			var path_old = to_path
+			var i = 0
+			while DirAccess.dir_exists_absolute(to_path):
+				i += 1
+				to_path = path_old + "_" + str(i)
+			if i != 0:
+				character.name = character.name + "_" + str(i)
+				item.set_text(0, character.name)
+			print("move from: " + path + " to: " + to_path)
+			
+			DirAccess.rename_absolute(path, to_path)
+			character.global = to_character.global
+			
+			#move in tree
 			item.move_before(to_item)
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#			layer.reparent(to_layer.get_parent()) #using disables internal
-			layer.get_parent().remove_child(layer)
-			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
-			to_layer.get_parent().move_child(layer, to_layer.get_index()) #not needed - sorted by z_index - only for saving and loading
+			
 		ON:
+			#move in folder
+			var path = character.get_path_to_save()
+			var to_path = to_character.get_path_to_save() + "/" + character.name
+			if path == to_path:
+				return
+			#resolve file conflict
+			var path_old = to_path
+			var i = 0
+			while DirAccess.dir_exists_absolute(to_path):
+				i += 1
+				to_path = path_old + "_" + str(i)
+			if i != 0:
+				character.name = character.name + "_" + str(i)
+				item.set_text(0, character.name)
+			print("move from: " + path + " to: " + to_path)
+			
+			DirAccess.rename_absolute(path, to_path)
+			character.global = to_character.global
+			
+			#move in tree
 			if to_item.get_child_count() == 0:
 				var dummy = create_item(to_item)
 				item.move_before(dummy)
@@ -132,23 +166,30 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 				dummy.free()
 			else:
 				item.move_before(to_item.get_first_child())
-				
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#			layer.reparent(to_layer)
-			layer.get_parent().remove_child(layer)
-			to_layer.add_child(layer, false, INTERNAL_MODE_FRONT)
-			to_layer.move_child(layer, 0)
+			
 		AFTER:
+			#move in folder
+			var path = character.get_path_to_save()
+			var to_path = to_character.get_path_to_save(false) + character.name
+			if path == to_path:
+				return
+			#resolve file conflict
+			var path_old = to_path
+			var i = 0
+			while DirAccess.dir_exists_absolute(to_path):
+				i += 1
+				to_path = path_old + "_" + str(i)
+			if i != 0:
+				character.name = character.name + "_" + str(i)
+				item.set_text(0, character.name)
+			print("move from: " + path + " to: " + to_path)
+			
+			DirAccess.rename_absolute(path, to_path)
+			character.global = to_character.global
+			
+			#move in tree
 			var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
-			
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#			layer.reparent(to_layer.get_parent())
-			layer.get_parent().remove_child(layer)
-			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
-			to_layer.get_parent().move_child(layer, to_layer.get_index()+1) #not needed - sorted by z_index - only for saving and loading
 		
 #loads all characters
 func load_characters():
