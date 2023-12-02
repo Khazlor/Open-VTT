@@ -33,17 +33,17 @@ var mouse_over_tr = false
 var mouse_over_br = false
 var mouse_over_rotate = false
 
-var select_size: Vector2
-var select_pos: Vector2
 var select_center_pos: Vector2
 var select_size_org: Vector2
 var select_pos_org: Vector2
 var select_rot_org: float
 var selected_org_scales = []
+var selected_org_sizes = []
 var selected_org_pos = []
 var selected_org_rots = []
 var flip_x = false
 var flip_y = false
+var oposite_corner_pos_in_world = null
 
 var mouse_pos = Vector2(0,0)
 
@@ -608,13 +608,16 @@ func _unhandled_input(event):
 					print("selection pressed")
 					if mouse_over_tl or mouse_over_tr or mouse_over_bl or mouse_over_br: #scale
 						print("mouse_over_bltlbrtr")
+						oposite_corner_pos_in_world = null
 						selected_scaling = true
 						min_max_x_y = Vector4(select_box.position.x, select_box.position.y, select_box.position.x+select_box.size.x, select_box.position.y+select_box.size.y)
 						select_pos_org = select_box.position
 						select_size_org = select_box.size
+						selected_org_sizes.clear()
 						selected_org_scales.clear()
 						selected_org_pos.clear()
 						for object in selected:
+							selected_org_sizes.append(object.size)
 							selected_org_scales.append(object.scale)
 							selected_org_pos.append(object.position)
 						return
@@ -711,143 +714,348 @@ func _unhandled_input(event):
 					#scale objects
 					elif selected_scaling:
 						print("scale")
-						select_pos = select_box.position
-						select_size = select_box.size
-						var relative_offset = event.relative/get_node("../Camera2D").zoom
-						
+						var mouse_pos_rot #position of mouse in select_box rotation plane
+						if select_box.rotation == 0:
+							mouse_pos_rot = mouse_pos
+						else:
+							var distance = select_box.position.distance_to(mouse_pos)
+							var angle = select_box.position.angle_to_point(mouse_pos)
+							mouse_pos_rot = Vector2(select_box.position.x + cos(- select_box.rotation + angle) * distance, select_box.position.y + sin(- select_box.rotation + angle) * distance)
 						if mouse_over_tl: #scale
-							if select_box.size.x-relative_offset.x > 0 and select_box.size.y-relative_offset.y > 0: #tl
-								var scal = (select_box.size-relative_offset)/select_box.size
-								select_box.set_begin(Vector2((select_box.get_begin().x+relative_offset.x), (select_box.get_begin().y+relative_offset.y)))
+							if mouse_pos_rot.x < select_box.position.x + select_box.size.x and mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tl
+#								var scal = (select_box.size-relative_offset)/select_box.size
+#								select_box.set_begin(Vector2((select_box.get_begin().x+relative_offset.x), (select_box.get_begin().y+relative_offset.y)))
+								if select_box.rotation == 0:
+									select_box.set_begin(mouse_pos_rot)
+								else:
+									if (oposite_corner_pos_in_world == null):
+										var distance = Vector2(0,0).distance_to(select_box.size)
+										var angle = Vector2(0,0).angle_to_point(select_box.size)
+										oposite_corner_pos_in_world = Vector2(select_box.position.x + distance * cos(angle + select_box.rotation), select_box.position.y + distance * sin(angle + select_box.rotation))
+									select_box.set_begin(mouse_pos)
+									var distance = mouse_pos.distance_to(oposite_corner_pos_in_world)
+									var angle = mouse_pos.angle_to_point(oposite_corner_pos_in_world)
+									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
+									select_box.set_end(new_location_in_local)
+#									
+								var scal = select_box.size/select_size_org
 								var i = 0
 								for object in selected:
-									object.scale = (select_size/select_size_org) * selected_org_scales[i]
-									if flip_x and flip_y:
-										object.scale *= -1
-										object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-									elif flip_x:
-										object.scale.x *= -1
-										object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									elif flip_y:
-										object.scale.y *= -1
-										object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									else:
-										object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									if (object.rotation == 0 and select_box.rotation == 0) or (object.rotation == select_box.rotation and selected.size() == 1): #scale without rotation, or one rotated object
+										object.scale = scal * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
+										elif flip_x:
+											object.scale.x *= -1
+											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										elif flip_y:
+											object.scale.y *= -1
+											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										else:
+											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+										var scal_square = scal
+										if scal_square.x < scal_square.y:
+											scal_square.y = scal_square.x
+										else:
+											scal_square.x = scal_square.y
+										object.scale = scal_square * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal 
+											difference = -difference
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										elif flip_x:
+											object.scale.x *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.x = -difference.x
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
+										elif flip_y:
+											object.scale.y *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.y = -difference.y
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										else:
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
 									i += 1
-							elif select_box.size.x-relative_offset.x > 0: #bl
+							elif mouse_pos_rot.x < select_box.position.x + select_box.size.x: #bl
 								flip_y = !flip_y
 								mouse_over_bl = true
 								mouse_over_tl = false
-							elif select_box.size.y-relative_offset.y > 0: #tr
+								for object in selected:
+									object.rotation = -object.rotation
+							elif mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tr
 								flip_x = !flip_x
 								mouse_over_tr = true
 								mouse_over_tl = false
+								for object in selected:
+									object.rotation = -object.rotation
 							else: #br
 								flip_x = !flip_x
 								flip_y = !flip_y
 								mouse_over_tl = true
 								mouse_over_tl = false
 						elif mouse_over_bl: #scale
-							if select_box.size.x-relative_offset.x > 0 and select_box.size.y+relative_offset.y > 0: #bl
-								var scal = Vector2((select_box.size.x-relative_offset.x)/select_box.size.x, (select_box.size.y+relative_offset.y)/select_box.size.y)
-								select_box.set_begin(Vector2((select_box.get_begin().x+relative_offset.x), select_pos.y))
-								select_box.size.y += relative_offset.y
+							if mouse_pos_rot.x < select_box.position.x + select_box.size.x and mouse_pos_rot.y > select_box.position.y: #bl
+#								var scal = Vector2((select_box.size.x-relative_offset.x)/select_box.size.x, (select_box.size.y+relative_offset.y)/select_box.size.y)
+#								select_box.set_begin(Vector2((select_box.get_begin().x+relative_offset.x), select_pos.y))
+#								select_box.size.y += relative_offset.y
+								if select_box.rotation == 0:
+									select_box.set_begin(Vector2(mouse_pos_rot.x, select_box.position.y))
+									select_box.size.y = mouse_pos_rot.y - select_box.position.y
+								else:
+									if (oposite_corner_pos_in_world == null):
+										var distance = select_box.size.x
+										var angle = 0
+										oposite_corner_pos_in_world = Vector2(select_box.position.x + distance * cos(angle + select_box.rotation), select_box.position.y + distance * sin(angle + select_box.rotation))
+									var distance = select_box.position.distance_to(oposite_corner_pos_in_world)
+									var angle = select_box.position.angle_to_point(oposite_corner_pos_in_world)
+									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
+									select_box.set_begin(Vector2(mouse_pos_rot.x, new_location_in_local.y))
+									select_box.set_end(Vector2(new_location_in_local.x, mouse_pos_rot.y))
+								var scal = select_box.size/select_size_org
 								var i = 0
 								for object in selected:
-									object.scale = (select_size/select_size_org) * selected_org_scales[i]
-									if flip_x and flip_y:
-										object.scale *= -1
-										object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-									elif flip_x:
-										object.scale.x *= -1
-										object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									elif flip_y:
-										object.scale.y *= -1
-										object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									else:
-										object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									if (object.rotation == 0 and select_box.rotation == 0) or (object.rotation == select_box.rotation and selected.size() == 1): #scale without rotation, or one rotated object
+										object.scale = scal * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
+										elif flip_x:
+											object.scale.x *= -1
+											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										elif flip_y:
+											object.scale.y *= -1
+											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										else:
+											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+										var scal_square = scal
+										if scal_square.x < scal_square.y:
+											scal_square.y = scal_square.x
+										else:
+											scal_square.x = scal_square.y
+										object.scale = scal_square * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal 
+											difference = -difference
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										elif flip_x:
+											object.scale.x *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.x = -difference.x
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
+										elif flip_y:
+											object.scale.y *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.y = -difference.y
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										else:
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
 									i += 1
-							elif select_box.size.x-relative_offset.x > 0: #tl
+							elif mouse_pos_rot.x < select_box.position.x + select_box.size.x: #tl
 								flip_y = !flip_y
 								mouse_over_tl = true
 								mouse_over_bl = false
-							elif select_box.size.y+relative_offset.y > 0: #br
+								for object in selected:
+									object.rotation = -object.rotation
+							elif mouse_pos_rot.y > select_box.position.y: #br
 								flip_x = !flip_x
 								mouse_over_br = true
 								mouse_over_bl = false
+								for object in selected:
+									object.rotation = -object.rotation
 							else: #tr
 								flip_x = !flip_x
 								flip_y = !flip_y
 								mouse_over_tr = true
 								mouse_over_bl = false
 						elif mouse_over_tr: #scale
-							if select_box.size.x+relative_offset.x > 0 and select_box.size.y-relative_offset.y > 0: #tr
-								var scal = Vector2((select_box.size.x+relative_offset.x)/select_box.size.x, (select_box.size.y-relative_offset.y)/select_box.size.y)
-								select_box.size.x += relative_offset.x
-								select_box.set_begin(Vector2(select_pos.x, select_box.get_begin().y+relative_offset.y))
+							if mouse_pos_rot.x > select_box.position.x and mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tr
+#								var scal = Vector2((select_box.size.x+relative_offset.x)/select_box.size.x, (select_box.size.y-relative_offset.y)/select_box.size.y)
+#								select_box.size.x += relative_offset.x
+#								select_box.set_begin(Vector2(select_pos.x, select_box.get_begin().y+relative_offset.y))
+								if select_box.rotation == 0:
+									select_box.set_begin(Vector2(select_box.position.x, mouse_pos_rot.y))
+									select_box.size.x = mouse_pos_rot.x - select_box.position.x
+								else:
+									if (oposite_corner_pos_in_world == null):
+										var distance = select_box.size.y
+										var angle = deg_to_rad(90)
+										oposite_corner_pos_in_world = Vector2(select_box.position.x + distance * cos(angle + select_box.rotation), select_box.position.y + distance * sin(angle + select_box.rotation))
+									var distance = select_box.position.distance_to(oposite_corner_pos_in_world)
+									var angle = select_box.position.angle_to_point(oposite_corner_pos_in_world)
+									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
+									select_box.set_begin(Vector2(new_location_in_local.x, mouse_pos_rot.y))
+									select_box.set_end(Vector2(mouse_pos_rot.x, new_location_in_local.y))
+								var scal = select_box.size/select_size_org
 								var i = 0
 								for object in selected:
-									object.scale = (select_size/select_size_org) * selected_org_scales[i]
-									if flip_x and flip_y:
-										object.scale *= -1
-										object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-									elif flip_x:
-										object.scale.x *= -1
-										object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									elif flip_y:
-										object.scale.y *= -1
-										object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									else:
-										object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									if (object.rotation == 0 and select_box.rotation == 0) or (object.rotation == select_box.rotation and selected.size() == 1): #scale without rotation, or one rotated object
+										object.scale = scal * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
+										elif flip_x:
+											object.scale.x *= -1
+											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										elif flip_y:
+											object.scale.y *= -1
+											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										else:
+											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+										var scal_square = scal
+										if scal_square.x < scal_square.y:
+											scal_square.y = scal_square.x
+										else:
+											scal_square.x = scal_square.y
+										object.scale = scal_square * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal 
+											difference = -difference
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										elif flip_x:
+											object.scale.x *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.x = -difference.x
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
+										elif flip_y:
+											object.scale.y *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.y = -difference.y
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										else:
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
 									i += 1
-							elif select_box.size.x+relative_offset.x > 0: #br
+							elif mouse_pos_rot.x > select_box.position.x: #br
 								flip_y = !flip_y
 								mouse_over_br = true
 								mouse_over_tr = false
-							elif select_box.size.y-relative_offset.y > 0: #tl
+								for object in selected:
+									object.rotation = -object.rotation
+							elif mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tl
 								flip_x = !flip_x
 								mouse_over_tl = true
 								mouse_over_tr = false
+								for object in selected:
+									object.rotation = -object.rotation
 							else: #bl
 								flip_x = !flip_x
 								flip_y = !flip_y
 								mouse_over_bl = true
 								mouse_over_tr = false
 						elif mouse_over_br: #scale
-							if select_box.size.x+relative_offset.x > 0 and select_box.size.y+relative_offset.y > 0: #br
-								var scal = (select_box.size+relative_offset)/select_box.size
-								select_box.size += relative_offset
+							if select_box.rotation == 0:
+								mouse_pos_rot = mouse_pos
+							else:
+								var distance = select_box.position.distance_to(mouse_pos)
+								var angle = select_box.position.angle_to_point(mouse_pos)
+								mouse_pos_rot = Vector2(select_box.position.x + cos(- select_box.rotation + angle) * distance, select_box.position.y + sin(- select_box.rotation + angle) * distance)
+							if (mouse_pos_rot.x > select_box.position.x) and (mouse_pos_rot.y > select_box.position.y): #br
+								select_box.set_end(mouse_pos_rot)
+								var scal = select_box.size/select_size_org
 								var i = 0
 								for object in selected:
-									object.scale = (select_size/select_size_org) * selected_org_scales[i]
-									if flip_x and flip_y:
-										object.scale *= -1
-										object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-									elif flip_x:
-										object.scale.x *= -1
-										object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									elif flip_y:
-										object.scale.y *= -1
-										object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-										object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-									else:
-										object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									if (object.rotation == 0 and select_box.rotation == 0) or (object.rotation == select_box.rotation and selected.size() == 1): #scale without rotation, or one rotated object
+										object.scale = scal * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
+										elif flip_x:
+											object.scale.x *= -1
+											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										elif flip_y:
+											object.scale.y *= -1
+											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+										else:
+											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+										var scal_square = scal
+										if scal_square.x < scal_square.y:
+											scal_square.y = scal_square.x
+										else:
+											scal_square.x = scal_square.y
+										object.scale = scal_square * selected_org_scales[i]
+										if flip_x and flip_y:
+											object.scale *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal 
+											difference = -difference
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										elif flip_x:
+											object.scale.x *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.x = -difference.x
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + select_box.size.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
+										elif flip_y:
+											object.scale.y *= -1
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											difference.y = -difference.y
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + select_box.size.y + distance * sin(angle))
+										else:
+											var difference = (selected_org_pos[i] - select_pos_org) * scal
+											var distance = Vector2(0,0).distance_to(difference)
+											var angle = Vector2(0,0).angle_to_point(difference)
+											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
 									i += 1
-							elif select_box.size.x+relative_offset.x > 0: #tr
+							elif mouse_pos_rot.x > select_box.position.x : #tr
+								print("entering tr")
 								flip_y = !flip_y
 								mouse_over_tr = true
 								mouse_over_br = false
-							elif select_box.size.y+relative_offset.y > 0: #bl
+								for object in selected:
+									object.rotation = -object.rotation
+							elif mouse_pos_rot.y > select_box.position.y: #bl
+								print("entering bl")
 								flip_x = !flip_x
 								mouse_over_bl = true
 								mouse_over_br = false
+								for object in selected:
+									object.rotation = -object.rotation
 							else: #tl
 								flip_x = !flip_x
 								flip_y = !flip_y

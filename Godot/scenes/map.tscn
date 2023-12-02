@@ -1,9 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
 [ext_resource type="Texture2D" uid="uid://ihv74426u2cc" path="res://images/Placeholder-1479066.png" id="2_8c7ws"]
-[ext_resource type="Script" path="res://scripts/Drag_Drop_data.gd" id="2_228l2"]
 [ext_resource type="Texture2D" uid="uid://007ihy4ed0nl" path="res://images/map_84x45.png" id="3_5u0ia"]
 [ext_resource type="PackedScene" uid="uid://ckr01rwlxratn" path="res://UI/map_tools.tscn" id="4_4e45f"]
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
@@ -48,19 +47,6 @@ region_enabled = true
 region_rect = Rect2(0, 0, 70000, 70000)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="Drag_Drop_data" type="Control" parent="CanvasLayer"]
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-mouse_filter = 1
-script = ExtResource("2_228l2")
 
 [node name="Layers" parent="CanvasLayer" instance=ExtResource("11_1618w")]
 offset_left = 2.0

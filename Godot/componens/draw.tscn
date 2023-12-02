@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://3qgtuhwblt4q"]
 
 [ext_resource type="Script" path="res://scripts/draw.gd" id="1_1loxi"]
-[ext_resource type="Script" path="res://scripts/Drag_Drop_data.gd" id="2_vd87b"]
+[ext_resource type="Script" path="res://scripts/Drag_Drop_data.gd" id="2_u28gs"]
 
 [node name="Draw" type="Node2D"]
 script = ExtResource("1_1loxi")
@@ -19,7 +19,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-script = ExtResource("2_vd87b")
+script = ExtResource("2_u28gs")
 
 [node name="Layers" type="Node2D" parent="."]
 
