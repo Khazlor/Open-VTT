@@ -148,25 +148,25 @@ func _unhandled_input(event):
 					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
 						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 							return
-					mouse_over_tl = false
+#					mouse_over_tl = false
 				if mouse_over_bl:
 					current_panel = select_box.get_child(1)
 					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
 						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 							return
-					mouse_over_bl = false
+#					mouse_over_bl = false
 				if mouse_over_tr:
 					current_panel = select_box.get_child(2)
 					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
 						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 							return
-					mouse_over_tr = false
+#					mouse_over_tr = false
 				if mouse_over_br:
 					current_panel = select_box.get_child(3)
 					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
 						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
 							return
-					mouse_over_br = false
+#					mouse_over_br = false
 				return
 			if !selected_creating:
 				return
@@ -277,11 +277,30 @@ func _unhandled_input(event):
 					print("size: ", child.size)
 					print("scale: ", child.scale)
 					if child.rotation == 0:
-						if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
-							if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-								if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
-									selected.append(child)
-									break
+						if child.scale.x < 0 and child.scale.y < 0: #flipped object
+							if child.position.x >= mouse_pos.x and child.position.y >= mouse_pos.y:
+								if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
+									if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
+										selected.append(child)
+										break
+						elif child.scale.x < 0: #flipped x
+							if child.position.x >= mouse_pos.x and child.position.y <= mouse_pos.y:
+								if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
+									if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+										selected.append(child)
+										break
+						elif child.scale.y < 0: #flipped y
+							if child.position.x <= mouse_pos.x and child.position.y >= mouse_pos.y:
+								if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+									if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
+										selected.append(child)
+										break
+						else: #not flipped
+							if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
+								if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+									if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+										selected.append(child)
+										break
 					else: #calculate with rotation
 						var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
 						var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
@@ -304,8 +323,30 @@ func _unhandled_input(event):
 				var s = selected[0]
 				select_box.rotation = s.rotation
 #				select_box.pivot_offset = s.pivot_offset
-				select_box.position = s.position
-				select_box.size = s.size*s.scale
+				var vect = s.size*s.scale #size cannot be negative
+				if vect.x < 0:
+					vect.x = vect.x * -1
+				if vect.y < 0:
+					vect.y = vect.y * -1
+				select_box.size = vect
+				if s.scale.x < 0 and s.scale.y < 0: #object flipped
+					var distance = Vector2(0,0).distance_to(s.size * s.scale)
+					var angle = Vector2(0,0).angle_to_point(s.size * s.scale) + s.rotation
+					print("dis: ", distance, " ang: ", angle)
+					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+				elif s.scale.x < 0: #object x flipped
+					var distance = s.size.x * s.scale.x
+					var angle = s.rotation
+					print("dis: ", distance, " ang: ", angle)
+					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+				elif s.scale.y < 0: #object y flipped
+					var distance = s.size.y * s.scale.y
+					var angle = deg_to_rad(90) + s.rotation
+					print("dis: ", distance, " ang: ", angle)
+					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+				else: #object not flipped
+					select_box.position = s.position
+				
 			else:
 				select_box.set_begin(Vector2(min_x, min_y))
 				select_box.set_end(Vector2(max_x, max_y))
@@ -621,7 +662,7 @@ func _unhandled_input(event):
 							selected_org_scales.append(object.scale)
 							selected_org_pos.append(object.position)
 						return
-					if mouse_over_rotate: #rotate
+					elif mouse_over_rotate: #rotate
 						print("mouse_over_rotate")
 						selected_rotating = true
 						if select_box.rotation == 0:
@@ -638,11 +679,11 @@ func _unhandled_input(event):
 							selected_org_rots.append(object.rotation)
 							selected_org_pos.append(object.position)
 						return
-					if mouse_over_selected: #drag
+					elif mouse_over_selected: #drag
 						print("mouse_over_selected")
 						return
 					#just pressed - create objects
-					if pressed:
+					elif pressed:
 						print("selection creating")
 						#remove old select
 						if select_box != null:
@@ -711,6 +752,7 @@ func _unhandled_input(event):
 							print(rad_to_deg(angle_org), " ", rad_to_deg(angle))
 							print(rad_to_deg(object.rotation), " ", rad_to_deg(selected_org_rots[i]), " ", rad_to_deg(object.rotation))
 							i += 1
+						return
 					#scale objects
 					elif selected_scaling:
 						print("scale")
@@ -721,6 +763,7 @@ func _unhandled_input(event):
 							var distance = select_box.position.distance_to(mouse_pos)
 							var angle = select_box.position.angle_to_point(mouse_pos)
 							mouse_pos_rot = Vector2(select_box.position.x + cos(- select_box.rotation + angle) * distance, select_box.position.y + sin(- select_box.rotation + angle) * distance)
+							mouse_pos_rot = mouse_pos_rot
 						if mouse_over_tl: #scale
 							if mouse_pos_rot.x < select_box.position.x + select_box.size.x and mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tl
 #								var scal = (select_box.size-relative_offset)/select_box.size
@@ -737,68 +780,7 @@ func _unhandled_input(event):
 									var angle = mouse_pos.angle_to_point(oposite_corner_pos_in_world)
 									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
 									select_box.set_end(new_location_in_local)
-#									
-								var scal = select_box.size/select_size_org
-								var i = 0
-								for object in selected:
-									if object.rotation == 0 and select_box.rotation == 0: #scale without rotation, or one rotated object
-										object.scale = scal * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-										elif flip_x:
-											object.scale.x *= -1
-											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										elif flip_y:
-											object.scale.y *= -1
-											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										else:
-											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
-									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
-										if object.rotation == select_box.rotation and selected.size() == 1:
-											object.scale = scal * selected_org_scales[i]
-										else:
-											var scal_square = scal
-											if scal_square.x < scal_square.y:
-												scal_square.y = scal_square.x
-											else:
-												scal_square.x = scal_square.y
-											object.scale = scal_square * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal 
-											difference = -difference
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset_distance = Vector2(0,0).distance_to(select_box.size)
-											var offset_angle = Vector2(0,0).angle_to_point(select_box.size) + select_box.rotation
-											var offset = Vector2(offset_distance * cos(offset_angle), offset_distance * sin(offset_angle))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_x:
-											object.scale.x *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.x = -difference.x
-											print(difference)
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.x * cos(select_box.rotation), select_box.size.x * sin(select_box.rotation))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_y:
-											object.scale.y *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.y = -difference.y
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.y * cos(select_box.rotation + deg_to_rad(90)), select_box.size.y * sin(select_box.rotation + deg_to_rad(90)))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										else:
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
-									i += 1
+								scale_items()
 							elif mouse_pos_rot.x < select_box.position.x + select_box.size.x: #bl
 								flip_y = !flip_y
 								mouse_over_bl = true
@@ -836,67 +818,7 @@ func _unhandled_input(event):
 									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
 									select_box.set_begin(Vector2(mouse_pos_rot.x, new_location_in_local.y))
 									select_box.set_end(Vector2(new_location_in_local.x, mouse_pos_rot.y))
-								var scal = select_box.size/select_size_org
-								var i = 0
-								for object in selected:
-									if object.rotation == 0 and select_box.rotation == 0: #scale without rotation, or one rotated object
-										object.scale = scal * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-										elif flip_x:
-											object.scale.x *= -1
-											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										elif flip_y:
-											object.scale.y *= -1
-											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										else:
-											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
-									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
-										if object.rotation == select_box.rotation and selected.size() == 1:
-											object.scale = scal * selected_org_scales[i]
-										else:
-											var scal_square = scal
-											if scal_square.x < scal_square.y:
-												scal_square.y = scal_square.x
-											else:
-												scal_square.x = scal_square.y
-											object.scale = scal_square * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal 
-											difference = -difference
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset_distance = Vector2(0,0).distance_to(select_box.size)
-											var offset_angle = Vector2(0,0).angle_to_point(select_box.size) + select_box.rotation
-											var offset = Vector2(offset_distance * cos(offset_angle), offset_distance * sin(offset_angle))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_x:
-											object.scale.x *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.x = -difference.x
-											print(difference)
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.x * cos(select_box.rotation), select_box.size.x * sin(select_box.rotation))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_y:
-											object.scale.y *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.y = -difference.y
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.y * cos(select_box.rotation + deg_to_rad(90)), select_box.size.y * sin(select_box.rotation + deg_to_rad(90)))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										else:
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
-									i += 1
+								scale_items()
 							elif mouse_pos_rot.x < select_box.position.x + select_box.size.x: #tl
 								flip_y = !flip_y
 								mouse_over_tl = true
@@ -934,67 +856,7 @@ func _unhandled_input(event):
 									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
 									select_box.set_begin(Vector2(new_location_in_local.x, mouse_pos_rot.y))
 									select_box.set_end(Vector2(mouse_pos_rot.x, new_location_in_local.y))
-								var scal = select_box.size/select_size_org
-								var i = 0
-								for object in selected:
-									if object.rotation == 0 and select_box.rotation == 0: #scale without rotation, or one rotated object
-										object.scale = scal * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-										elif flip_x:
-											object.scale.x *= -1
-											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										elif flip_y:
-											object.scale.y *= -1
-											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										else:
-											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
-									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
-										if object.rotation == select_box.rotation and selected.size() == 1:
-											object.scale = scal * selected_org_scales[i]
-										else:
-											var scal_square = scal
-											if scal_square.x < scal_square.y:
-												scal_square.y = scal_square.x
-											else:
-												scal_square.x = scal_square.y
-											object.scale = scal_square * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal 
-											difference = -difference
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset_distance = Vector2(0,0).distance_to(select_box.size)
-											var offset_angle = Vector2(0,0).angle_to_point(select_box.size) + select_box.rotation
-											var offset = Vector2(offset_distance * cos(offset_angle), offset_distance * sin(offset_angle))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_x:
-											object.scale.x *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.x = -difference.x
-											print(difference)
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.x * cos(select_box.rotation), select_box.size.x * sin(select_box.rotation))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_y:
-											object.scale.y *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.y = -difference.y
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.y * cos(select_box.rotation + deg_to_rad(90)), select_box.size.y * sin(select_box.rotation + deg_to_rad(90)))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										else:
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
-									i += 1
+								scale_items()
 							elif mouse_pos_rot.x > select_box.position.x: #br
 								flip_y = !flip_y
 								mouse_over_br = true
@@ -1023,67 +885,7 @@ func _unhandled_input(event):
 								mouse_pos_rot = Vector2(select_box.position.x + cos(- select_box.rotation + angle) * distance, select_box.position.y + sin(- select_box.rotation + angle) * distance)
 							if (mouse_pos_rot.x > select_box.position.x) and (mouse_pos_rot.y > select_box.position.y): #br
 								select_box.set_end(mouse_pos_rot)
-								var scal = select_box.size/select_size_org
-								var i = 0
-								for object in selected:
-									if (object.rotation == 0 and select_box.rotation == 0): #scale without rotation, or one rotated object
-										object.scale = scal * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
-										elif flip_x:
-											object.scale.x *= -1
-											object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y	
-										elif flip_y:
-											object.scale.y *= -1
-											object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
-											object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
-										else:
-											object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
-									else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
-										if object.rotation == select_box.rotation and selected.size() == 1:
-											object.scale = scal * selected_org_scales[i]
-										else:
-											var scal_square = scal
-											if scal_square.x < scal_square.y:
-												scal_square.y = scal_square.x
-											else:
-												scal_square.x = scal_square.y
-											object.scale = scal_square * selected_org_scales[i]
-										if flip_x and flip_y:
-											object.scale *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal 
-											difference = -difference
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset_distance = Vector2(0,0).distance_to(select_box.size)
-											var offset_angle = Vector2(0,0).angle_to_point(select_box.size) + select_box.rotation
-											var offset = Vector2(offset_distance * cos(offset_angle), offset_distance * sin(offset_angle))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_x:
-											object.scale.x *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.x = -difference.x
-											print(difference)
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.x * cos(select_box.rotation), select_box.size.x * sin(select_box.rotation))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										elif flip_y:
-											object.scale.y *= -1
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											difference.y = -difference.y
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											var offset = Vector2(select_box.size.y * cos(select_box.rotation + deg_to_rad(90)), select_box.size.y * sin(select_box.rotation + deg_to_rad(90)))
-											object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
-										else:
-											var difference = (selected_org_pos[i] - select_pos_org) * scal
-											var distance = Vector2(0,0).distance_to(difference)
-											var angle = Vector2(0,0).angle_to_point(difference)
-											object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
-									i += 1
+								scale_items()
 							elif mouse_pos_rot.x > select_box.position.x : #tr
 								print("entering tr")
 								flip_y = !flip_y
@@ -1128,7 +930,7 @@ func _unhandled_input(event):
 								select_box.size.y = select_box.size.x
 								
 	elif event is InputEventKey:
-		if Input.is_action_just_pressed("Delete"):
+		if Input.is_action_just_pressed("Delete"): #delete selection
 			for child in selected:
 				child.queue_free()
 			#remove select box
@@ -1144,9 +946,9 @@ func _unhandled_input(event):
 			mouse_over_bl = false
 			mouse_over_tr = false
 			mouse_over_br = false
-		elif Input.is_action_just_pressed("Escape"):
+		elif Input.is_action_just_pressed("Escape"): #go back to map selection
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
-		elif Input.is_action_just_pressed("I-pressed"):
+		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
 			var ch_sh = char_sheet.instantiate()
 			ch_sh.position = get_viewport().get_mouse_position()
 			add_child(ch_sh)
@@ -1158,22 +960,106 @@ func _on_select_mouse_entered():
 func _on_select_mouse_exited():
 	mouse_over_selected = false
 	
-#func create_handle(x: float, y: float, s: float):
-#	current_panel = Panel.new()
-#	current_panel.position = Vector2(x-s/2,y-s/2)
-#	current_panel.size = Vector2(s,s)
-#	var style = StyleBoxFlat.new()
-#	style.bg_color = Color.WHITE
-#	style.border_color = Color.BLACK
-#	style.set_border_width_all(s/5)
-#	style.set_corner_radius_all(s)
-#	current_panel.add_theme_stylebox_override("panel", style)
-#	$Select.get_child(0).add_child(current_panel)
-
+#scales item of selectbox based on his changes
+func scale_items():
+	var scal = select_box.size/select_size_org
+	var i = 0
+	for object in selected:
+		if (object.rotation == 0 and select_box.rotation == 0): #scale without rotation, or one rotated object
+			object.scale = scal * selected_org_scales[i]
+			if flip_x and flip_y:
+				object.scale *= -1
+				object.position = (select_pos_org - selected_org_pos[i] + select_size_org) / select_size_org * select_box.size + select_box.position
+			elif flip_x:
+				object.scale.x *= -1
+				object.position.x = (select_pos_org.x - selected_org_pos[i].x + select_size_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+				object.position.y = (selected_org_pos[i].y - select_pos_org.y) / select_size_org.y * select_box.size.y + select_box.position.y	
+			elif flip_y:
+				object.scale.y *= -1
+				object.position.x = (selected_org_pos[i].x - select_pos_org.x) / select_size_org.x * select_box.size.x + select_box.position.x
+				object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
+			else:
+				object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
+		else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+			if object.rotation == select_box.rotation and selected.size() == 1: #one item scale with select_box
+				object.scale = scal * selected_org_scales[i]
+				print(object.scale)
+			else: #more items scale with lesser of select_box changes - works decently well
+				var scal_square = scal
+				if scal_square.x < scal_square.y:
+					scal_square.y = scal_square.x
+				else:
+					scal_square.x = scal_square.y
+				object.scale = scal_square * selected_org_scales[i]
+			# ==== scaling objects based on flip state of select_box ====
+			if flip_x and flip_y:
+				print("flip xy")
+				object.scale = -object.scale #flip xy
+				#get difference between object positions
+				var difference = (selected_org_pos[i] - select_pos_org)
+				var distance = Vector2(0,0).distance_to(difference)
+				var angle = Vector2(0,0).angle_to_point(difference)
+				print("angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				#rotate diference based on select_box rotation:
+				difference = Vector2(distance * cos(angle - select_box.rotation), distance * sin(angle - select_box.rotation)) * scal
+				difference = -difference #flip xy in difference
+				distance = Vector2(0,0).distance_to(difference)
+				angle = Vector2(0,0).angle_to_point(difference) + select_box.rotation #rotate object back based on select_box rotation
+				print("rot angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				var offset_distance = Vector2(0,0).distance_to(select_box.size)
+				var offset_angle = Vector2(0,0).angle_to_point(select_box.size) + select_box.rotation
+				var offset = Vector2(offset_distance * cos(offset_angle), offset_distance * sin(offset_angle))
+				object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
+				print("selectbox_pos: ", select_box.position, " offset: ", offset, " object_pos: ", object.position)
+			elif flip_x:
+				print("flip x")
+				object.scale.x = -object.scale.x #flip x
+				#get difference between object positions
+				var difference = (selected_org_pos[i] - select_pos_org)
+				var distance = Vector2(0,0).distance_to(difference)
+				var angle = Vector2(0,0).angle_to_point(difference)
+				print("angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				#rotate diference based on select_box rotation:
+				difference = Vector2(distance * cos(angle - select_box.rotation), distance * sin(angle - select_box.rotation)) * scal
+				difference.x = -difference.x #flip x in difference
+				distance = Vector2(0,0).distance_to(difference)
+				angle = Vector2(0,0).angle_to_point(difference) + select_box.rotation #rotate object back based on select_box rotation
+				print("rot angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				var offset = Vector2(select_box.size.x * cos(select_box.rotation), select_box.size.x * sin(select_box.rotation))
+				object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
+				print("selectbox_pos: ", select_box.position, " offset: ", offset, " object_pos: ", object.position)
+			elif flip_y:
+				print("flip y")
+				object.scale.y = -object.scale.y #flip y
+				#get difference between object positions
+				var difference = (selected_org_pos[i] - select_pos_org)
+				var distance = Vector2(0,0).distance_to(difference)
+				var angle = Vector2(0,0).angle_to_point(difference)
+				print("angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				#rotate diference based on select_box rotation:
+				difference = Vector2(distance * cos(angle - select_box.rotation), distance * sin(angle - select_box.rotation)) * scal
+				difference.y = -difference.y #flip y in difference
+				distance = Vector2(0,0).distance_to(difference)
+				angle = Vector2(0,0).angle_to_point(difference) + select_box.rotation #rotate object back based on select_box rotation
+				print("rot angle: ", rad_to_deg(angle), " distance: ", distance, " difference: ", difference)
+				var offset = Vector2(select_box.size.y * cos(select_box.rotation + deg_to_rad(90)), select_box.size.y * sin(select_box.rotation + deg_to_rad(90)))
+				object.position = Vector2(select_box.position.x + offset.x + distance * cos(angle), select_box.position.y + offset.y + distance * sin(angle))
+				print("selectbox_pos: ", select_box.position, " offset: ", offset, " object_pos: ", object.position)
+			else:
+				#get difference between object positions
+				var difference = (selected_org_pos[i] - select_pos_org)
+				var distance = Vector2(0,0).distance_to(difference)
+				var angle = Vector2(0,0).angle_to_point(difference)
+				#rotate diference based on select_box rotation:
+				difference = Vector2(distance * cos(angle - select_box.rotation), distance * sin(angle - select_box.rotation)) * scal
+				distance = Vector2(0,0).distance_to(difference)
+				angle = Vector2(0,0).angle_to_point(difference) + select_box.rotation #rotate object back based on select_box rotation
+				object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
+		i += 1
+	
 #creates handle for selection box
 #preset - anchor point
 #s - size
-
 func create_handle(preset: Control.LayoutPreset, s: float):
 	current_panel = Panel.new()
 	current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
