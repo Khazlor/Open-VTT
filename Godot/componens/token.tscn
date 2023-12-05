@@ -1,10 +1,14 @@
-[gd_scene format=3 uid="uid://0gfii8buhxxb"]
+[gd_scene load_steps=2 format=3 uid="uid://0gfii8buhxxb"]
+
+[ext_resource type="Script" path="res://scripts/token.gd" id="1_8ye4b"]
 
 [node name="Token" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 70.0
 offset_bottom = 70.0
+mouse_filter = 1
+script = ExtResource("1_8ye4b")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -13,15 +17,32 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 
-[node name="bar" type="ProgressBar" parent="."]
-modulate = Color(1, 0, 0, 1)
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = -20.0
-offset_bottom = -5.0
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Panel"]
+remote_path = NodePath("../../UI")
+update_rotation = false
+update_scale = false
+
+[node name="UI" type="Node2D" parent="."]
+
+[node name="Bars" type="VBoxContainer" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
 grow_horizontal = 2
+grow_vertical = 2
+
+[node name="bar" type="ProgressBar" parent="UI/Bars"]
+modulate = Color(1, 0, 0, 1)
+layout_mode = 2
+mouse_filter = 1
 theme_override_font_sizes/font_size = 15
 max_value = 10.0
 value = 7.0

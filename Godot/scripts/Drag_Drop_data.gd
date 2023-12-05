@@ -20,6 +20,6 @@ func _drop_data(position, data):
 	if data.get_meta("character") != null:
 		print("dropped: " + data.get_meta("character").name)
 		var token = token_comp.instantiate()
-		token.position = d.get_global_mouse_position()
+		token.get_child(0).position = d.get_global_mouse_position() #set position of image - UI will follow via remote transform
 		Globals.draw_layer.add_child(token)
 	

@@ -38,7 +38,6 @@ var select_size_org: Vector2
 var select_pos_org: Vector2
 var select_rot_org: float
 var selected_org_scales = []
-var selected_org_sizes = []
 var selected_org_pos = []
 var selected_org_rots = []
 var flip_x = false
@@ -86,9 +85,9 @@ func _unhandled_input(event):
 	#		event.position = 70 * round(event.position/70)
 	#		print(event.position)
 
-			print(mouse_pos)
+#			print(mouse_pos)
 			mouse_pos = round(mouse_pos/(70/Globals.snappingFraction))*(70/Globals.snappingFraction) #snap to grid
-			print(mouse_pos)
+#			print(mouse_pos)
 		#skip if position not changed
 	#	if last_event_pos == event.position:
 	#		return
@@ -183,9 +182,11 @@ func _unhandled_input(event):
 			var min_y = select_box.size.y + select_box.position.y
 			#snap selection size to children
 			for child in lines_children:
+				if "character" in child: #if character token
+					child = child.get_child(0)
 				if child.is_class("Node2D"):
 					continue
-				if child.rotation == 0:
+				if child.rotation == 0: #no rotation - faster
 					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
 						if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
 							if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
@@ -270,12 +271,14 @@ func _unhandled_input(event):
 			if selected.is_empty():
 				for x in range(lines_children.size()):
 					var child = lines_children[-x-1]
+					if "character" in child: #if character token
+						child = child.get_child(0)
 					if child.is_class("Node2D"):
 						continue
-					print("mouse pos: ", mouse_pos)
-					print("pos: ", child.position)
-					print("size: ", child.size)
-					print("scale: ", child.scale)
+#					print("mouse pos: ", mouse_pos)
+#					print("pos: ", child.position)
+#					print("size: ", child.size)
+#					print("scale: ", child.scale)
 					if child.rotation == 0:
 						if child.scale.x < 0 and child.scale.y < 0: #flipped object
 							if child.position.x >= mouse_pos.x and child.position.y >= mouse_pos.y:
@@ -308,6 +311,7 @@ func _unhandled_input(event):
 						var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
 						var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
 						var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+						print(top_left, top_right, bottom_right, bottom_left)
 						if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
 							selected.append(child)
 							break
@@ -322,7 +326,6 @@ func _unhandled_input(event):
 				print("one item")
 				var s = selected[0]
 				select_box.rotation = s.rotation
-#				select_box.pivot_offset = s.pivot_offset
 				var vect = s.size*s.scale #size cannot be negative
 				if vect.x < 0:
 					vect.x = vect.x * -1
@@ -369,11 +372,6 @@ func _unhandled_input(event):
 			create_handle(Control.PRESET_CENTER_TOP, 20)
 			current_panel.connect("mouse_entered", _rotate_handle_mouse_entered)
 			current_panel.connect("mouse_exited", _rotate_handle_mouse_exited)
-			
-			for child in select_box.get_children():
-				print(child.get_signal_connection_list("mouse_entered"))
-			print(select_box.get_begin())
-			print(select_box.get_end())
 		#circle or rect drawing finished
 		if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
 			if current_panel == null:
@@ -654,13 +652,13 @@ func _unhandled_input(event):
 						min_max_x_y = Vector4(select_box.position.x, select_box.position.y, select_box.position.x+select_box.size.x, select_box.position.y+select_box.size.y)
 						select_pos_org = select_box.position
 						select_size_org = select_box.size
-						selected_org_sizes.clear()
 						selected_org_scales.clear()
 						selected_org_pos.clear()
 						for object in selected:
-							selected_org_sizes.append(object.size)
-							selected_org_scales.append(object.scale)
 							selected_org_pos.append(object.position)
+							if "character" in object: #character token - rotate only image, not bars
+								object = object.get_child(0)
+							selected_org_scales.append(object.scale)
 						return
 					elif mouse_over_rotate: #rotate
 						print("mouse_over_rotate")
@@ -676,8 +674,10 @@ func _unhandled_input(event):
 						selected_org_rots.clear()
 						selected_org_pos.clear()
 						for object in selected:
-							selected_org_rots.append(object.rotation)
 							selected_org_pos.append(object.position)
+							if "character" in object: #character token - rotate only image, not bars
+								object = object.get_child(0)
+							selected_org_rots.append(object.rotation)
 						return
 					elif mouse_over_selected: #drag
 						print("mouse_over_selected")
@@ -743,15 +743,14 @@ func _unhandled_input(event):
 						var i = 0
 						print(select_box.position)
 						for object in selected:
-							print(rad_to_deg(angle), " ",angle)
 							distance = select_center_pos.distance_to(selected_org_pos[i])
 							angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
 							object.position = Vector2(select_center_pos.x + cos(angle_org + angle - select_rot_org) * distance, select_center_pos.y + sin(angle_org + angle - select_rot_org) * distance)
 							object.rotation = fmod(selected_org_rots[i] + angle - select_rot_org, 2*PI)
-							print(object.position, select_box.position)
-							print(rad_to_deg(angle_org), " ", rad_to_deg(angle))
-							print(rad_to_deg(object.rotation), " ", rad_to_deg(selected_org_rots[i]), " ", rad_to_deg(object.rotation))
 							i += 1
+							#if object is token - update UI
+							if "character" in object.get_parent():
+								object.get_parent().UI_set_position()
 						return
 					#scale objects
 					elif selected_scaling:
@@ -802,22 +801,17 @@ func _unhandled_input(event):
 								mouse_over_tl = false
 						elif mouse_over_bl: #scale
 							if mouse_pos_rot.x < select_box.position.x + select_box.size.x and mouse_pos_rot.y > select_box.position.y: #bl
-#								var scal = Vector2((select_box.size.x-relative_offset.x)/select_box.size.x, (select_box.size.y+relative_offset.y)/select_box.size.y)
-#								select_box.set_begin(Vector2((select_box.get_begin().x+relative_offset.x), select_pos.y))
-#								select_box.size.y += relative_offset.y
 								if select_box.rotation == 0:
 									select_box.set_begin(Vector2(mouse_pos_rot.x, select_box.position.y))
 									select_box.size.y = mouse_pos_rot.y - select_box.position.y
 								else:
-									if (oposite_corner_pos_in_world == null):
+									if (oposite_corner_pos_in_world == null): #if new - reset upon new scale
 										var distance = select_box.size.x
 										var angle = 0
 										oposite_corner_pos_in_world = Vector2(select_box.position.x + distance * cos(angle + select_box.rotation), select_box.position.y + distance * sin(angle + select_box.rotation))
-									var distance = select_box.position.distance_to(oposite_corner_pos_in_world)
-									var angle = select_box.position.angle_to_point(oposite_corner_pos_in_world)
-									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
-									select_box.set_begin(Vector2(mouse_pos_rot.x, new_location_in_local.y))
-									select_box.set_end(Vector2(new_location_in_local.x, mouse_pos_rot.y))
+									#intersect lines from mouse_pos and oposite_corner_pos_in_world to get new position
+									select_box.position = Geometry2D.line_intersects_line(oposite_corner_pos_in_world, Vector2.LEFT.rotated(select_box.rotation), mouse_pos, Vector2.UP.rotated(select_box.rotation))
+									select_box.size = Vector2(select_box.position.distance_to(oposite_corner_pos_in_world), select_box.position.distance_to(mouse_pos))
 								scale_items()
 							elif mouse_pos_rot.x < select_box.position.x + select_box.size.x: #tl
 								flip_y = !flip_y
@@ -851,11 +845,9 @@ func _unhandled_input(event):
 										var distance = select_box.size.y
 										var angle = deg_to_rad(90)
 										oposite_corner_pos_in_world = Vector2(select_box.position.x + distance * cos(angle + select_box.rotation), select_box.position.y + distance * sin(angle + select_box.rotation))
-									var distance = select_box.position.distance_to(oposite_corner_pos_in_world)
-									var angle = select_box.position.angle_to_point(oposite_corner_pos_in_world)
-									var new_location_in_local = Vector2(select_box.position.x + distance * cos(angle - select_box.rotation), select_box.position.y + distance * sin(angle - select_box.rotation))
-									select_box.set_begin(Vector2(new_location_in_local.x, mouse_pos_rot.y))
-									select_box.set_end(Vector2(mouse_pos_rot.x, new_location_in_local.y))
+									#intersect lines from mouse_pos and oposite_corner_pos_in_world to get new position
+									select_box.position = Geometry2D.line_intersects_line(oposite_corner_pos_in_world, Vector2.UP.rotated(select_box.rotation), mouse_pos, Vector2.LEFT.rotated(select_box.rotation))
+									select_box.size = Vector2(select_box.position.distance_to(mouse_pos), select_box.position.distance_to(oposite_corner_pos_in_world))
 								scale_items()
 							elif mouse_pos_rot.x > select_box.position.x: #br
 								flip_y = !flip_y
@@ -932,6 +924,8 @@ func _unhandled_input(event):
 	elif event is InputEventKey:
 		if Input.is_action_just_pressed("Delete"): #delete selection
 			for child in selected:
+				if "character" in child.get_parent(): #character token
+					child = child.get_parent()
 				child.queue_free()
 			#remove select box
 			if select_box != null:
@@ -960,12 +954,22 @@ func _on_select_mouse_entered():
 func _on_select_mouse_exited():
 	mouse_over_selected = false
 	
-#scales item of selectbox based on his changes
+#scales item of selectbox based on its changes
 func scale_items():
 	var scal = select_box.size/select_size_org
 	var i = 0
 	for object in selected:
-		if (object.rotation == 0 and select_box.rotation == 0): #scale without rotation, or one rotated object
+#		var token = null #is character token - flip image, not object
+#		var char_offset = Vector2(0,0) #offset for character token - image is in different global location than token object
+#		if "character" in object: #character token - sca only image, not bars
+#			token = object.get_child(0)
+#			object.rotation = token.rotation
+#			object.scale = token.scale
+#			print("scale at start: ", object.scale, token.rotation)
+#			var distance = Vector2(0,0).distance_to(object.size * object.scale / 2)
+#			var angle = (object.size * object.scale).angle_to_point(Vector2(0,0)) + object.rotation
+#			char_offset = object.size * object.scale / 2 + Vector2(distance * cos(angle), distance * sin(angle))
+		if (object.rotation == 0 and select_box.rotation == 0): #scale without rotation - faster
 			object.scale = scal * selected_org_scales[i]
 			if flip_x and flip_y:
 				object.scale *= -1
@@ -980,11 +984,13 @@ func scale_items():
 				object.position.y = (select_pos_org.y - selected_org_pos[i].y + select_size_org.y) / select_size_org.y * select_box.size.y + select_box.position.y
 			else:
 				object.position = (selected_org_pos[i] - select_pos_org) / select_size_org * select_box.size + select_box.position
-		else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale
+		else: #scale with rotation - not great, proper implementation would require nesting inside another component - one for rotate, other for scale, and would lead to permanent deformation
+			print(object.rotation, " ", select_box.rotation)
 			if object.rotation == select_box.rotation and selected.size() == 1: #one item scale with select_box
 				object.scale = scal * selected_org_scales[i]
-				print(object.scale)
+				print("one object", object.scale)
 			else: #more items scale with lesser of select_box changes - works decently well
+				print("multiple objects", object.scale)
 				var scal_square = scal
 				if scal_square.x < scal_square.y:
 					scal_square.y = scal_square.x
@@ -1056,6 +1062,9 @@ func scale_items():
 				angle = Vector2(0,0).angle_to_point(difference) + select_box.rotation #rotate object back based on select_box rotation
 				object.position = Vector2(select_box.position.x + distance * cos(angle), select_box.position.y + distance * sin(angle))
 		i += 1
+		#if object is token - update UI
+		if "character" in object.get_parent():
+			object.get_parent().UI_set_position()
 	
 #creates handle for selection box
 #preset - anchor point
