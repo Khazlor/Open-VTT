@@ -655,9 +655,11 @@ func _unhandled_input(event):
 						selected_org_scales.clear()
 						selected_org_pos.clear()
 						for object in selected:
+							print(object)
 							selected_org_pos.append(object.position)
-							if "character" in object: #character token - rotate only image, not bars
-								object = object.get_child(0)
+#							if "character" in object: #character token - rotate only image, not bars
+#								selected_org_scales.append(object.get_child(0).scale)
+#							else:
 							selected_org_scales.append(object.scale)
 						return
 					elif mouse_over_rotate: #rotate
@@ -675,8 +677,9 @@ func _unhandled_input(event):
 						selected_org_pos.clear()
 						for object in selected:
 							selected_org_pos.append(object.position)
-							if "character" in object: #character token - rotate only image, not bars
-								object = object.get_child(0)
+#							if "character" in object: #character token - rotate only image, not bars
+#								selected_org_rots.append(object.get_child(0).rotation)
+#							else:
 							selected_org_rots.append(object.rotation)
 						return
 					elif mouse_over_selected: #drag
@@ -743,6 +746,7 @@ func _unhandled_input(event):
 						var i = 0
 						print(select_box.position)
 						for object in selected:
+							print("rot: ", object.rotation)
 							distance = select_center_pos.distance_to(selected_org_pos[i])
 							angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
 							object.position = Vector2(select_center_pos.x + cos(angle_org + angle - select_rot_org) * distance, select_center_pos.y + sin(angle_org + angle - select_rot_org) * distance)
@@ -959,6 +963,7 @@ func scale_items():
 	var scal = select_box.size/select_size_org
 	var i = 0
 	for object in selected:
+		print("object scale: ", object.scale, selected_org_scales[i])
 #		var token = null #is character token - flip image, not object
 #		var char_offset = Vector2(0,0) #offset for character token - image is in different global location than token object
 #		if "character" in object: #character token - sca only image, not bars

@@ -16,9 +16,7 @@ func _ready():
 	connect("moved", _move_item)
 	var item = create_item() #root
 	item.set_selectable(0, false)
-	#set root of draw_layers - might no longer be needed
-	item.add_button(0, button_add, 1)
-	
+	item.add_button(0, button_add, 0)
 	load_characters()
 	
 #	print("creating character tree ===========================================")
@@ -201,6 +199,8 @@ func load_characters():
 	dir = DirAccess.open("res://saves/Characters")
 	if dir != null:
 		load_characters_in_dir(dir, "Global", get_root(), true)
+	if get_root().get_child_count() == 0:
+		hide_root = false
 
 #loads characters in dir and it's subdirs
 func load_characters_in_dir(dir: DirAccess, char_name: String, parent_item: TreeItem, global: bool):

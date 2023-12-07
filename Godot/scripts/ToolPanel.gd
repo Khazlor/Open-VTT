@@ -33,8 +33,10 @@ func _on_tree_item_selected():
 
 func _on_tree_button_clicked(item, column, id, mouse_button_index):
 	if id == 0:#add new
-		var new_item = tree.add_new_item(item.get_text(0) + "_copy", item)
-		tree.set_selected(new_item, 0)
+		if item == tree.get_root(): #first character
+			tree.add_new_item("Character", item)
+		else:
+			tree.add_new_item(item.get_text(0) + "_copy", item)
 	if id == 1:#remove
 		dialog_item = item
 		$ConfirmationDialog.popup()

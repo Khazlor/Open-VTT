@@ -12,13 +12,20 @@ func _ready():
 	if Globals.new_map.saved_layers != null:
 		print("load")
 		layers.replace_by(Globals.new_map.saved_layers.instantiate())
-		layers = $Draw/Layers
-		
+		layers = $Draw/Layers #get new $Draw/Layers
+		#load tokens
+		for i in Globals.new_map.tokens.size():
+			var parent = get_node(Globals.new_map.token_paths[i])
+			print(Globals.new_map.token_paths[i])
+			if Globals.new_map.token_paths[i].is_empty():
+				print("path is empty")
+			parent.add_child(Globals.new_map.tokens[i])
+			parent.move_child(Globals.new_map.tokens[i], Globals.new_map.token_indexes[i])
 		#recursively create treeitem for each layer
 		tree.load_self_and_children(layers, null)
 		
 		$Draw.layers_root = layers
-
+		
 #		var item = $CanvasLayer/Layers/Tree.create_item()
 #		item.add_child(Globals.new_map.saved_layer_tree)
 #		print_tree_pretty()
@@ -48,14 +55,25 @@ func _ready():
 func _process(delta):
 	pass
 	
+	
+func _on_child_exiting_tree(node):
+	if node == self.get_child(-1): #first node - rest are still in tree - save layers
+		print("tree: ", self.get_tree())
+		print("tree 2 : ", self.get_child(0).get_tree())
+		#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
+		get_viewport().set_embedding_subwindows(true)
+		#clear tokens list in map
+		Globals.map.tokens.clear()
+		#set ownership of all nodes (might have been deleted when moving layers around)
+		set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
+		var saved_layers = PackedScene.new()
+		saved_layers.pack($Draw/Layers);
+		Globals.map.save(saved_layers)
+		print("tree: ", get_tree())
+	
+	
 func _on_tree_exiting():
-	#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
-	get_viewport().set_embedding_subwindows(true)
-	#set ownership of all nodes (might have been deleted when moving layers around)
-	set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
-	var saved_layers = PackedScene.new()
-	saved_layers.pack($Draw/Layers);
-	Globals.map.save(saved_layers)
+	pass
 
 
 func _on_maps_button_pressed():
@@ -74,6 +92,10 @@ func _on_maps_mouse_exited():
 	
 #sets owner of node and all its children and subchildren
 func set_owner_on_self_and_children(node, owner: Node2D):
+	print("node, path: ", node, node.is_inside_tree(), node.get_tree(), node.get_path())
+	if "character" in node: #character token - saving and loading broken - https://github.com/godotengine/godot/issues/68666 - saving separately
+		Globals.map.tokens.append(node)
+		return
 	node.set_owner(owner)
 	var meta = node.get_meta("item_name")
 	if meta != null:
@@ -83,3 +105,7 @@ func set_owner_on_self_and_children(node, owner: Node2D):
 	for child in node.get_children(true):
 		set_owner_on_self_and_children(child, owner)
 		
+	
+		
+
+

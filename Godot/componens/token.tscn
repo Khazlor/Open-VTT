@@ -1,25 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://0gfii8buhxxb"]
+[gd_scene load_steps=3 format=3 uid="uid://0gfii8buhxxb"]
 
 [ext_resource type="Script" path="res://scripts/token.gd" id="1_8ye4b"]
+[ext_resource type="Script" path="res://componens/CustomPolygon.gd" id="2_pj8py"]
 
 [node name="Token" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 70.0
-offset_bottom = 70.0
 mouse_filter = 1
 script = ExtResource("1_8ye4b")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="TokenPolygon" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
 mouse_filter = 1
+script = ExtResource("2_pj8py")
 
-[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Panel"]
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="TokenPolygon"]
 remote_path = NodePath("../../UI")
 update_rotation = false
 update_scale = false

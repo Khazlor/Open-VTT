@@ -5,12 +5,19 @@ var character: Character
 @onready var name_line_edit = $TabContainer/Attributes/MarginContainer/VBoxContainer/FlowContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/VBoxContainer
 @onready var empty_style = StyleBoxEmpty.new()
+var token: Control
+
+#called even before ready
+func _enter_tree():
+	token = $TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview/ScrollContainer/CustomPolygon
+	token.character = character
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	load_character()
-
-
+	print("sheet")
+	
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
@@ -80,3 +87,45 @@ func load_character():
 	for attribute in character.attributes:
 		print(attribute + " ==> " + character.attributes[attribute])
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
+		
+# ================================= section of token editor =====================================
+
+func _on_shape_size_x_spin_box_value_changed(value):
+	character.token_size.x = value
+	token.pivot_offset.x = value/2 #only in token preview, not on game board
+	character.emit_signal("token_changed")
+
+func _on_shape_size_y_spin_box_value_changed(value):
+	character.token_size.y = value
+	token.pivot_offset.y = value/2 #only in token preview, not on game board
+	character.emit_signal("token_changed")
+
+
+func _on_shape_scale_x_spin_box_value_changed(value):
+	character.token_scale.x = value
+	character.emit_signal("token_changed")
+
+
+func _on_shape_scale_y_spin_box_value_changed(value):
+	character.token_scale.y = value
+	character.emit_signal("token_changed")
+
+
+func _on_image_offset_x_spin_box_value_changed(value):
+	character.token_texture_offset.x = value
+	character.emit_signal("token_changed")
+
+
+func _on_image_offset_y_spin_box_value_changed(value):
+	character.token_texture_offset.y = value
+	character.emit_signal("token_changed")
+
+
+func _on_image_scale_x_spin_box_value_changed(value):
+	character.token_texture_scale.x = value
+	character.emit_signal("token_changed")
+
+
+func _on_image_scale_y_spin_box_value_changed(value):
+	character.token_texture_scale.y = value
+	character.emit_signal("token_changed")

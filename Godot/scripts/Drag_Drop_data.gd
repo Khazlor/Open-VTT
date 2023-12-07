@@ -17,9 +17,13 @@ func _can_drop_data(position, data):
 	return data is TreeItem
 	
 func _drop_data(position, data):
-	if data.get_meta("character") != null:
-		print("dropped: " + data.get_meta("character").name)
+	if data.has_meta("character"):
 		var token = token_comp.instantiate()
 		token.get_child(0).position = d.get_global_mouse_position() #set position of image - UI will follow via remote transform
+		var character = data.get_meta("character")
+		if character.singleton: #character with linked attributes
+			token.character = character
+		else:
+			token.character = character.duplicate(true)
 		Globals.draw_layer.add_child(token)
 	

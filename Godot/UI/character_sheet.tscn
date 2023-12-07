@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://chldgnhe1p4fg"]
+[gd_scene load_steps=5 format=3 uid="uid://chldgnhe1p4fg"]
 
 [ext_resource type="Script" path="res://scripts/character_sheet.gd" id="1_bacpi"]
 [ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_jwo46"]
 [ext_resource type="Texture2D" uid="uid://bsrjpdacbqs26" path="res://icons/MakeFloating.svg" id="3_03ubt"]
+[ext_resource type="Script" path="res://componens/CustomPolygon.gd" id="3_e4ecn"]
 
 [node name="CharacterSheet" type="Window"]
 title = "Name - Character sheet"
@@ -18,6 +19,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+use_hidden_tabs_for_min_size = true
 
 [node name="Attributes" type="HBoxContainer" parent="TabContainer"]
 layout_mode = 2
@@ -70,6 +72,218 @@ item_count = 2
 item_0/text = "name"
 item_1/text = "value"
 
+[node name="Token" type="HBoxContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="TabContainer/Token"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TokenPreview" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+text = "Preview:"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview"]
+layout_mode = 2
+
+[node name="CustomPolygon" type="Control" parent="TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+script = ExtResource("3_e4ecn")
+
+[node name="ShapePanel" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer"]
+layout_mode = 2
+text = "Shape:"
+horizontal_alignment = 1
+
+[node name="ShapeFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShapeSizeFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ShapeSizeXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
+layout_mode = 2
+text = "size x:"
+
+[node name="ShapeSizeXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+value = 70.0
+allow_greater = true
+update_on_text_changed = true
+
+[node name="ShapeSizeYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
+layout_mode = 2
+text = "size y:"
+
+[node name="ShapeSizeYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+value = 70.0
+allow_greater = true
+update_on_text_changed = true
+
+[node name="ShapeScaleFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ShapeScaleXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
+layout_mode = 2
+text = "scale x:"
+
+[node name="ShapeScaleXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 1.0
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="ShapeScaleYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
+layout_mode = 2
+text = "scale y:"
+
+[node name="ShapeScaleYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 1.0
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="ImagePanel" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel"]
+layout_mode = 2
+
+[node name="ImageLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer"]
+layout_mode = 2
+text = "Image:"
+horizontal_alignment = 1
+
+[node name="ImageFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ImageLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageFlowContainer"]
+layout_mode = 2
+text = "image:"
+
+[node name="ImageLE" type="LineEdit" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Image path:"
+
+[node name="BrowseImageButton" type="Button" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageFlowContainer"]
+layout_mode = 2
+icon = ExtResource("2_jwo46")
+
+[node name="ImageOffsetFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ImageOffsetXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
+layout_mode = 2
+text = "offset x:"
+
+[node name="ImageOffsetXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="ImageOffsetYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
+layout_mode = 2
+text = "offset y:"
+
+[node name="ImageOffsetYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="ImageScaleFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ImageScaleXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
+layout_mode = 2
+text = "scale x:"
+
+[node name="ImageScaleXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 1.0
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="ImageScaleYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
+layout_mode = 2
+text = "scale y:"
+
+[node name="ImageScaleYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 1.0
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+
+[node name="MarginContainer2" type="MarginContainer" parent="TabContainer/Token"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Token/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Macros"
+
+[node name="ItemList" type="ItemList" parent="TabContainer/Token/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+item_count = 2
+item_0/text = "name"
+item_1/text = "value"
+
 [node name="PopupButton" type="Button" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
@@ -83,4 +297,13 @@ icon_alignment = 1
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer/VBoxContainer/FlowContainer/Add_Attribute_Button" to="." method="_on_add_attribute_button_pressed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox" to="." method="_on_shape_size_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox" to="." method="_on_shape_size_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleXSpinBox" to="." method="_on_shape_scale_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox" to="." method="_on_shape_scale_y_spin_box_value_changed"]
+[connection signal="pressed" from="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageFlowContainer/BrowseImageButton" to="." method="_on_add_attribute_button_pressed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox" to="." method="_on_image_offset_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox" to="." method="_on_image_offset_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox" to="." method="_on_image_scale_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox" to="." method="_on_image_scale_y_spin_box_value_changed"]
 [connection signal="pressed" from="PopupButton" to="." method="_on_popup_button_pressed"]

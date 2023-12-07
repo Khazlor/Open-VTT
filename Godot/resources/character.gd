@@ -1,10 +1,24 @@
-class_name Character
 extends Resource
+class_name Character
 
 @export var name = ""
 @export var attributes = {} #dictionary for all attributes of character
 @export var global = false #global characters are shared between campaings
+@export var singleton = false #all tokens have linked attributes
+
+@export var token_shape: PackedVector2Array
+@export var token_size: Vector2 = Vector2(20,20)
+@export var token_scale: Vector2 = Vector2(1,1)
+@export var token_outline_width: float = 2
+@export var token_outline_color: Color = Color.BLACK
+@export var token_outline_faction_color: bool = true
+@export var token_texture: Texture2D
+@export var token_texture_offset: Vector2 = Vector2(0,0)
+@export var token_texture_scale: Vector2 = Vector2(1,1)
+
 var tree_item: TreeItem
+
+signal token_changed()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
