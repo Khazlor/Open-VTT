@@ -1,7 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://shwkx1k388tb"]
+[gd_scene load_steps=9 format=3 uid="uid://shwkx1k388tb"]
 
 [ext_resource type="Script" path="res://scripts/ToolPanel.gd" id="1_57fim"]
 [ext_resource type="Script" path="res://scripts/character_tree.gd" id="2_nt2nq"]
+[ext_resource type="Script" path="res://scripts/CollapsibleContainer.gd" id="3_8bqlb"]
+[ext_resource type="Script" path="res://scripts/ToolPanel_Object.gd" id="3_oj6qf"]
+[ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="4_ev7tq"]
+[ext_resource type="Script" path="res://componens/ToolPanel_Map.gd" id="6_rxrna"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_atfvi"]
 bg_color = Color(0.160784, 0.152941, 0.14902, 1)
@@ -18,6 +22,7 @@ corner_radius_bottom_left = 2
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o68u3"]
 
 [node name="ToolPanel" type="Control"]
+clip_contents = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,6 +54,8 @@ theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
 
 [node name="Characters" type="MarginContainer" parent="TabContainer"]
+visible = false
+clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -69,6 +76,493 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("2_nt2nq")
 
+[node name="Object" type="MarginContainer" parent="TabContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+script = ExtResource("3_oj6qf")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Object"]
+clip_contents = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CollapsibleContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer"]
+layout_mode = 2
+text = "Transform"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer"]
+layout_mode = 2
+
+[node name="TransformContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container"]
+layout_mode = 2
+
+[node name="Position X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X"]
+layout_mode = 2
+text = "Position X:"
+
+[node name="PosXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Position Y" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y"]
+layout_mode = 2
+text = "Position Y:"
+
+[node name="PosYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Size X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X"]
+layout_mode = 2
+text = "Size X:"
+
+[node name="SizeXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="Size Y" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size Y"]
+layout_mode = 2
+text = "Size Y:"
+
+[node name="SizeYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size Y"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="Scale X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale X"]
+layout_mode = 2
+text = "Scale X:
+"
+
+[node name="ScaleXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale X"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Scale Y" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale Y"]
+layout_mode = 2
+text = "Scale Y:"
+
+[node name="ScaleYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale Y"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Rotation" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Rotation"]
+layout_mode = 2
+text = "Rotation:"
+
+[node name="RotSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Rotation"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 360.0
+
+[node name="CollapsibleContainer2" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
+layout_mode = 2
+text = "Light"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
+layout_mode = 2
+
+[node name="LightContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container"]
+layout_mode = 2
+
+[node name="CastLight" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+text = "Cast Light"
+
+[node name="Offset X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset X"]
+layout_mode = 2
+text = "Offset X:"
+
+[node name="OffsetXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset X"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Offset Y" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset Y"]
+layout_mode = 2
+text = "Offset Y:"
+
+[node name="OffsetYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset Y"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Resolution" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Resolution"]
+layout_mode = 2
+text = "Resolution:"
+
+[node name="ResolutionSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Resolution"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+allow_greater = true
+
+[node name="Radius" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Radius"]
+layout_mode = 2
+text = "Radius:
+"
+
+[node name="RadiusSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Radius"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+allow_greater = true
+
+[node name="Color" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Color"]
+layout_mode = 2
+text = "Color:
+"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Color"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.807843, 0.615686, 0.45098, 1)
+
+[node name="Energy" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Energy"]
+layout_mode = 2
+text = "Energy:"
+
+[node name="EnergySpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Energy"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 10.0
+value = 1.0
+
+[node name="CollapsibleContainer3" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
+layout_mode = 2
+text = "Shadow"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
+layout_mode = 2
+
+[node name="ShadowContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container"]
+layout_mode = 2
+
+[node name="CastShadow" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
+layout_mode = 2
+text = "Cast Shadows"
+
+[node name="OneSided" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
+layout_mode = 2
+text = "One Sided"
+
+[node name="FlipSides" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
+layout_mode = 2
+text = "Flip Sides"
+
+[node name="Map" type="MarginContainer" parent="TabContainer"]
+visible = false
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+script = ExtResource("6_rxrna")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Map"]
+clip_contents = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BackgroundColor" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/BackgroundColor"]
+layout_mode = 2
+text = "Background Color:
+"
+
+[node name="BackgroundColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/BackgroundColor"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.261719, 0.386719, 0.3125, 1)
+
+[node name="CollapsibleContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer"]
+layout_mode = 2
+text = "Grid"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container"]
+layout_mode = 2
+
+[node name="GridEnable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+text = "Grid Enabled"
+
+[node name="Thickness" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Thickness"]
+layout_mode = 2
+text = "Thickness:
+"
+
+[node name="HSlider" type="HSlider" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Thickness"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+
+[node name="Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Color"]
+layout_mode = 2
+text = "Color:
+"
+
+[node name="GridColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Color"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.807843, 0.615686, 0.45098, 1)
+
+[node name="Grid Size px" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size px"]
+layout_mode = 2
+text = "Grid Size (px):"
+
+[node name="GridSizePxSpinBox" type="SpinBox" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size px"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+value = 70.0
+allow_greater = true
+
+[node name="Grid Size Units" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size Units"]
+layout_mode = 2
+text = "Units per grid cell:"
+
+[node name="GridSizeUnitSpinBox" type="SpinBox" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size Units"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 5.0
+allow_greater = true
+allow_lesser = true
+
+[node name="Units" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Units"]
+layout_mode = 2
+text = "Distance Unit:"
+
+[node name="LineEdit" type="LineEdit" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Units"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ft"
+placeholder_text = "Unit"
+
+[node name="CollapsibleContainer2" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
+layout_mode = 2
+text = "Light and Shadow"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
+layout_mode = 2
+
+[node name="Light and Shadow" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container"]
+layout_mode = 2
+
+[node name="Darkness Enable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
+layout_mode = 2
+text = "Darkness Enable"
+
+[node name="Darkness Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Color"]
+layout_mode = 2
+text = "Darkness Color:"
+
+[node name="DarknessColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Color"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DM Darkness Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/DM Darkness Color"]
+layout_mode = 2
+text = "DM Darkness Color:"
+
+[node name="DmDarknessColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/DM Darkness Color"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.172549, 0.172549, 0.172549, 1)
+
+[node name="CollapsibleContainer3" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_8bqlb")
+
+[node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
+layout_mode = 2
+text = "Field of Vision"
+icon = ExtResource("4_ev7tq")
+
+[node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
+layout_mode = 2
+
+[node name="FovContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container"]
+layout_mode = 2
+
+[node name="FovEnable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer"]
+layout_mode = 2
+text = "FOV Enable"
+
+[node name="Opacity" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity"]
+layout_mode = 2
+text = "Unselected Opacity:
+"
+
+[node name="OpacityHSlider" type="HSlider" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 0.3
+
+[node name="Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color"]
+layout_mode = 2
+text = "Color:
+"
+
+[node name="FovColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 title = "Warning"
 initial_position = 1
@@ -88,3 +582,33 @@ horizontal_alignment = 1
 [connection signal="item_activated" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_activated"]
 [connection signal="item_edited" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_edited"]
 [connection signal="item_selected" from="TabContainer/Characters/ScrollContainer/Tree" to="." method="_on_tree_item_selected"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X/PosXSpinBox" to="TabContainer/Object" method="_on_pos_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y/PosYSpinBox" to="TabContainer/Object" method="_on_pos_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X/SizeXSpinBox" to="TabContainer/Object" method="_on_size_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size Y/SizeYSpinBox" to="TabContainer/Object" method="_on_size_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale X/ScaleXSpinBox" to="TabContainer/Object" method="_on_scale_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale Y/ScaleYSpinBox" to="TabContainer/Object" method="_on_scale_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Rotation/RotSpinBox" to="TabContainer/Object" method="_on_rot_spin_box_value_changed"]
+[connection signal="toggled" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/CastLight" to="TabContainer/Object" method="_on_cast_light_toggled"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset X/OffsetXSpinBox" to="TabContainer/Object" method="_on_offset_x_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset Y/OffsetYSpinBox" to="TabContainer/Object" method="_on_offset_y_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Resolution/ResolutionSpinBox" to="TabContainer/Object" method="_on_resolution_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Radius/RadiusSpinBox" to="TabContainer/Object" method="_on_radius_spin_box_value_changed"]
+[connection signal="color_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Color/ColorPickerButton" to="TabContainer/Object" method="_on_color_picker_button_color_changed"]
+[connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Energy/EnergySpinBox" to="TabContainer/Object" method="_on_energy_spin_box_value_changed"]
+[connection signal="toggled" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer/CastShadow" to="TabContainer/Object" method="_on_cast_shadow_toggled"]
+[connection signal="toggled" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer/OneSided" to="TabContainer/Object" method="_on_one_sided_toggled"]
+[connection signal="toggled" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer/FlipSides" to="TabContainer/Object" method="_on_flip_sides_toggled"]
+[connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/BackgroundColor/BackgroundColorPickerButton" to="TabContainer/Map" method="_on_background_color_picker_button_color_changed"]
+[connection signal="toggled" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/GridEnable" to="TabContainer/Map" method="_on_grid_enable_toggled"]
+[connection signal="value_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Thickness/HSlider" to="TabContainer/Map" method="_on_h_slider_value_changed"]
+[connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Color/GridColorPickerButton" to="TabContainer/Map" method="_on_grid_color_picker_button_color_changed"]
+[connection signal="value_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size px/GridSizePxSpinBox" to="TabContainer/Map" method="_on_grid_size_px_spin_box_value_changed"]
+[connection signal="value_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size Units/GridSizeUnitSpinBox" to="TabContainer/Map" method="_on_grid_size_unit_spin_box_value_changed"]
+[connection signal="text_submitted" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Units/LineEdit" to="TabContainer/Map" method="_on_line_edit_text_submitted"]
+[connection signal="toggled" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Enable" to="TabContainer/Map" method="_on_darkness_enable_toggled"]
+[connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Color/DarknessColorPickerButton" to="TabContainer/Map" method="_on_darkness_color_picker_button_color_changed"]
+[connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/DM Darkness Color/DmDarknessColorPickerButton" to="TabContainer/Map" method="_on_dm_darkness_color_picker_button_color_changed"]
+[connection signal="toggled" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/FovEnable" to="TabContainer/Map" method="_on_fov_enable_toggled"]
+[connection signal="value_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity/OpacityHSlider" to="TabContainer/Map" method="_on_opacity_h_slider_value_changed"]
+[connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color/FovColorPickerButton" to="TabContainer/Map" method="_on_fov_color_picker_button_color_changed"]

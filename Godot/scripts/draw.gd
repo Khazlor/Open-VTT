@@ -22,8 +22,10 @@ var min_max_x_y: Vector4 # min_x min_y max_x max_y
 #select
 var select_box: Panel #visual setection box
 var selected = [] #list of selected items
+var selected_tokens = [] #list of selected tokens - for changing fov opacity
 var mouse_over_selected = false
 var selected_creating = false
+var selected_dragging = false
 var selected_scaling = false
 var selected_rotating = false
 #hadles around selection - top bottom left right
@@ -50,8 +52,15 @@ var last_event_pos = Vector2(-1,-1)
 
 @export var layers_root: Node2D = null
 
+@onready var tool_panel_object_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Object"
+@onready var tool_panel_map_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Map"
+
 func _ready():
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
+	#editing selected transforms
+	tool_panel_object_menu.connect("object_change", _on_object_change_signal)
+	#edited fov opacity in map options -> update all fov objects
+	tool_panel_map_menu.connect("fov_opacity_changed", _on_fov_opacity_changed_signal)
 
 func _unhandled_input(event):
 #	print_tree_pretty() #DEBUG TODO remove
@@ -130,7 +139,8 @@ func _unhandled_input(event):
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
 			print("mouse released with select - scaling: " + str(selected_scaling))
 			#drag finished
-			if mouse_over_selected and !selected_creating and !selected_scaling and !selected_rotating:
+			if selected_dragging:
+				selected_dragging = false
 				return
 			#rotating selection finished
 			if selected_rotating:
@@ -356,6 +366,15 @@ func _unhandled_input(event):
 				select_box.rotation = 0
 #				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
 			print(selected)
+			#set selected token fov opacity to 1, reset unselected token opacity
+			for token in selected_tokens:
+				token.fov.color.a = Globals.new_map.fov_opacity
+			selected_tokens.clear()
+			for object in selected:
+				if "character" in object: #token
+					var token = object.get_parent()
+					selected_tokens.append(token)
+					token.fov.color.a = 1.0
 			#control points - handles
 			create_handle(Control.PRESET_TOP_LEFT, 15)
 			current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
@@ -435,6 +454,7 @@ func _unhandled_input(event):
 						current_rect = ColorRect.new()
 						current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_rect.color = Color(0,0,0,0)
+						current_rect.set_meta("polygon", true)
 						current_line = Line2D.new()
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
@@ -465,6 +485,7 @@ func _unhandled_input(event):
 					if pressed:
 						current_ellipse = CustomEllipse.new()
 						current_ellipse.mouse_filter = Control.MOUSE_FILTER_PASS
+						current_ellipse.set_meta("polygon", true)
 						begin = mouse_pos
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
@@ -549,6 +570,7 @@ func _unhandled_input(event):
 						#just pressed - create objects
 						if pressed:
 							current_line = Line2D.new()
+							current_line.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
 							Globals.draw_layer.add_child(current_line)
@@ -560,6 +582,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -569,7 +592,7 @@ func _unhandled_input(event):
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_line.set_point_position(1, mouse_pos)
-						current_label.text = str(snapped(current_line.get_point_position(0).distance_to(current_line.get_point_position(1))/14, 0.01)) + " ft"
+						current_label.text = str(snapped(current_line.get_point_position(0).distance_to(current_line.get_point_position(1))/Globals.map.grid_size, 0.01) * Globals.map.unit_size) + " " + Globals.map.unit
 						current_rect.set_position(mouse_pos)
 						current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
 						print(current_label.anchors_preset)
@@ -581,6 +604,7 @@ func _unhandled_input(event):
 						if pressed:
 							begin = mouse_pos
 							current_circle = CustomCircle.new()
+							current_circle.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_circle.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
@@ -591,6 +615,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -600,9 +625,10 @@ func _unhandled_input(event):
 					#moved - modify objects
 					if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						current_circle.radius = begin.distance_to(mouse_pos)
-						current_label.text = str(snapped(begin.distance_to(mouse_pos)/14, 0.01)) + " ft"
+						current_label.text = str(snapped(begin.distance_to(mouse_pos)/Globals.map.grid_size, 0.01) * Globals.map.unit_size) + " " + Globals.map.unit
 						current_rect.set_position(mouse_pos)
 						current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
+						print("z index: ", current_label.z_index)
 						print(current_circle.center, begin)
 						print(current_circle.radius, current_circle.size, current_circle.position, mouse_pos)
 						
@@ -613,6 +639,7 @@ func _unhandled_input(event):
 						if pressed:
 							begin = mouse_pos
 							current_arc = CustomArc.new()
+							current_arc.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_arc.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
@@ -624,6 +651,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
+							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -635,7 +663,7 @@ func _unhandled_input(event):
 						current_arc.angle_direction = (mouse_pos - begin).angle()
 						print(begin.angle_to(mouse_pos))
 						current_arc.radius = begin.distance_to(mouse_pos)
-						current_label.text = str(snapped(begin.distance_to(mouse_pos)/14, 0.01)) + " ft"
+						current_label.text = str(snapped(begin.distance_to(mouse_pos)/Globals.map.grid_size, 0.01) * Globals.map.unit_size) + " " + Globals.map.unit
 						current_rect.set_position(mouse_pos)
 						current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
 						print(current_arc.center, begin)
@@ -684,6 +712,7 @@ func _unhandled_input(event):
 						return
 					elif mouse_over_selected: #drag
 						print("mouse_over_selected")
+						selected_dragging = true
 						return
 					#just pressed - create objects
 					elif pressed:
@@ -713,16 +742,10 @@ func _unhandled_input(event):
 						selected_creating = true
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-					print("selection drag - scaling: " + str(selected_scaling))
-					if mouse_over_bl: print("bl")
-					if mouse_over_tl: print("tl")
-					if mouse_over_br: print("br")
-					if mouse_over_tr: print("tr")
-					if mouse_over_rotate: print("rotate")
 					if select_box == null:
 						return
 					#drag - move objects
-					if mouse_over_selected and !selected_creating and !selected_scaling and !selected_rotating:
+					if selected_dragging:
 						print("drag")
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
 						for object in selected:
@@ -930,12 +953,19 @@ func _unhandled_input(event):
 			for child in selected:
 				if "character" in child.get_parent(): #character token
 					child = child.get_parent()
+					Globals.new_map.remove_token(child)
+				if child.has_meta("light"):
+					var light = get_object_light(child)
+					if light != null:
+						light.queue_free()
 				child.queue_free()
 			#remove select box
 			if select_box != null:
 				select_box.queue_free()
 				
 			#resetting select box state variables
+			selected_tokens.clear()
+			selected.clear()
 			mouse_over_selected = false
 			selected_creating = false
 			selected_scaling = false
@@ -944,6 +974,7 @@ func _unhandled_input(event):
 			mouse_over_bl = false
 			mouse_over_tr = false
 			mouse_over_br = false
+			mouse_over_rotate = false
 		elif Input.is_action_just_pressed("Escape"): #go back to map selection
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
@@ -1169,4 +1200,289 @@ func _text_edit_finished():
 	
 func _text_edit_text_changed():
 	current_textedit.size = current_textedit.get_theme_font("normal_font").get_multiline_string_size(current_textedit.text) + Vector2(20, current_textedit.get_theme_font("normal_font").get_height(Globals.fontSize))
+	
+func _on_transform_signal(index, value):
+	if index == 0:
+		for object in selected:
+			object.position.x = value
+	if index == 1:
+		for object in selected:
+			object.position.y = value
+	if index == 2:
+		for object in selected:
+			object.size.x = value
+			print(object)
+			if object.name == "TokenPolygon": #token - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 3:
+		for object in selected:
+			object.size.y = value
+			print(object)
+			if object.name == "TokenPolygon": #token - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 4:
+		for object in selected:
+			object.scale.x = value
+	if index == 5:
+		for object in selected:
+			object.scale.y = value
+	if index == 6:
+		for object in selected:
+			object.rotation = value
+			
+func _on_light_signal(index, value):
+	if index == 0:
+		for object in selected:
+			object.position.x = value
+	if index == 1:
+		for object in selected:
+			object.position.y = value
+	if index == 2:
+		for object in selected:
+			object.size.x = value
+			print(object)
+			if object.name == "TokenPolygon": #token - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 3:
+		for object in selected:
+			object.size.y = value
+			print(object)
+			if object.name == "TokenPolygon": #token - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 4:
+		for object in selected:
+			object.scale.x = value
+	if index == 5:
+		for object in selected:
+			object.scale.y = value
+	if index == 6:
+		for object in selected:
+			object.rotation = value
+			
+#editing object in tool panel
+func _on_object_change_signal(index, value):
+	#transforms
+	if index == 0: #position x
+		for object in selected:
+			object.position.x = value
+	if index == 1: #position y
+		for object in selected:
+			object.position.y = value
+	if index == 2: #size x
+		for object in selected:
+			object.size.x = value
+			if object.name == "TokenPolygon": #token size - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 3: #size y
+		for object in selected:
+			object.size.y = value
+			if object.name == "TokenPolygon": #token size - need to update polygon points
+				object.scale_shape_to_size()
+				object.get_parent().UI_set_position()
+	if index == 4: #scale x
+		for object in selected:
+			object.scale.x = value
+	if index == 5: #scale y
+		for object in selected:
+			object.scale.y = value
+	if index == 6: #rotation
+		for object in selected:
+			object.rotation = value
+			
+	#light
+	if index == 10: #light enable
+		if value == true:
+			for object in selected:
+				create_or_enable_light(object)
+		else:
+			for object in selected:
+				disable_light(object)
+	if index == 11: #light offset x
+		for object in selected:
+			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
+				var light_remote = get_object_light_remote(object)
+				if light_remote != null:
+					light_remote.position.x = value
+	if index == 12: #light offset y
+		for object in selected:
+			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
+				var light_remote = get_object_light_remote(object)
+				if light_remote != null:
+					light_remote.position.y = value
+			
+	if index == 13: #light texture resolution
+		for object in selected:
+			if object.has_meta("light"):
+				var light = get_object_light(object)
+				if light != null:
+					light.texture.height = value
+					light.texture.width = value
+	if index == 14: #light radius
+		for object in selected:
+			if object.has_meta("light"):
+				var light = get_object_light(object)
+				if light != null:
+					light.texture_scale = value/light.texture.get_height()*2
+	if index == 15: #light color
+		for object in selected:
+			if object.has_meta("light"):
+				var light = get_object_light(object)
+				if light != null:
+					light.color = value
+	if index == 16: #light energy
+		for object in selected:
+			if object.has_meta("light"):
+				var light = get_object_light(object)
+				if light != null:
+					light.energy = value
+	
+	#shadows
+	if index == 20: #shadow enable
+		if value == true:
+			for object in selected:
+				create_or_enable_shadow(object)
+		else:
+			for object in selected:
+				disable_shadow(object)
+	if index == 21: #shadow one sided
+		for object in selected:
+			if object.has_meta("shadow"):
+				var shadow = get_object_shadow(object)
+				if shadow != null:
+					var flipped = tool_panel_object_menu.get_shadow_flipped()
+					if value == false:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
+					elif value == true and flipped:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
+					else:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
+				
+	if index == 22: #shadow flip sides
+		for object in selected:
+			if object.has_meta("shadow"):
+				var shadow = get_object_shadow(object)
+				if shadow != null:
+					var one_sided = tool_panel_object_menu.get_shadow_one_sided()
+					if not one_sided:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
+					elif one_sided and value == true:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
+					else:
+						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
+				
+func get_object_light(object):
+	for child in object.get_children():
+		if child is RemoteTransform2D and child.has_meta("light"):
+			return child.get_node(child.get_remote_node())
+	return null
+	
+func get_object_light_remote(object):
+	for child in object.get_children():
+		if child is RemoteTransform2D and child.has_meta("light"):
+			return child
+	return null
+
+func create_or_enable_light(object):
+	if object.has_meta("light"):
+		var light = get_object_light(object)
+		if light != null:
+			light.visible = true
+	else: #create light
+		var light = PointLight2D.new()
+		light.position = Vector2(tool_panel_object_menu.get_position_x(), tool_panel_object_menu.get_position_y())
+		var texture = GradientTexture2D.new()
+		texture.gradient = Gradient.new()
+		texture.gradient.set_offset(0, 0.7)
+		texture.gradient.set_offset(1, 0)
+#		texture.gradient.add_point(0.7, Color.BLACK)
+#		texture.gradient.add_point(0, Color.WHITE)
+		texture.height = tool_panel_object_menu.get_light_resolution()
+		texture.width = texture.height
+		texture.fill = GradientTexture2D.FILL_RADIAL
+		texture.fill_from = Vector2(0.5, 0.5)
+		texture.fill_to = Vector2(1, 0)
+		texture.repeat = GradientTexture2D.REPEAT_NONE
+		light.texture = texture
+		#light.offset = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y()) #changed to remote - offset does not change casting point
+		light.texture_scale = tool_panel_object_menu.get_light_radius()/texture.get_height()*2
+		light.color = tool_panel_object_menu.get_light_color()
+		light.energy = tool_panel_object_menu.get_light_energy()
+		light.range_z_max = 4095
+		light.range_z_min = -4096
+		light.range_layer_max = 0
+		light.range_layer_min = -512
+		light.shadow_enabled = true
+		object.add_sibling(light)
+		object.set_meta("light", true)
+		var remote = RemoteTransform2D.new()
+		remote.update_scale = false
+		remote.position = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y())
+		remote.set_meta("light", true)
+		object.add_child(remote)
+		remote.set_remote_node(remote.get_path_to(light))
+		
+func disable_light(object):
+	if object.has_meta("light"):
+		var light = get_object_light(object)
+		if light != null:
+			light.visible = false
+		
+		
+func get_object_shadow(object):
+	for child in object.get_children():
+		if child is LightOccluder2D:
+			return child
+	return null
+
+
+func create_or_enable_shadow(object):
+	if object.has_meta("shadow"):
+		var shadow = get_object_shadow(object)
+		if shadow != null:
+			shadow.visible = true
+	else: #create shadow
+		var shadow = LightOccluder2D.new()
+		shadow.occluder = OccluderPolygon2D.new()
+		if object is CustomEllipse:
+			print("custom ellipse detected")
+			shadow.occluder.polygon = object.pointArray
+		elif object is ColorRect:
+			print("lines detected")
+			var line = null
+			for child in object.get_children():
+				if child is Line2D:
+					line = child
+			if line == null:
+				print("lines not found in children")
+				return
+			shadow.occluder.polygon = line.points
+			shadow.position = -object.position
+			shadow.occluder.closed = false
+		elif "character" in object:
+			print("token detected")
+			shadow.occluder.polygon = object.ScaledPointArray
+		else:
+			print("square")
+			var points = PackedVector2Array([Vector2(0,0), Vector2(object.size.x, 0), Vector2(object.size.x, object.size.y), Vector2(0, object.size.y)])
+			shadow.occluder.polygon = points
+		object.add_child(shadow)
+		object.set_meta("shadow", true)
+		
+func disable_shadow(object):
+	if object.has_meta("shadow"):
+		var shadow = get_object_shadow(object)
+		if shadow != null:
+			shadow.visible = false
+		
+#value is new opacity, begin is in case of first call
+func _on_fov_opacity_changed_signal(value):
+	for token in Globals.new_map.tokens:
+		if token.is_inside_tree():
+			if not selected_tokens.has(token):
+				token.fov.color.a = value
 	

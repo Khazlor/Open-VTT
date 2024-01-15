@@ -2,6 +2,8 @@ extends Control
 
 class_name CustomEllipse
 
+var pointArray: PackedVector2Array
+
 var angle_shift = 5:
 	set(value):
 		angle_shift = value
@@ -22,7 +24,7 @@ func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/
 	var ab = self.size/2
 	var seg = 360/angle_shift
 	var angle = 0
-	var pointArray: PackedVector2Array
+	pointArray.clear()
 	pointArray.append(Vector2(ab.x + ab.x, ab.y))
 	for i in range(int(seg)):
 		angle += angle_shift_rad

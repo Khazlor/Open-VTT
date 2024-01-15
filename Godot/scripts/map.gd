@@ -4,6 +4,9 @@ var char_sheet = preload("res://UI/character_sheet.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	#light
+	get_viewport().set_canvas_cull_mask_bit(2, false)
+	
 	
 	randomize()
 	var layers = $Draw/Layers
@@ -25,7 +28,6 @@ func _ready():
 		tree.load_self_and_children(layers, null)
 		
 		$Draw.layers_root = layers
-		
 #		var item = $CanvasLayer/Layers/Tree.create_item()
 #		item.add_child(Globals.new_map.saved_layer_tree)
 #		print_tree_pretty()
@@ -94,7 +96,7 @@ func _on_maps_mouse_exited():
 func set_owner_on_self_and_children(node, owner: Node2D):
 	print("node, path: ", node, node.is_inside_tree(), node.get_tree(), node.get_path())
 	if "character" in node: #character token - saving and loading broken - https://github.com/godotengine/godot/issues/68666 - saving separately
-		Globals.map.tokens.append(node)
+		#Globals.map.tokens.append(node)
 		return
 	node.set_owner(owner)
 	var meta = node.get_meta("item_name")

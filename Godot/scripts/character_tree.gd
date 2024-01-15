@@ -83,6 +83,9 @@ func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 
 
 func _get_drag_data(_item_position):
+	#place drag and drop layer on top - in case of dragging to map
+	Globals.drag_drop_canvas_layer.layer = 128
+	
 	set_drop_mode_flags(DROP_MODE_INBETWEEN | DROP_MODE_ON_ITEM)
 	var selected = get_selected()
 	if not selected:
@@ -94,10 +97,13 @@ func _get_drag_data(_item_position):
 
 
 func _can_drop_data(_item_position, data):
-	print(data is TreeItem)
+	return data is TreeItem
 
 
 func _drop_data(item_position, item):
+	#place drag and drop layer back to bottom - in case of dragging to map
+	Globals.drag_drop_canvas_layer.layer = -1
+	
 	var to_item = get_item_at_position(item_position)
 	var shift = get_drop_section_at_position(item_position)
 	

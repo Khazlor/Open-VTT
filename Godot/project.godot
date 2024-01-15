@@ -20,12 +20,21 @@ config/icon="res://icon.svg"
 PersistentData="*res://resources/Save_data.gd"
 Globals="*res://resources/globals.gd"
 
+[debug]
+
+gdscript/warnings/native_method_override=1
+
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=2
 window/stretch/aspect="expand"
+
+[filesystem]
+
+import/blender/enabled=false
+import/fbx/enabled=false
 
 [input]
 

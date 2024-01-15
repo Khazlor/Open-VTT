@@ -1,30 +1,219 @@
-[gd_scene load_steps=12 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=26 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
 [ext_resource type="Texture2D" uid="uid://ihv74426u2cc" path="res://images/Placeholder-1479066.png" id="2_8c7ws"]
 [ext_resource type="Texture2D" uid="uid://007ihy4ed0nl" path="res://images/map_84x45.png" id="3_5u0ia"]
 [ext_resource type="PackedScene" uid="uid://ckr01rwlxratn" path="res://UI/map_tools.tscn" id="4_4e45f"]
+[ext_resource type="Shader" path="res://shaders/fov.gdshader" id="6_8pr1o"]
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
+[ext_resource type="Shader" path="res://shaders/invert.gdshader" id="6_kcpcw"]
 [ext_resource type="PackedScene" uid="uid://3qgtuhwblt4q" path="res://componens/draw.tscn" id="6_txqn8"]
-[ext_resource type="Texture2D" uid="uid://dk4s6w4hwuvxg" path="res://images/grid_white.png" id="7_uhnxr"]
 [ext_resource type="PackedScene" uid="uid://shwkx1k388tb" path="res://componens/tool_panel.tscn" id="9_61n3b"]
 [ext_resource type="PackedScene" uid="uid://7ynxnxtwfalq" path="res://scenes/Maps.tscn" id="10_q214b"]
 [ext_resource type="PackedScene" uid="uid://h5xb4t4cm47n" path="res://componens/layers.tscn" id="11_1618w"]
+
+[sub_resource type="Gradient" id="Gradient_8yhos"]
+offsets = PackedFloat32Array(0.0291667, 0.7125)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_5mix0"]
+gradient = SubResource("Gradient_8yhos")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_abmsw"]
+closed = false
+polygon = PackedVector2Array(-519, 165, 565, 158, 565, -178, 844, -173, 843, -263, 844, -342)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_wkcxk"]
+closed = false
+polygon = PackedVector2Array(-256, 301, 569, 296, 570, 652, 848, 653, 850, 849)
+
+[sub_resource type="Gradient" id="Gradient_nu6o1"]
+offsets = PackedFloat32Array(0.612903, 0.696774)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_856u5"]
+gradient = SubResource("Gradient_nu6o1")
+width = 1024
+height = 1024
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_daso1"]
+bg_color = Color(0.396078, 0.396078, 0.396078, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_hd0vp"]
+closed = false
+cull_mode = 2
+polygon = PackedVector2Array(1227, 269, 1335, 267, 1337, 539, 1227, 543, 1227, 269)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lt01u"]
+blend_mode = 3
+
+[sub_resource type="Gradient" id="Gradient_vtlie"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.983333)
+colors = PackedColorArray(0, 0, 0, 0, 0.25107, 0.412172, 0.319751, 0.780392)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_rmbfd"]
+gradient = SubResource("Gradient_vtlie")
+width = 70
+height = 70
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aoati"]
+shader = ExtResource("6_8pr1o")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k4ge3"]
+shader = ExtResource("6_kcpcw")
 
 [node name="Map" type="Node2D"]
 texture_repeat = 2
 script = ExtResource("1_rabh7")
 
+[node name="Darkness" type="CanvasModulate" parent="."]
+color = Color(0.345098, 0.345098, 0.345098, 1)
+
+[node name="test - preview" type="Node2D" parent="."]
+
+[node name="Map84x45" type="Sprite2D" parent="test - preview"]
+position = Vector2(350, 385)
+texture = ExtResource("3_5u0ia")
+
+[node name="DirectionalLight2D" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(286, 219)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+texture_scale = 8.14
+
+[node name="DirectionalLight2D3" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(1099, 518)
+color = Color(0.752941, 0.419608, 0, 1)
+energy = 1.77
+range_z_min = -4096
+range_z_max = 4095
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 1.0
+texture = SubResource("GradientTexture2D_5mix0")
+texture_scale = 18.34
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="test - preview"]
+visible = false
+position = Vector2(0, -18.855)
+occluder = SubResource("OccluderPolygon2D_abmsw")
+
+[node name="LightOccluder2D2" type="LightOccluder2D" parent="test - preview"]
+visible = false
+position = Vector2(0, -17.84)
+occluder = SubResource("OccluderPolygon2D_wkcxk")
+
+[node name="DirectionalLight2D4" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(1062, 426)
+scale = Vector2(0.285937, 0.285937)
+color = Color(0, 0, 0, 0)
+range_z_min = -4096
+range_z_max = 4096
+range_layer_min = -512
+range_layer_max = 512
+range_item_cull_mask = 2
+shadow_enabled = true
+shadow_color = Color(1, 1, 1, 1)
+texture = SubResource("GradientTexture2D_856u5")
+texture_scale = 50.0
+
+[node name="DirectionalLight2D5" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(1279.66, 439.184)
+range_z_min = -4096
+range_z_max = 4096
+range_layer_min = -512
+range_layer_max = 512
+range_item_cull_mask = 2
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+texture = SubResource("GradientTexture2D_856u5")
+texture_scale = 50.0
+
+[node name="DirectionalLight2D6" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(735, 428.774)
+scale = Vector2(0.08176, 0.08176)
+color = Color(1, 1, 1, 0.333333)
+range_z_min = -4096
+range_z_max = 4096
+range_layer_min = -512
+range_layer_max = 512
+range_item_cull_mask = 2
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+texture = SubResource("GradientTexture2D_856u5")
+texture_scale = 50.0
+
+[node name="DirectionalLight2D7" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(735, 361.319)
+scale = Vector2(0.08176, 0.08176)
+color = Color(1, 1, 1, 0.333333)
+range_z_min = -4096
+range_z_max = 4096
+range_layer_min = -512
+range_layer_max = 512
+range_item_cull_mask = 2
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+texture = SubResource("GradientTexture2D_856u5")
+texture_scale = 50.0
+
+[node name="DirectionalLight2D2" type="PointLight2D" parent="test - preview"]
+visible = false
+light_mask = 2
+visibility_layer = 2
+position = Vector2(466, 238)
+scale = Vector2(0.285937, 0.285937)
+energy = 8.29
+range_z_min = -1
+range_z_max = -1
+range_item_cull_mask = 3
+shadow_enabled = true
+shadow_item_cull_mask = 3
+texture = SubResource("GradientTexture2D_856u5")
+texture_scale = 50.0
+
+[node name="Panel" type="Panel" parent="test - preview"]
+offset_left = 1226.0
+offset_top = 266.0
+offset_right = 1337.0
+offset_bottom = 544.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_daso1")
+
+[node name="LightOccluder2D3" type="LightOccluder2D" parent="test - preview/Panel"]
+position = Vector2(-1226, -266)
+occluder = SubResource("OccluderPolygon2D_hd0vp")
+
 [node name="Placeholder-1479066" type="Sprite2D" parent="."]
 visible = false
-position = Vector2(576, 320)
 texture = ExtResource("2_8c7ws")
-
-[node name="Map84x45" type="Sprite2D" parent="."]
-visible = false
-position = Vector2(320, 352)
-texture = ExtResource("3_5u0ia")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("1_ihf1l")
@@ -32,21 +221,65 @@ script = ExtResource("1_ihf1l")
 [node name="Draw" parent="." instance=ExtResource("6_txqn8")]
 texture_repeat = 2
 
+[node name="FovCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="FovColorRect" type="ColorRect" parent="FovCanvasLayer"]
+light_mask = 2
+material = SubResource("CanvasItemMaterial_lt01u")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="CanvasModulate" type="CanvasModulate" parent="FovCanvasLayer"]
+color = Color(0, 0, 0, 1)
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
-layer = 0
+layer = 1
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
 motion_mirroring = Vector2(70000, 70000)
 
 [node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
-modulate = Color(0.360784, 0.545098, 0.509804, 0.309804)
 texture_filter = 2
 texture_repeat = 3
-texture = ExtResource("7_uhnxr")
+texture = SubResource("GradientTexture2D_rmbfd")
 region_enabled = true
 region_rect = Rect2(0, 0, 70000, 70000)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="FovColorRect2" type="ColorRect" parent="CanvasLayer"]
+visible = false
+light_mask = 2
+material = SubResource("ShaderMaterial_aoati")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="FovColorRect" type="ColorRect" parent="CanvasLayer"]
+visible = false
+light_mask = 2
+material = SubResource("ShaderMaterial_k4ge3")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
 
 [node name="Layers" parent="CanvasLayer" instance=ExtResource("11_1618w")]
 offset_left = 2.0
@@ -64,6 +297,7 @@ mouse_filter = 2
 split_offset = -225
 
 [node name="Control" type="Control" parent="CanvasLayer/HSplitContainer"]
+light_mask = 2
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2

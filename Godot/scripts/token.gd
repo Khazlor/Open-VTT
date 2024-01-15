@@ -2,7 +2,8 @@ extends Control
 
 var character: Character
 var token_polygon: Control
-
+var bars: VBoxContainer
+var fov: PointLight2D
 # Called even before ready
 func _enter_tree():
 	token_polygon = $TokenPolygon
@@ -11,8 +12,9 @@ func _enter_tree():
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	bars = $UI/Bars
+	fov = $UI/FovLight
 	UI_set_position()
-	pass
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -24,9 +26,10 @@ func UI_set_position():
 	var center = get_center_offset()
 	var distance = Vector2(0,0).distance_to((token_polygon.size * token_polygon.scale)/2)
 	#bars
-	var bars = $UI/Bars
+	
 	bars.size.x = token_polygon.size.x * abs(token_polygon.scale.x)
 	bars.position = center + Vector2(-(token_polygon.size.x * abs(token_polygon.scale.x))/2, -distance - bars.size.y)
+	fov.position = center
 	
 func get_center_offset():
 	var distance = Vector2(0,0).distance_to((token_polygon.size * token_polygon.scale)/2)

@@ -38,6 +38,7 @@ func update_token():
 	scale_shape_to_size()
 	
 func scale_shape_to_size():
+	print("scaling custom polygon token")
 	ScaledPointArray.clear()
 	for point in shapePointArray:
 		ScaledPointArray.append(point * size)

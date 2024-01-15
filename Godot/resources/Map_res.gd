@@ -5,10 +5,25 @@ var token_comp = preload("res://componens/token.tscn") #token component
 
 @export var map_name = "Map Name"
 @export var map_desc = "Description"
+@export var background_color = Color.DARK_GRAY
+#grid settings
+@export var grid_enable = true
+@export var grid_color = Color(0,128,0,128)
+@export var grid_thickness = 0.01
 @export var grid_size = 70
 @export var unit_size = 5
 @export var unit = "ft"
+#darkness settings
+@export var darkness_enable = false
+@export var darkness_color = Color.BLACK
+@export var DM_darkness_color = Color.DIM_GRAY
+#fov settings
+@export var fov_enable = false
+@export var fov_opacity = 0.3
+@export var fov_color = Color.BLACK
+#preview
 @export var image = "res://images/Placeholder-1479066.png"
+#saved layers
 @export var saved_layers: PackedScene = null
 var tokens = []
 var token_paths = []
@@ -142,3 +157,8 @@ func load_token(save_file: FileAccess):
 	token_polygon.character = character
 	print("token loaded")
 
+func add_token(token):
+	tokens.append(token)
+
+func remove_token(token):
+	tokens.erase(token)
