@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling roll panel functionality - parsing and evaluating roll commands
+
 extends Control
 
 const roll_panel_item_template = preload("res://componens/roll_panel_item.tscn")

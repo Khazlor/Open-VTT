@@ -1,3 +1,8 @@
+#Author: Vladimír Horák
+#Desc:
+#Custom shape, draws polygon of shape based on normalized mapping, scaled to control size
+#Used for drawing character tokens
+
 extends Control
 #class_name CustomPolygon #unfortunately saving custom class inside scene breaks loading
 

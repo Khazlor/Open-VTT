@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling token component
+
 extends Control
 
 var character: Character

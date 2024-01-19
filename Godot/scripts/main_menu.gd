@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling main menu scene
+
 extends Control
 var maplist
 

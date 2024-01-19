@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Custom shape, circle based on center and radius
+
 extends Control
 
 class_name CustomCircle

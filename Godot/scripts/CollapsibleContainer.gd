@@ -1,7 +1,11 @@
+#Author: Vladimír Horák
+#Desc:
+#Simple Script for creating collapsible containers
+
 #USAGE:
 #use on VboxContainer
 
-#requires Button and PanelContainer children
+#requires "Button" and "Container" children
 
 #pressing Button toggles Container Visibility
 

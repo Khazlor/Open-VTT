@@ -1,3 +1,8 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling ToolPanel - contains tabs with player data and setting for different elements
+#contains character_tree button functions - TODO move to separate script applied on "Characters" Margin container
+
 extends Control
 
 var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")

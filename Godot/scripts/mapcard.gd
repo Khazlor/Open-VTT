@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling mapcards in Maps scene - selecting map, signal for opening map setting popup
+
 extends Control
 var map: Map_res
 signal mapcard_right_click(map, mapcard)

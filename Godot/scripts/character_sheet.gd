@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling Character sheet GUI
+
 extends Window
 
 var character: Character

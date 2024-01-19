@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://scripts/CollapsibleContainer.gd" id="3_8bqlb"]
 [ext_resource type="Script" path="res://scripts/ToolPanel_Object.gd" id="3_oj6qf"]
 [ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="4_ev7tq"]
-[ext_resource type="Script" path="res://componens/ToolPanel_Map.gd" id="6_rxrna"]
+[ext_resource type="Script" path="res://scripts/ToolPanel_Map.gd" id="6_8u5xx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_atfvi"]
 bg_color = Color(0.160784, 0.152941, 0.14902, 1)
@@ -54,7 +54,6 @@ theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
 
 [node name="Characters" type="MarginContainer" parent="TabContainer"]
-visible = false
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -77,6 +76,7 @@ size_flags_vertical = 3
 script = ExtResource("2_nt2nq")
 
 [node name="Object" type="MarginContainer" parent="TabContainer"]
+visible = false
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -350,7 +350,7 @@ theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
-script = ExtResource("6_rxrna")
+script = ExtResource("6_8u5xx")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Map"]
 clip_contents = false

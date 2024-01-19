@@ -1,9 +1,10 @@
-[gd_scene load_steps=26 format=3 uid="uid://ccw42f1qnw32m"]
+[gd_scene load_steps=78 format=3 uid="uid://ccw42f1qnw32m"]
 
 [ext_resource type="Script" path="res://scripts/CameraMap.gd" id="1_ihf1l"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_rabh7"]
 [ext_resource type="Texture2D" uid="uid://ihv74426u2cc" path="res://images/Placeholder-1479066.png" id="2_8c7ws"]
 [ext_resource type="Texture2D" uid="uid://007ihy4ed0nl" path="res://images/map_84x45.png" id="3_5u0ia"]
+[ext_resource type="Texture2D" uid="uid://brxvlwr4gqimd" path="res://tilesets/Lined Brick.png" id="3_hdsme"]
 [ext_resource type="PackedScene" uid="uid://ckr01rwlxratn" path="res://UI/map_tools.tscn" id="4_4e45f"]
 [ext_resource type="Shader" path="res://shaders/fov.gdshader" id="6_8pr1o"]
 [ext_resource type="PackedScene" uid="uid://cs5ssdv7aympf" path="res://componens/roll_panel.tscn" id="6_ijfhq"]
@@ -71,6 +72,655 @@ height = 70
 fill = 2
 fill_from = Vector2(0.5, 0.5)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_swwe1"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 11.6667, -11.6667, 11.6667, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_5rtde"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 11.6667, -11.6667, 11.6667, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_l2e3x"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_o4x50"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_8hcle"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_c5nmp"]
+polygon = PackedVector2Array(-35, 35, -35, -11.6667, -11.6667, -11.6667, -11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_kh358"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 35, -35, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -35, 35, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_7r1vu"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_r3fmw"]
+polygon = PackedVector2Array(35, -35, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667, -35, -35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_648sh"]
+polygon = PackedVector2Array(35, -35, -11.6667, -35, -11.6667, -11.6667, -35, -11.6667, -35, 11.6667, -11.6667, 11.6667, -11.6667, 35, 35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_tkdyr"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_apt8m"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 11.6667, -11.6667, 11.6667, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1xrvy"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 35, -11.6667, 35, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_2wysa"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 35, -11.6667, 35, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_0nea6"]
+polygon = PackedVector2Array(-11.6667, -35, 35, -35, 35, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_hx5kr"]
+polygon = PackedVector2Array(-11.6667, -35, 35, -35, 35, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_f10ks"]
+polygon = PackedVector2Array(-35, -11.6667, 35, -11.6667, 35, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_kvffg"]
+polygon = PackedVector2Array(-35, -11.6667, 35, -11.6667, 35, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_x7h73"]
+polygon = PackedVector2Array(-35, -35, 35, -35, 35, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ahho7"]
+polygon = PackedVector2Array(-35, -35, 35, -35, 35, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_0eigc"]
+polygon = PackedVector2Array(-35, -11.6667, 11.6667, -11.6667, 11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_670hx"]
+polygon = PackedVector2Array(-35, -11.6667, 11.6667, -11.6667, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_tpdnc"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_el8jb"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_gy4bc"]
+polygon = PackedVector2Array(-11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_jjqsc"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, -11.6667, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_5a243"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_r7alw"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 35, -35, 35, 11.6667, -35, 11.6667, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_lvdp5"]
+polygon = PackedVector2Array(-35, -11.6667, 11.6667, -11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1vmfe"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 11.6667, -35, 11.6667, 11.6667, -35, 11.6667, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_sjrsb"]
+polygon = PackedVector2Array(-35, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_a0pfv"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_eyue7"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_a3jd3"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, -35, 11.6667, -35, -11.6667, -11.6667, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1f5bf"]
+polygon = PackedVector2Array(-11.6667, -35, 35, -35, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_kdtqo"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_50ssr"]
+polygon = PackedVector2Array(-35, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_y8bxu"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667, -35, -11.6667, -11.6667, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_nqdwq"]
+polygon = PackedVector2Array(-35, -11.6667, 35, -11.6667, 35, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ttjnp"]
+polygon = PackedVector2Array(-11.6667, -35, 11.6667, -35, 11.6667, 35, -35, 35, -35, -11.6667, -11.6667, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_l26fo"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 35, -35, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_tk6xu"]
+polygon = PackedVector2Array(-35, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_vb83w"]
+polygon = PackedVector2Array(-35, -35, 35, -35, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_4g8hv"]
+polygon = PackedVector2Array(11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 35, -35, 35, -35, -35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ejsjc"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667, -35, -11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_6l8eg"]
+polygon = PackedVector2Array(-35, -11.6667, -11.6667, -11.6667, -11.6667, -35, 11.6667, -35, 11.6667, -11.6667, 35, -11.6667, 35, 11.6667, 11.6667, 11.6667, 11.6667, 35, -35, 35)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_istdh"]
+polygon = PackedVector2Array(-35, -35, 35, -35, 35, 35, -11.6667, 35, -11.6667, 11.6667, -35, 11.6667)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_v1k8d"]
+polygon = PackedVector2Array(-11.6667, -11.6667, -11.6667, -35, 35, -35, 35, 35, -35, 35, -35, -11.6667)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4q0mx"]
+texture = ExtResource("3_hdsme")
+texture_region_size = Vector2i(70, 70)
+0:0/0 = 0
+0:0/0/terrain_set = 0
+0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_swwe1")
+1:0/0 = 0
+1:0/0/terrain_set = 0
+1:0/0/terrain = 0
+1:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_1xrvy")
+1:0/0/terrains_peering_bit/right_side = 0
+2:0/0 = 0
+2:0/0/terrain_set = 0
+2:0/0/terrain = 0
+2:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_f10ks")
+2:0/0/terrains_peering_bit/right_side = 0
+2:0/0/terrains_peering_bit/left_side = 0
+3:0/0 = 0
+3:0/0/terrain_set = 0
+3:0/0/terrain = 0
+3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_0eigc")
+3:0/0/terrains_peering_bit/left_side = 0
+4:0/0 = 0
+4:0/0/terrain_set = 0
+4:0/0/terrain = 0
+4:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_gy4bc")
+4:0/0/terrains_peering_bit/right_side = 0
+4:0/0/terrains_peering_bit/bottom_side = 0
+5:0/0 = 0
+5:0/0/terrain_set = 0
+5:0/0/terrain = 0
+5:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_lvdp5")
+5:0/0/terrains_peering_bit/bottom_side = 0
+5:0/0/terrains_peering_bit/left_side = 0
+6:0/0 = 0
+6:0/0/terrain_set = 0
+6:0/0/terrain = 0
+6:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_eyue7")
+6:0/0/terrains_peering_bit/right_side = 0
+6:0/0/terrains_peering_bit/bottom_side = 0
+6:0/0/terrains_peering_bit/top_side = 0
+0:1/0 = 0
+0:1/0/terrain_set = 0
+0:1/0/terrain = 0
+0:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_5rtde")
+0:1/0/terrains_peering_bit/bottom_side = 0
+1:1/0 = 0
+1:1/0/terrain_set = 0
+1:1/0/terrain = 0
+1:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_2wysa")
+1:1/0/terrains_peering_bit/right_side = 0
+1:1/0/terrains_peering_bit/bottom_right_corner = 0
+1:1/0/terrains_peering_bit/bottom_side = 0
+2:1/0 = 0
+2:1/0/terrain_set = 0
+2:1/0/terrain = 0
+2:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_kvffg")
+2:1/0/terrains_peering_bit/right_side = 0
+2:1/0/terrains_peering_bit/bottom_right_corner = 0
+2:1/0/terrains_peering_bit/bottom_side = 0
+2:1/0/terrains_peering_bit/bottom_left_corner = 0
+2:1/0/terrains_peering_bit/left_side = 0
+3:1/0 = 0
+3:1/0/terrain_set = 0
+3:1/0/terrain = 0
+3:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_670hx")
+3:1/0/terrains_peering_bit/bottom_side = 0
+3:1/0/terrains_peering_bit/bottom_left_corner = 0
+3:1/0/terrains_peering_bit/left_side = 0
+4:1/0 = 0
+4:1/0/terrain_set = 0
+4:1/0/terrain = 0
+4:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_jjqsc")
+4:1/0/terrains_peering_bit/right_side = 0
+4:1/0/terrains_peering_bit/top_side = 0
+5:1/0 = 0
+5:1/0/terrain_set = 0
+5:1/0/terrain = 0
+5:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_1vmfe")
+5:1/0/terrains_peering_bit/left_side = 0
+5:1/0/terrains_peering_bit/top_side = 0
+6:1/0 = 0
+6:1/0/terrain_set = 0
+6:1/0/terrain = 0
+6:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_a3jd3")
+6:1/0/terrains_peering_bit/right_side = 0
+6:1/0/terrains_peering_bit/left_side = 0
+6:1/0/terrains_peering_bit/top_side = 0
+7:0/0 = 0
+7:0/0/terrain_set = 0
+7:0/0/terrain = 0
+7:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_50ssr")
+7:0/0/terrains_peering_bit/right_side = 0
+7:0/0/terrains_peering_bit/bottom_side = 0
+7:0/0/terrains_peering_bit/left_side = 0
+7:1/0 = 0
+7:1/0/terrain_set = 0
+7:1/0/terrain = 0
+7:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_y8bxu")
+7:1/0/terrains_peering_bit/bottom_side = 0
+7:1/0/terrains_peering_bit/left_side = 0
+7:1/0/terrains_peering_bit/top_side = 0
+8:1/0 = 0
+8:1/0/terrain_set = 0
+8:1/0/terrain = 0
+8:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_tk6xu")
+8:1/0/terrains_peering_bit/right_side = 0
+8:1/0/terrains_peering_bit/bottom_side = 0
+8:1/0/terrains_peering_bit/left_side = 0
+8:1/0/terrains_peering_bit/top_left_corner = 0
+8:1/0/terrains_peering_bit/top_side = 0
+8:0/0 = 0
+8:0/0/terrain_set = 0
+8:0/0/terrain = 0
+8:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_l26fo")
+8:0/0/terrains_peering_bit/right_side = 0
+8:0/0/terrains_peering_bit/bottom_side = 0
+8:0/0/terrains_peering_bit/left_side = 0
+8:0/0/terrains_peering_bit/top_side = 0
+8:0/0/terrains_peering_bit/top_right_corner = 0
+9:0/0 = 0
+9:0/0/terrain_set = 0
+9:0/0/terrain = 0
+9:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_ejsjc")
+9:0/0/terrains_peering_bit/right_side = 0
+9:0/0/terrains_peering_bit/bottom_right_corner = 0
+9:0/0/terrains_peering_bit/bottom_side = 0
+9:0/0/terrains_peering_bit/left_side = 0
+9:0/0/terrains_peering_bit/top_side = 0
+9:1/0 = 0
+9:1/0/terrain_set = 0
+9:1/0/terrain = 0
+9:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_6l8eg")
+9:1/0/terrains_peering_bit/right_side = 0
+9:1/0/terrains_peering_bit/bottom_side = 0
+9:1/0/terrains_peering_bit/bottom_left_corner = 0
+9:1/0/terrains_peering_bit/left_side = 0
+9:1/0/terrains_peering_bit/top_side = 0
+10:1/0 = 0
+10:1/0/terrain_set = 0
+10:1/0/terrain = 0
+10:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_c5nmp")
+10:1/0/terrains_peering_bit/right_side = 0
+10:1/0/terrains_peering_bit/bottom_right_corner = 0
+10:1/0/terrains_peering_bit/bottom_side = 0
+10:1/0/terrains_peering_bit/bottom_left_corner = 0
+10:1/0/terrains_peering_bit/left_side = 0
+10:1/0/terrains_peering_bit/top_side = 0
+10:0/0 = 0
+10:0/0/terrain_set = 0
+10:0/0/terrain = 0
+10:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_8hcle")
+10:0/0/terrains_peering_bit/right_side = 0
+10:0/0/terrains_peering_bit/bottom_side = 0
+10:0/0/terrains_peering_bit/bottom_left_corner = 0
+10:0/0/terrains_peering_bit/left_side = 0
+10:0/0/terrains_peering_bit/top_left_corner = 0
+10:0/0/terrains_peering_bit/top_side = 0
+11:1/0 = 0
+11:1/0/terrain_set = 0
+11:1/0/terrain = 0
+11:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_648sh")
+11:1/0/terrains_peering_bit/right_side = 0
+11:1/0/terrains_peering_bit/bottom_right_corner = 0
+11:1/0/terrains_peering_bit/bottom_side = 0
+11:1/0/terrains_peering_bit/left_side = 0
+11:1/0/terrains_peering_bit/top_side = 0
+11:1/0/terrains_peering_bit/top_right_corner = 0
+11:0/0 = 0
+11:0/0/terrain_set = 0
+11:0/0/terrain = 0
+11:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_r3fmw")
+11:0/0/terrains_peering_bit/right_side = 0
+11:0/0/terrains_peering_bit/bottom_side = 0
+11:0/0/terrains_peering_bit/left_side = 0
+11:0/0/terrains_peering_bit/top_left_corner = 0
+11:0/0/terrains_peering_bit/top_side = 0
+11:0/0/terrains_peering_bit/top_right_corner = 0
+11:2/0 = 0
+11:2/0/terrain_set = 0
+11:2/0/terrain = 0
+11:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_tkdyr")
+11:2/0/terrains_peering_bit/right_side = 0
+11:2/0/terrains_peering_bit/bottom_right_corner = 0
+11:2/0/terrains_peering_bit/bottom_side = 0
+11:2/0/terrains_peering_bit/left_side = 0
+11:2/0/terrains_peering_bit/top_left_corner = 0
+11:2/0/terrains_peering_bit/top_side = 0
+11:3/0 = 0
+11:3/0/terrain_set = 0
+11:3/0/terrain = 0
+11:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_apt8m")
+10:3/0 = 0
+10:3/0/terrain_set = 0
+10:3/0/terrain = 0
+10:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_7r1vu")
+10:3/0/terrains_peering_bit/right_side = 0
+10:3/0/terrains_peering_bit/bottom_side = 0
+10:3/0/terrains_peering_bit/left_side = 0
+10:3/0/terrains_peering_bit/top_side = 0
+10:2/0 = 0
+10:2/0/terrain_set = 0
+10:2/0/terrain = 0
+10:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_kh358")
+10:2/0/terrains_peering_bit/right_side = 0
+10:2/0/terrains_peering_bit/bottom_side = 0
+10:2/0/terrains_peering_bit/bottom_left_corner = 0
+10:2/0/terrains_peering_bit/left_side = 0
+10:2/0/terrains_peering_bit/top_side = 0
+10:2/0/terrains_peering_bit/top_right_corner = 0
+9:2/0 = 0
+9:2/0/terrain_set = 0
+9:2/0/terrain = 0
+9:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_istdh")
+9:2/0/terrains_peering_bit/right_side = 0
+9:2/0/terrains_peering_bit/bottom_right_corner = 0
+9:2/0/terrains_peering_bit/bottom_side = 0
+9:2/0/terrains_peering_bit/left_side = 0
+9:2/0/terrains_peering_bit/top_left_corner = 0
+9:2/0/terrains_peering_bit/top_side = 0
+9:2/0/terrains_peering_bit/top_right_corner = 0
+9:3/0 = 0
+9:3/0/terrain_set = 0
+9:3/0/terrain = 0
+9:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_v1k8d")
+9:3/0/terrains_peering_bit/right_side = 0
+9:3/0/terrains_peering_bit/bottom_right_corner = 0
+9:3/0/terrains_peering_bit/bottom_side = 0
+9:3/0/terrains_peering_bit/bottom_left_corner = 0
+9:3/0/terrains_peering_bit/left_side = 0
+9:3/0/terrains_peering_bit/top_side = 0
+9:3/0/terrains_peering_bit/top_right_corner = 0
+8:3/0 = 0
+8:3/0/terrain_set = 0
+8:3/0/terrain = 0
+8:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_4g8hv")
+8:3/0/terrains_peering_bit/right_side = 0
+8:3/0/terrains_peering_bit/bottom_right_corner = 0
+8:3/0/terrains_peering_bit/bottom_side = 0
+8:3/0/terrains_peering_bit/bottom_left_corner = 0
+8:3/0/terrains_peering_bit/left_side = 0
+8:3/0/terrains_peering_bit/top_left_corner = 0
+8:3/0/terrains_peering_bit/top_side = 0
+8:2/0 = 0
+8:2/0/terrain_set = 0
+8:2/0/terrain = 0
+8:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_vb83w")
+8:2/0/terrains_peering_bit/right_side = 0
+8:2/0/terrains_peering_bit/bottom_side = 0
+8:2/0/terrains_peering_bit/bottom_left_corner = 0
+8:2/0/terrains_peering_bit/left_side = 0
+8:2/0/terrains_peering_bit/top_left_corner = 0
+8:2/0/terrains_peering_bit/top_side = 0
+8:2/0/terrains_peering_bit/top_right_corner = 0
+7:2/0 = 0
+7:2/0/terrain_set = 0
+7:2/0/terrain = 0
+7:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_nqdwq")
+7:2/0/terrains_peering_bit/right_side = 0
+7:2/0/terrains_peering_bit/bottom_right_corner = 0
+7:2/0/terrains_peering_bit/bottom_side = 0
+7:2/0/terrains_peering_bit/left_side = 0
+7:3/0 = 0
+7:3/0/terrain_set = 0
+7:3/0/terrain = 0
+7:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_ttjnp")
+7:3/0/terrains_peering_bit/bottom_side = 0
+7:3/0/terrains_peering_bit/bottom_left_corner = 0
+7:3/0/terrains_peering_bit/left_side = 0
+7:3/0/terrains_peering_bit/top_side = 0
+6:3/0 = 0
+6:3/0/terrain_set = 0
+6:3/0/terrain = 0
+6:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_kdtqo")
+6:3/0/terrains_peering_bit/right_side = 0
+6:3/0/terrains_peering_bit/left_side = 0
+6:3/0/terrains_peering_bit/top_left_corner = 0
+6:3/0/terrains_peering_bit/top_side = 0
+6:2/0 = 0
+6:2/0/terrain_set = 0
+6:2/0/terrain = 0
+6:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_1f5bf")
+6:2/0/terrains_peering_bit/right_side = 0
+6:2/0/terrains_peering_bit/bottom_side = 0
+6:2/0/terrains_peering_bit/top_side = 0
+6:2/0/terrains_peering_bit/top_right_corner = 0
+5:3/0 = 0
+5:3/0/terrain_set = 0
+5:3/0/terrain = 0
+5:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_a0pfv")
+5:3/0/terrains_peering_bit/bottom_side = 0
+5:3/0/terrains_peering_bit/left_side = 0
+5:3/0/terrains_peering_bit/top_left_corner = 0
+5:3/0/terrains_peering_bit/top_side = 0
+5:2/0 = 0
+5:2/0/terrain_set = 0
+5:2/0/terrain = 0
+5:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_sjrsb")
+5:2/0/terrains_peering_bit/right_side = 0
+5:2/0/terrains_peering_bit/bottom_side = 0
+5:2/0/terrains_peering_bit/bottom_left_corner = 0
+5:2/0/terrains_peering_bit/left_side = 0
+4:3/0 = 0
+4:3/0/terrain_set = 0
+4:3/0/terrain = 0
+4:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_r7alw")
+4:3/0/terrains_peering_bit/right_side = 0
+4:3/0/terrains_peering_bit/left_side = 0
+4:3/0/terrains_peering_bit/top_side = 0
+4:3/0/terrains_peering_bit/top_right_corner = 0
+4:2/0 = 0
+4:2/0/terrain_set = 0
+4:2/0/terrain = 0
+4:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_5a243")
+4:2/0/terrains_peering_bit/right_side = 0
+4:2/0/terrains_peering_bit/bottom_right_corner = 0
+4:2/0/terrains_peering_bit/bottom_side = 0
+4:2/0/terrains_peering_bit/top_side = 0
+3:3/0 = 0
+3:3/0/terrain_set = 0
+3:3/0/terrain = 0
+3:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_el8jb")
+3:3/0/terrains_peering_bit/left_side = 0
+3:3/0/terrains_peering_bit/top_left_corner = 0
+3:3/0/terrains_peering_bit/top_side = 0
+3:2/0 = 0
+3:2/0/terrain_set = 0
+3:2/0/terrain = 0
+3:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_tpdnc")
+3:2/0/terrains_peering_bit/bottom_side = 0
+3:2/0/terrains_peering_bit/bottom_left_corner = 0
+3:2/0/terrains_peering_bit/left_side = 0
+3:2/0/terrains_peering_bit/top_left_corner = 0
+3:2/0/terrains_peering_bit/top_side = 0
+2:3/0 = 0
+2:3/0/terrain_set = 0
+2:3/0/terrain = 0
+2:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_ahho7")
+2:3/0/terrains_peering_bit/right_side = 0
+2:3/0/terrains_peering_bit/left_side = 0
+2:3/0/terrains_peering_bit/top_left_corner = 0
+2:3/0/terrains_peering_bit/top_side = 0
+2:3/0/terrains_peering_bit/top_right_corner = 0
+2:2/0 = 0
+2:2/0/terrain_set = 0
+2:2/0/terrain = 0
+2:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_x7h73")
+2:2/0/terrains_peering_bit/right_side = 0
+2:2/0/terrains_peering_bit/bottom_right_corner = 0
+2:2/0/terrains_peering_bit/bottom_side = 0
+2:2/0/terrains_peering_bit/bottom_left_corner = 0
+2:2/0/terrains_peering_bit/left_side = 0
+2:2/0/terrains_peering_bit/top_left_corner = 0
+2:2/0/terrains_peering_bit/top_side = 0
+2:2/0/terrains_peering_bit/top_right_corner = 0
+1:3/0 = 0
+1:3/0/terrain_set = 0
+1:3/0/terrain = 0
+1:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_hx5kr")
+1:3/0/terrains_peering_bit/right_side = 0
+1:3/0/terrains_peering_bit/top_side = 0
+1:3/0/terrains_peering_bit/top_right_corner = 0
+1:2/0 = 0
+1:2/0/terrain_set = 0
+1:2/0/terrain = 0
+1:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_0nea6")
+1:2/0/terrains_peering_bit/right_side = 0
+1:2/0/terrains_peering_bit/bottom_right_corner = 0
+1:2/0/terrains_peering_bit/bottom_side = 0
+1:2/0/terrains_peering_bit/top_side = 0
+1:2/0/terrains_peering_bit/top_right_corner = 0
+0:2/0 = 0
+0:2/0/terrain_set = 0
+0:2/0/terrain = 0
+0:2/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_l2e3x")
+0:2/0/terrains_peering_bit/bottom_side = 0
+0:2/0/terrains_peering_bit/top_side = 0
+0:3/0 = 0
+0:3/0/terrain_set = 0
+0:3/0/terrain = 0
+0:3/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_o4x50")
+0:3/0/terrains_peering_bit/top_side = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1bqkn"]
+texture = ExtResource("3_hdsme")
+texture_region_size = Vector2i(70, 70)
+0:0/0 = 0
+0:0/0/terrain_set = 1
+1:0/0 = 0
+1:0/0/terrain_set = 1
+2:0/0 = 0
+2:0/0/terrain_set = 1
+3:0/0 = 0
+3:0/0/terrain_set = 1
+4:0/0 = 0
+4:0/0/terrain_set = 1
+5:0/0 = 0
+5:0/0/terrain_set = 1
+6:0/0 = 0
+6:0/0/terrain_set = 1
+7:0/0 = 0
+7:0/0/terrain_set = 1
+8:0/0 = 0
+8:0/0/terrain_set = 1
+9:0/0 = 0
+9:0/0/terrain_set = 1
+10:0/0 = 0
+10:0/0/terrain_set = 1
+11:0/0 = 0
+11:0/0/terrain_set = 1
+0:1/0 = 0
+0:1/0/terrain_set = 1
+1:1/0 = 0
+1:1/0/terrain_set = 1
+2:1/0 = 0
+2:1/0/terrain_set = 1
+3:1/0 = 0
+3:1/0/terrain_set = 1
+4:1/0 = 0
+4:1/0/terrain_set = 1
+5:1/0 = 0
+5:1/0/terrain_set = 1
+6:1/0 = 0
+6:1/0/terrain_set = 1
+7:1/0 = 0
+7:1/0/terrain_set = 1
+8:1/0 = 0
+8:1/0/terrain_set = 1
+9:1/0 = 0
+9:1/0/terrain_set = 1
+10:1/0 = 0
+10:1/0/terrain_set = 1
+11:1/0 = 0
+11:1/0/terrain_set = 1
+0:2/0 = 0
+0:2/0/terrain_set = 1
+1:2/0 = 0
+1:2/0/terrain_set = 1
+2:2/0 = 0
+2:2/0/terrain_set = 1
+2:2/0/terrain = 0
+2:2/0/terrains_peering_bit/right_side = 0
+2:2/0/terrains_peering_bit/bottom_right_corner = 0
+2:2/0/terrains_peering_bit/bottom_side = 0
+2:2/0/terrains_peering_bit/bottom_left_corner = 0
+2:2/0/terrains_peering_bit/left_side = 0
+2:2/0/terrains_peering_bit/top_left_corner = 0
+2:2/0/terrains_peering_bit/top_side = 0
+2:2/0/terrains_peering_bit/top_right_corner = 0
+3:2/0 = 0
+3:2/0/terrain_set = 1
+4:2/0 = 0
+4:2/0/terrain_set = 1
+5:2/0 = 0
+5:2/0/terrain_set = 1
+6:2/0 = 0
+6:2/0/terrain_set = 1
+7:2/0 = 0
+7:2/0/terrain_set = 1
+8:2/0 = 0
+8:2/0/terrain_set = 1
+9:2/0 = 0
+9:2/0/terrain_set = 1
+10:2/0 = 0
+10:2/0/terrain_set = 1
+11:2/0 = 0
+11:2/0/terrain_set = 1
+0:3/0 = 0
+0:3/0/terrain_set = 1
+1:3/0 = 0
+1:3/0/terrain_set = 1
+2:3/0 = 0
+2:3/0/terrain_set = 1
+3:3/0 = 0
+3:3/0/terrain_set = 1
+4:3/0 = 0
+4:3/0/terrain_set = 1
+5:3/0 = 0
+5:3/0/terrain_set = 1
+6:3/0 = 0
+6:3/0/terrain_set = 1
+7:3/0 = 0
+7:3/0/terrain_set = 1
+8:3/0 = 0
+8:3/0/terrain_set = 1
+9:3/0 = 0
+9:3/0/terrain_set = 1
+10:3/0 = 0
+10:3/0/terrain_set = 1
+11:3/0 = 0
+11:3/0/terrain_set = 1
+
+[sub_resource type="TileSet" id="TileSet_7nee6"]
+tile_size = Vector2i(70, 70)
+occlusion_layer_0/light_mask = 1
+terrain_set_0/mode = 0
+terrain_set_0/terrain_0/name = "Stone Wall"
+terrain_set_0/terrain_0/color = Color(0.501961, 0.345098, 0.25098, 1)
+terrain_set_1/mode = 0
+terrain_set_1/terrain_0/name = "Stone Floor"
+terrain_set_1/terrain_0/color = Color(0.388235, 0.537255, 0.309804, 1)
+sources/4 = SubResource("TileSetAtlasSource_4q0mx")
+sources/6 = SubResource("TileSetAtlasSource_1bqkn")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_aoati"]
 shader = ExtResource("6_8pr1o")
 
@@ -82,13 +732,485 @@ texture_repeat = 2
 script = ExtResource("1_rabh7")
 
 [node name="Darkness" type="CanvasModulate" parent="."]
-color = Color(0.345098, 0.345098, 0.345098, 1)
+visible = false
+color = Color(0.784314, 0.784314, 0.784314, 1)
 
 [node name="test - preview" type="Node2D" parent="."]
+visible = false
 
 [node name="Map84x45" type="Sprite2D" parent="test - preview"]
 position = Vector2(350, 385)
 texture = ExtResource("3_5u0ia")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview"]
+visible = false
+position = Vector2(100, -482.72)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8"]
+visible = false
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
+
+[node name="DirectionalLight2D8" type="PointLight2D" parent="test - preview/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8/DirectionalLight2D8"]
+position = Vector2(100, 0)
+color = Color(0, 0.54902, 0.705882, 1)
+range_z_min = -4096
+range_z_max = 4095
+range_layer_min = -512
+range_layer_max = 512
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter_smooth = 2.3
+texture = SubResource("GradientTexture2D_5mix0")
 
 [node name="DirectionalLight2D" type="PointLight2D" parent="test - preview"]
 visible = false
@@ -106,7 +1228,7 @@ texture_scale = 8.14
 
 [node name="DirectionalLight2D3" type="PointLight2D" parent="test - preview"]
 visible = false
-position = Vector2(1099, 518)
+position = Vector2(500, -500)
 color = Color(0.752941, 0.419608, 0, 1)
 energy = 1.77
 range_z_min = -4096
@@ -201,6 +1323,7 @@ texture = SubResource("GradientTexture2D_856u5")
 texture_scale = 50.0
 
 [node name="Panel" type="Panel" parent="test - preview"]
+visible = false
 offset_left = 1226.0
 offset_top = 266.0
 offset_right = 1337.0
@@ -250,6 +1373,13 @@ texture_repeat = 3
 texture = SubResource("GradientTexture2D_rmbfd")
 region_enabled = true
 region_rect = Rect2(0, 0, 70000, 70000)
+
+[node name="TestTileMap" type="TileMap" parent="."]
+visible = false
+position = Vector2(0, -490)
+tile_set = SubResource("TileSet_7nee6")
+format = 2
+layer_0/tile_data = PackedInt32Array(-131100, 327684, 1, -196636, 4, 2, -262172, 4, 2, -327708, 4, 2, -393244, 327684, 0, -131101, 131076, 0, -393245, 131076, 0, -131102, 131076, 0, -393246, 131076, 0, -131103, 65540, 0, -393247, 131076, 0, -393248, 131076, 0, -131105, 327684, 0, -393249, 131076, 0, -131106, 262148, 1, -196642, 4, 2, -262178, 4, 2, -327714, 4, 2, -393250, 262148, 0, -131093, 327684, 1, -196629, 4, 2, -262165, 4, 2, -327701, 4, 2, -393237, 327684, 0, -131094, 131076, 0, -393238, 131076, 0, -131095, 65540, 0, -393239, 131076, 0, -393240, 131076, 0, -131097, 196612, 0, -393241, 131076, 0, -131098, 262148, 1, -196634, 4, 2, -262170, 4, 2, -327706, 4, 2, -393242, 262148, 0, -33, 262148, 1, -65569, 4, 2, -27, 131076, 0, -28, 131076, 0, -29, 131076, 0, -30, 131076, 0, -31, 131076, 0, -32, 131076, 0, -21, 327684, 0, -22, 131076, 0, -23, 131076, 0, -24, 131076, 0, -25, 131076, 0, -26, 131076, 0, 131051, 4, 3, 65515, 4, 2, -65555, 4, 0, -196627, 4, 0, -327699, 4, 0, -458771, 4, 0, 131082, 327684, 1, 65546, 4, 2, 10, 4, 2, -65526, 4, 2, -131062, 4, 2, -196598, 4, 2, -262134, 4, 2, -327670, 4, 2, -393206, 4, 2, -458742, 4, 2, -524278, 327684, 0, 131081, 65540, 0, 65545, 131078, 2, 9, 131078, 2, -65527, 131078, 2, -131063, 131078, 2, -196599, 131078, 2, -262135, 131078, 2, -327671, 131078, 2, -393207, 131078, 2, -458743, 131078, 2, -524279, 131076, 0, 65544, 131078, 2, 8, 131078, 2, -65528, 131078, 2, -131064, 131078, 2, -196600, 131078, 2, -262136, 131078, 2, -327672, 131078, 2, -393208, 196612, 0, -458744, 131078, 2, -524280, 131076, 0, 131079, 196612, 0, 65543, 131078, 2, 7, 131078, 2, -65529, 720900, 3, -131065, 131078, 2, -196601, 131078, 2, -262137, 720900, 3, -327673, 131078, 2, -393209, 131076, 0, -458745, 131078, 2, -524281, 131076, 0, 131078, 393220, 1, 65542, 4, 1, 6, 131078, 2, -65530, 131078, 2, -131066, 131078, 2, -196602, 131078, 2, -262138, 131078, 2, -327674, 131078, 2, -393210, 131076, 0, -458746, 131078, 2, -524282, 131076, 0, 131077, 131076, 0, 65541, 131078, 2, 5, 131078, 2, -65531, 131078, 2, -131067, 131078, 2, -196603, 131078, 2, -262139, 131078, 2, -327675, 131078, 2, -393211, 131076, 0, -458747, 131078, 2, -524283, 131076, 0, 131076, 393220, 1, 65540, 4, 1, 4, 131078, 2, -65532, 131078, 2, -131068, 131078, 2, -196604, 131078, 2, -262140, 196612, 0, -327676, 131078, 2, -393212, 131076, 0, -458748, 131078, 2, -524284, 131076, 0, 131075, 131076, 0, 65539, 131078, 2, 3, 131078, 2, -65533, 4, 0, -131069, 131078, 2, -196605, 4, 3, -262141, 262148, 0, -327677, 131078, 2, -393213, 131076, 0, -458749, 131078, 2, -524285, 131076, 0, 131074, 131076, 0, 65538, 131078, 2, 2, 131078, 2, -65534, 131078, 2, -131070, 131078, 2, -196606, 131078, 2, -262142, 131078, 2, -327678, 131078, 2, -393214, 131076, 0, -458750, 131078, 2, -524286, 131076, 0, 131073, 393220, 1, 65537, 4, 1, 1, 131078, 2, -65535, 131078, 2, -131071, 131078, 2, -196607, 131078, 2, -262143, 131078, 2, -327679, 131078, 2, -393215, 131076, 0, -458751, 131078, 2, -524287, 131076, 0, 131072, 131076, 0, 65536, 131078, 2, 0, 131078, 2, -65536, 131078, 2, -131072, 196612, 3, -196608, 196612, 1, -262144, 131078, 2, -327680, 131078, 2, -393216, 131076, 0, -458752, 131078, 2, -524288, 131076, 0, 196607, 393220, 1, 131071, 4, 1, 65535, 131078, 2, -1, 131078, 2, -65537, 65540, 3, -131073, 65540, 1, -196609, 131078, 2, -262145, 131078, 2, -327681, 131076, 0, -393217, 131078, 2, -458753, 131076, 0, 196606, 131076, 0, 131070, 131078, 2, 65534, 131078, 2, -2, 131078, 2, -65538, 131078, 2, -131074, 131078, 2, -196610, 131078, 2, -262146, 131078, 2, -327682, 131076, 0, -393218, 131078, 2, -458754, 131076, 0, 196605, 393220, 1, 131069, 4, 2, 65533, 4, 2, -3, 4, 1, -65539, 131078, 2, -131075, 131078, 1, -196611, 4, 3, -262147, 4, 2, -327683, 262148, 0, -393219, 131078, 2, -458755, 131076, 0, 196604, 131076, 0, 131068, 131078, 2, 65532, 131078, 2, -4, 131078, 2, -65540, 131078, 2, -131076, 131078, 2, -196612, 131078, 2, -262148, 131078, 2, -327684, 131078, 2, -393220, 131078, 2, -458756, 131076, 0, 196603, 262148, 1, 131067, 4, 2, 65531, 4, 2, -5, 4, 2, -65541, 4, 2, -131077, 4, 2, -196613, 4, 2, -262149, 4, 2, -327685, 4, 2, -393221, 4, 2, -458757, 262148, 0, 131080, 131078, 2, -65588, 327684, 1, -131124, 4, 2, -196660, 4, 2, -262196, 4, 2, -327732, 4, 2, -393268, 4, 2, -458804, 4, 2, -524340, 327684, 0, -65589, 131076, 0, -131125, 131078, 2, -196661, 131078, 2, -262197, 131078, 2, -327733, 131078, 2, -393269, 131078, 2, -458805, 131078, 2, -524341, 131076, 0, -65590, 131076, 0, -131126, 131078, 2, -196662, 131078, 2, -262198, 131078, 2, -327734, 4, 0, -393270, 131078, 2, -458806, 131078, 2, -524342, 131076, 0, -65591, 131076, 0, -131127, 131078, 2, -196663, 196612, 3, -262199, 196612, 1, -327735, 131078, 2, -393271, 131078, 2, -458807, 131078, 2, -524343, 131076, 0, -65592, 131076, 0, -131128, 131078, 2, -196664, 65540, 3, -262200, 65540, 1, -327736, 131078, 2, -393272, 131078, 2, -458808, 131078, 2, -524344, 131076, 0, -65593, 131076, 0, -131129, 131078, 2, -196665, 131078, 2, -262201, 131078, 2, -327737, 4, 0, -393273, 131078, 2, -458809, 131078, 2, -524345, 131076, 0, -65594, 131076, 0, -131130, 131078, 2, -196666, 131078, 2, -262202, 131078, 2, -327738, 131078, 2, -393274, 131078, 2, -458810, 131078, 2, -524346, 131076, 0, -65595, 131076, 0, -131131, 131078, 2, -196667, 131078, 2, -262203, 131078, 2, -327739, 131078, 2, -393275, 131078, 2, -458811, 131078, 2, -524347, 131076, 0, -65596, 131076, 0, -131132, 131078, 2, -196668, 131078, 2, -262204, 131078, 2, -327740, 4, 0, -393276, 131078, 2, -458812, 131078, 2, -524348, 131076, 0, -65597, 393220, 3, -131133, 196612, 2, -196669, 196612, 1, -262205, 131078, 2, -327741, 131078, 2, -393277, 131078, 2, -458813, 131078, 2, -524349, 131076, 0, -65598, 262148, 3, -131134, 65540, 2, -196670, 65540, 1, -262206, 131078, 2, -327742, 131078, 2, -393278, 131078, 2, -458814, 131078, 2, -524350, 131076, 0, -65599, 131076, 0, -131135, 131078, 2, -196671, 131078, 2, -262207, 131078, 2, -327743, 196612, 0, -393279, 131078, 2, -458815, 131078, 2, -524351, 131076, 0, -65600, 131076, 0, -131136, 131078, 2, -196672, 131078, 2, -262208, 131078, 2, -327744, 131076, 0, -393280, 131078, 2, -458816, 131078, 2, -524352, 131076, 0, -65601, 131076, 0, -131137, 131078, 2, -196673, 131078, 2, -262209, 131078, 2, -327745, 131076, 0, -393281, 131078, 2, -458817, 131078, 2, -524353, 131076, 0, -65602, 131076, 0, -131138, 131078, 2, -196674, 131078, 2, -262210, 131078, 2, -327746, 131076, 0, -393282, 131078, 2, -458818, 131078, 2, -524354, 131076, 0, -65603, 262148, 1, -131139, 4, 2, -196675, 4, 2, -262211, 4, 2, -327747, 393220, 0, -393283, 4, 2, -458819, 4, 2, -524355, 262148, 0)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2

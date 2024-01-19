@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script implementing custom tooltip for rolled results
+
 extends RichTextLabel
 
 # Called when the node enters the scene tree for the first time.

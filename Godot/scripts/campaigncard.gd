@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling Campaign cards of Campaigns scene - selecting Campaign, signal for opening Campaign setting popup
+
 extends Control
 var campaign: Campaign_res
 signal campaigncard_right_click(campaign, campaigncard)

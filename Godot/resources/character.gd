@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Resource for saving character data
+
 extends Resource
 class_name Character
 

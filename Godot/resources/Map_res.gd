@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Resource for saving map data
+
 class_name Map_res
 extends Resource
 

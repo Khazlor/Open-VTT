@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling Object settings tab in Toolpanel
+
 extends MarginContainer
 
 signal object_change(index, value)

@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling Campaign scene -- creating, editing, selecting Campaign
+
 extends Control
 
 const CampaignCard = preload("res://componens/campaigncard.tscn")

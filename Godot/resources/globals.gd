@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#List of Global variables - used for setting currrent map and campaign and easy data sharing between scripts
+
 class_name Tool
 extends Node
 

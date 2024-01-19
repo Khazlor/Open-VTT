@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling Maps scene -- creating, editing, selecting map from mapcard
+
 extends Control
 
 const MapCard = preload("res://componens/mapcard.tscn")

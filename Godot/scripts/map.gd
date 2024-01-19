@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling map scene - mainly loading and saving
+
 extends Node2D
 
 var char_sheet = preload("res://UI/character_sheet.tscn")

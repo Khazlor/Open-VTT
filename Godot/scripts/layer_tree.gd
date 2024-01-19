@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling tree structure GUI representing map layers
+
 extends Tree
 
 var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")

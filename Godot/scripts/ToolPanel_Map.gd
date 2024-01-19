@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling Map settings tab in Toolpanel
+
 extends MarginContainer
 
 #grid object

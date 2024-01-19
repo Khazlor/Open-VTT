@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script enabling dragging of characters from character_tree to map and creating tokens
+
 extends Control
 
 var token_comp = preload("res://componens/token.tscn") #token component

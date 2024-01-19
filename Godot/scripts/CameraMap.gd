@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling camera in map scene
+
 extends Camera2D
 
 #settings for map camera navigation

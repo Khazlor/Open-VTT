@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Resource for saving campaign settings
+
 class_name Campaign_res
 extends Resource
 

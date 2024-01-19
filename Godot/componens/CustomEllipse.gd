@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Custom shape, elipse inscribed in control size rectangle
+
 extends Control
 
 class_name CustomEllipse

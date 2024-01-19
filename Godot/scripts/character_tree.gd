@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling tree structure with list of characters
+
 extends Tree
 
 var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")

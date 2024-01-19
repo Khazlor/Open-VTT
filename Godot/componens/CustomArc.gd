@@ -1,3 +1,9 @@
+#Author: Vladimír Horák
+#Desc:
+#Custom shape, draws arc of angle_size degrees from center to radius in angle_direction
+
+
+
 extends Control
 
 class_name CustomArc

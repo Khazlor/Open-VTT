@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script controlling map_tools - drawing tools on the left side of screen
+
 extends Control
 # Called when the node enters the scene tree for the first time.
 func _ready():

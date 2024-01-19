@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script implementing all of map drawing and selecting functionality
+
 extends Node2D
 
 var char_sheet = preload("res://UI/character_sheet.tscn")
