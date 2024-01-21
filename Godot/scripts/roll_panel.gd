@@ -21,6 +21,8 @@ var final_expression_part = "" #variable for input of individual rolls before ro
 var final_expression = "" #variable for final expression after rolls (2d20+5 -> 23+5)
 var roll_hint = "" #string with individually rolled dice - for roll hint
 
+@onready var textEdit = $MarginContainer/VBoxContainer/TextEdit
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -30,11 +32,15 @@ func _process(delta):
 	pass
 
 func _input(event):
-	if $MarginContainer/VBoxContainer/TextEdit.has_focus():
+	if textEdit.has_focus():
 		if Input.is_action_just_pressed("enter"):
+			if Input.is_action_pressed("shift"):
+				textEdit.insert_text_at_caret("\n")
+				return
 			roll_panel_item = roll_panel_item_template.instantiate()
 			$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(roll_panel_item)
-			var text_in = $MarginContainer/VBoxContainer/TextEdit.text
+			var text_in = textEdit.text
+			textEdit.connect("text_changed", remove_break)
 			roll_panel_item.get_node("VBoxContainer/Text").text = "character rolls: " + text_in
 			text_in += " " #placing ending char at end of input - to finish evaluating the preceding char
 			for character in text_in: #reading char from input
@@ -268,4 +274,7 @@ func calculate_expression():
 		roll_panel_item.get_node("VBoxContainer/Result").text = "expression error"
 	roll_hint = ""
 	
-
+#removes break created by enter (submit)
+func remove_break():
+	textEdit.backspace()
+	textEdit.disconnect("text_changed", remove_break)

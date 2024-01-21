@@ -17,7 +17,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-PersistentData="*res://resources/Save_data.gd"
 Globals="*res://resources/globals.gd"
 
 [debug]

@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cs5ssdv7aympf"]
+[gd_scene load_steps=2 format=3 uid="uid://cs5ssdv7aympf"]
 
 [ext_resource type="Script" path="res://scripts/roll_panel.gd" id="1_iov8f"]
-[ext_resource type="PackedScene" uid="uid://gft43bnph770" path="res://componens/roll_panel_item.tscn" id="2_384sr"]
 
 [node name="RollPanel" type="MarginContainer"]
 anchors_preset = 15
@@ -30,7 +29,6 @@ theme_override_constants/margin_bottom = 2
 layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
-clip_contents = false
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
@@ -39,24 +37,6 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/PanelContainer"]
-layout_mode = 2
-
-[node name="Text" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-text = "Text"
-
-[node name="Result" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-text = "Result
-"
-
-[node name="Roll_panel_item" parent="MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("2_384sr")]
-layout_mode = 2
 
 [node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
