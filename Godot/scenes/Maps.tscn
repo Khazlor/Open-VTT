@@ -43,6 +43,8 @@ vertical_alignment = 1
 [node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 0
+mouse_force_pass_scroll_events = false
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2

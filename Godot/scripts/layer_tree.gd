@@ -8,6 +8,7 @@ var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
 var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
 var button_add: Texture2D = load("res://icons/Add.svg")
 var button_remove: Texture2D = load("res://icons/Remove.svg")
+var button_light: Texture2D = load("res://icons/LightOccluder2D.svg")
 var layer = preload("res://componens/draw.tscn")
 
 @onready var draw_root = $"../../../Draw/Layers"
@@ -58,6 +59,7 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 	item.add_button(0, button_visible)
 	item.add_button(0, button_add)
 	item.add_button(0, button_remove)
+	item.add_button(0, button_light)
 	
 	var draw_layer = Node2D.new()
 	#set meta for recreation after loading
@@ -67,10 +69,10 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 	draw_layer.z_as_relative = false
 	item.set_meta("draw_layer", draw_layer)
 	if parent == null:
-		draw_root.add_child(draw_layer, false, INTERNAL_MODE_FRONT)
+		draw_root.add_child(draw_layer)
 		draw_root.move_child(draw_layer, 0)
 	else:
-		parent.get_meta("draw_layer").add_child(draw_layer, false, INTERNAL_MODE_FRONT)
+		parent.get_meta("draw_layer").add_child(draw_layer)
 		parent.get_meta("draw_layer").move_child(draw_layer, 0)
 	
 	draw_layer.set_owner(draw_root)
@@ -128,7 +130,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 #			if prev_item != item.get_prev_in_tree():
 #			layer.reparent(to_layer.get_parent()) #using disables internal
 			layer.get_parent().remove_child(layer)
-			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.get_parent().add_child(layer)
 			to_layer.get_parent().move_child(layer, to_layer.get_index()) #not needed - sorted by z_index - only for saving and loading
 		ON:
 			if to_item.get_child_count() == 0:
@@ -143,7 +145,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 #			if prev_item != item.get_prev_in_tree():
 #			layer.reparent(to_layer)
 			layer.get_parent().remove_child(layer)
-			to_layer.add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.add_child(layer)
 			to_layer.move_child(layer, 0)
 		AFTER:
 			var next_to_item = to_item.get_next() #get next sibling of to_item
@@ -153,7 +155,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 #			if prev_item != item.get_prev_in_tree():
 #			layer.reparent(to_layer.get_parent())
 			layer.get_parent().remove_child(layer)
-			to_layer.get_parent().add_child(layer, false, INTERNAL_MODE_FRONT)
+			to_layer.get_parent().add_child(layer)
 			to_layer.get_parent().move_child(layer, to_layer.get_index()+1) #not needed - sorted by z_index - only for saving and loading
 		
 #	var prev_item = item.get_prev_in_tree() # to check if items were moved
@@ -255,13 +257,29 @@ func load_self_and_children(node: Node2D, parent: TreeItem):
 			item.set_button(0, 0, button_hidden)
 		item.add_button(0, button_add)
 		item.add_button(0, button_remove)
+		item.add_button(0, button_light)
 	else: #root has only one button
 		item.add_button(0, button_add, 1)
 		item.set_selectable(0, false)
 	
 	for child in node.get_children(true):
-		if child.is_class("Node2D"):
+		if child.has_meta("item_name"):
 			load_self_and_children(child, item)
 	
+	
+func set_light_on_self_and_children(node, mask):
+	if node.is_class("CanvasItem"):
+		node.light_mask = mask
+		if node is PointLight2D:
+			if not node.has_meta("fov"): #fov light
+				node.range_item_cull_mask = mask
+			node.shadow_item_cull_mask = mask
+		if node is LightOccluder2D:
+			node.occluder_light_mask = mask
+		for child in node.get_children():
+			if child.has_meta("item_name"):
+				continue
+			set_light_on_self_and_children(child, mask)
+		
 
 

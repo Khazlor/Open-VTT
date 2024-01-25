@@ -7,6 +7,7 @@ extends MarginContainer
 #grid object
 @onready var grid = $"../../../../../../ParallaxBackground/ParallaxLayer/Sprite2D"
 @onready var darkness = $"../../../../../../Darkness"
+@onready var layers = $"../../../../../../CanvasLayer/Layers"
 @onready var fov = $"../../../../../../FovCanvasLayer/FovColorRect"
 
 signal fov_opacity_changed(value)
@@ -102,6 +103,8 @@ func _on_dm_darkness_color_picker_button_color_changed(color):
 func _on_fov_enable_toggled(button_pressed):
 	Globals.new_map.fov_enable = button_pressed
 	fov.visible = button_pressed
+	layers.set_layers_visibility()
+	layers.set_token_visibility(Globals.draw_layer.light_mask)
 	
 
 func _on_opacity_h_slider_value_changed(value):

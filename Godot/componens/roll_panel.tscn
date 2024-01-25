@@ -31,6 +31,8 @@ layout_mode = 2
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 0
+mouse_force_pass_scroll_events = false
 horizontal_scroll_mode = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
@@ -42,5 +44,6 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_vertical = 8
 size_flags_stretch_ratio = 0.0
+mouse_force_pass_scroll_events = false
 placeholder_text = "/r"
 scroll_fit_content_height = true

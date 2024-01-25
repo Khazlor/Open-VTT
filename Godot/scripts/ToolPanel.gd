@@ -12,7 +12,7 @@ var char_sheet = preload("res://UI/character_sheet.tscn")
 
 var dialog_item
 
-@onready var tree = $TabContainer/Characters/ScrollContainer/Tree
+@onready var tree = $TabContainer/Characters/Tree
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

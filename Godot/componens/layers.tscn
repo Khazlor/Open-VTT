@@ -1,7 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://h5xb4t4cm47n"]
+[gd_scene load_steps=6 format=3 uid="uid://h5xb4t4cm47n"]
 
 [ext_resource type="Script" path="res://scripts/Layers.gd" id="1_5oi25"]
 [ext_resource type="Script" path="res://scripts/layer_tree.gd" id="2_v7jm0"]
+[ext_resource type="Texture2D" uid="uid://cbva1i4r4s3qu" path="res://icons/Tree.svg" id="3_bkwb7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48r5t"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7eg5t"]
+content_margin_left = 5.0
+content_margin_top = 2.0
+content_margin_right = 10.0
+content_margin_bottom = 2.0
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="Layers" type="Control"]
 layout_mode = 3
@@ -14,6 +28,7 @@ script = ExtResource("1_5oi25")
 layout_mode = 0
 offset_right = 250.0
 offset_bottom = 250.0
+mouse_force_pass_scroll_events = false
 script = ExtResource("2_v7jm0")
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
@@ -31,8 +46,58 @@ text = "Layer not empty,
 are you sure you want to remove it?"
 horizontal_alignment = 1
 
+[node name="PopupPanel" type="PopupPanel" parent="."]
+size = Vector2i(240, 62)
+theme_override_styles/panel = SubResource("StyleBoxEmpty_48r5t")
+
+[node name="LightItemList" type="ItemList" parent="PopupPanel"]
+clip_contents = false
+offset_right = 240.0
+offset_bottom = 62.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_7eg5t")
+select_mode = 1
+auto_height = true
+item_count = 18
+max_columns = 9
+same_column_width = true
+fixed_column_width = 20
+icon_mode = 0
+item_0/text = "1"
+item_1/text = "2"
+item_2/text = "3"
+item_3/text = "4"
+item_4/text = "5"
+item_5/text = "6"
+item_6/text = "7"
+item_7/text = "8"
+item_8/text = "9"
+item_9/text = "10"
+item_10/text = "11"
+item_11/text = "12"
+item_12/text = "13"
+item_13/text = "14"
+item_14/text = "15"
+item_15/text = "16"
+item_16/text = "17"
+item_17/text = "18"
+
+[node name="LightPropagateButton" type="Button" parent="PopupPanel/LightItemList"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -24.0
+grow_horizontal = 0
+grow_vertical = 2
+tooltip_text = "Propagate Light layers to all child layers"
+icon = ExtResource("3_bkwb7")
+flat = true
+
 [connection signal="button_clicked" from="Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="item_activated" from="Tree" to="." method="_on_tree_item_activated"]
 [connection signal="item_edited" from="Tree" to="." method="_on_tree_item_edited"]
 [connection signal="item_selected" from="Tree" to="." method="_on_tree_item_selected"]
 [connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
+[connection signal="multi_selected" from="PopupPanel/LightItemList" to="." method="_on_light_item_list_multi_selected"]
+[connection signal="pressed" from="PopupPanel/LightItemList/LightPropagateButton" to="." method="_on_light_propagate_button_pressed"]

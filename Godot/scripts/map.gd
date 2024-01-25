@@ -28,6 +28,8 @@ func _ready():
 				print("path is empty")
 			parent.add_child(Globals.new_map.tokens[i])
 			parent.move_child(Globals.new_map.tokens[i], Globals.new_map.token_indexes[i])
+			Globals.new_map.tokens[i].light_mask = parent.light_mask
+			Globals.new_map.tokens[i].fov.shadow_item_cull_mask = parent.light_mask
 		#recursively create treeitem for each layer
 		tree.load_self_and_children(layers, null)
 		
@@ -69,7 +71,7 @@ func _on_child_exiting_tree(node):
 		#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
 		get_viewport().set_embedding_subwindows(true)
 		#clear tokens list in map
-		Globals.map.tokens.clear()
+		#Globals.map.tokens.clear() - no lomger filled in set_owner_on_self_and_children
 		#set ownership of all nodes (might have been deleted when moving layers around)
 		set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
 		var saved_layers = PackedScene.new()
@@ -87,20 +89,12 @@ func _on_maps_button_pressed():
 	
 func _on_maps_back_button_pressed():
 	$CanvasLayer/VSplitContainer.visible = false
-
-func _on_maps_mouse_entered():
-	print("entered")
-	Globals.mouseOverMaps = true
-	
-func _on_maps_mouse_exited():
-	print("exited")
-	Globals.mouseOverMaps = false
 	
 #sets owner of node and all its children and subchildren
 func set_owner_on_self_and_children(node, owner: Node2D):
 	print("node, path: ", node, node.is_inside_tree(), node.get_tree(), node.get_path())
 	if "character" in node: #character token - saving and loading broken - https://github.com/godotengine/godot/issues/68666 - saving separately
-		#Globals.map.tokens.append(node)
+		#Globals.map.tokens.append(node) - now filled during token creation and loading
 		return
 	node.set_owner(owner)
 	var meta = node.get_meta("item_name")
