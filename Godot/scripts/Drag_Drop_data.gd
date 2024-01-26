@@ -30,8 +30,9 @@ func _drop_data(position, data):
 			token.character = character
 		else:
 			token.character = character.duplicate(true)
-		token.light_mask = Globals.draw_layer.light_mask
-		token.fov.shadow_item_cull_mask = Globals.draw_layer.light_mask
+			token.character.token_texture = load(character.token_texture.resource_path) # duplicate removes resource path from loaded texture
 		Globals.draw_layer.add_child(token)
 		Globals.map.add_token(token)
+		token.light_mask = Globals.draw_layer.light_mask
+		token.fov.shadow_item_cull_mask = Globals.draw_layer.light_mask
 	

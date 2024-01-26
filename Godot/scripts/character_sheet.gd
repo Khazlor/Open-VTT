@@ -8,12 +8,13 @@ var character: Character
 
 @onready var name_line_edit = $TabContainer/Attributes/MarginContainer/VBoxContainer/FlowContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/VBoxContainer
+@onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
 
 #called even before ready
 func _enter_tree():
-	token = $TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview/ScrollContainer/CustomPolygon
+	token = $TabContainer/Token/MarginContainer/VBoxContainer/TokenPreview/ScrollContainer/Token
 	token.character = character
 
 # Called when the node enters the scene tree for the first time.
@@ -92,26 +93,63 @@ func load_character():
 		print(attribute + " ==> " + character.attributes[attribute])
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
 		
+	#load token settings
+	for entry in Globals.tokenShapeDict:
+		shape.add_item(entry)
+		if entry == character.token_shape:
+			shape.select(shape.item_count-1)
+	shape.get_child(0, true).always_on_top = true #set option button popup to be always on top - otherwise behind character sheet
+	token.custom_minimum_size = character.token_size
+	$TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox.value = character.token_size.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox.value = character.token_size.y
+	$TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleXSpinBox.value = character.token_scale.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox.value = character.token_scale.y
+	$TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = character.token_texture
 # ================================= section of token editor =====================================
+
+
+func _on_option_button_item_selected(index):
+	character.token_shape = shape.get_item_text(index)
+	character.emit_signal("token_changed")
+
 
 func _on_shape_size_x_spin_box_value_changed(value):
 	character.token_size.x = value
-	token.pivot_offset.x = value/2 #only in token preview, not on game board
+	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed")
 
 func _on_shape_size_y_spin_box_value_changed(value):
 	character.token_size.y = value
-	token.pivot_offset.y = value/2 #only in token preview, not on game board
+	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed")
 
 
 func _on_shape_scale_x_spin_box_value_changed(value):
 	character.token_scale.x = value
+	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed")
 
 
 func _on_shape_scale_y_spin_box_value_changed(value):
 	character.token_scale.y = value
+	token.custom_minimum_size = character.token_size * character.token_scale
+	character.emit_signal("token_changed")
+
+func _on_border_width_spin_box_value_changed(value):
+	character.token_outline_width = value
+	character.emit_signal("token_changed")
+	
+func _on_border_color_picker_button_color_changed(color):
+	character.token_outline_color = color
+	character.emit_signal("token_changed")
+
+func _on_browse_image_button_pressed():
+	$TokenImageFileDialog.popup()
+
+
+func _on_token_image_file_dialog_file_selected(path):
+	character.token_texture = load(path)
+	$TabContainer/Token/MarginContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = character.token_texture
 	character.emit_signal("token_changed")
 
 
@@ -133,3 +171,5 @@ func _on_image_scale_x_spin_box_value_changed(value):
 func _on_image_scale_y_spin_box_value_changed(value):
 	character.token_texture_scale.y = value
 	character.emit_signal("token_changed")
+
+

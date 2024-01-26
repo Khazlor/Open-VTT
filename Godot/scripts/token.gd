@@ -8,6 +8,7 @@ var character: Character
 var token_polygon: Control
 var bars: VBoxContainer
 var fov: PointLight2D
+
 # Called even before ready
 func _enter_tree():
 	token_polygon = $TokenPolygon

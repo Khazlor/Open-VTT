@@ -567,15 +567,14 @@ size_flags_horizontal = 3
 title = "Warning"
 initial_position = 1
 size = Vector2i(300, 110)
-ok_button_text = "Remove"
+ok_button_text = "Delete"
 
 [node name="Label" type="Label" parent="ConfirmationDialog"]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 292.0
 offset_bottom = 61.0
-text = "Layer not empty,
-are you sure you want to remove it?"
+text = "Are you sure you want to delete character?"
 horizontal_alignment = 1
 
 [connection signal="button_clicked" from="TabContainer/Characters/Tree" to="." method="_on_tree_button_clicked"]
@@ -612,3 +611,4 @@ horizontal_alignment = 1
 [connection signal="toggled" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/FovEnable" to="TabContainer/Map" method="_on_fov_enable_toggled"]
 [connection signal="value_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity/OpacityHSlider" to="TabContainer/Map" method="_on_opacity_h_slider_value_changed"]
 [connection signal="color_changed" from="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color/FovColorPickerButton" to="TabContainer/Map" method="_on_fov_color_picker_button_color_changed"]
+[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

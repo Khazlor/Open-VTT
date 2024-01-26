@@ -280,6 +280,18 @@ func set_light_on_self_and_children(node, mask):
 			if child.has_meta("item_name"):
 				continue
 			set_light_on_self_and_children(child, mask)
+			
+			
+#returns array of descendant treeitems
+func get_descendants(treeitem: TreeItem):
+	var array = []
+	var final = treeitem.get_next()
+	treeitem = treeitem.get_next_in_tree()
+	while treeitem != final:
+		array.append(treeitem)
+		treeitem = treeitem.get_next_in_tree()
+	return array
 		
+	
 
 

@@ -10,10 +10,10 @@ class_name Character
 @export var global = false #global characters are shared between campaings
 @export var singleton = false #all tokens have linked attributes
 
-@export var token_shape: PackedVector2Array
-@export var token_size: Vector2 = Vector2(20,20)
+@export var token_shape: StringName = &"Square"
+@export var token_size: Vector2 = Vector2(70,70)
 @export var token_scale: Vector2 = Vector2(1,1)
-@export var token_outline_width: float = 2
+@export var token_outline_width: float = 5
 @export var token_outline_color: Color = Color.BLACK
 @export var token_outline_faction_color: bool = true
 @export var token_texture: Texture2D
@@ -57,9 +57,29 @@ func save(resolve_conflict: bool = false):
 		print("file open error - aborting")
 		print(error_string(FileAccess.get_open_error()))
 		return
-	save.store_var(attributes)
+	store_char_data(save)
 	save.close()
 	print("saving char: " + name + " finished")
+	
+func store_char_data(save: FileAccess):
+	save.store_var(name)
+	save.store_var(attributes)
+	save.store_var(global)
+	save.store_var(singleton)
+	save.store_var(token_shape)
+	save.store_var(token_size)
+	save.store_var(token_scale)
+	save.store_var(token_outline_width)
+	save.store_var(token_outline_color)
+	save.store_var(token_outline_faction_color)
+	if token_texture != null:
+		save.store_var(token_texture.resource_path)
+		print("save texture path: ==============================================>", token_texture.resource_path)
+	else:
+		save.store_var("")
+		print("save texture path: ==============================================> :(")
+	save.store_var(token_texture_offset)
+	save.store_var(token_texture_scale)
 	
 func load_char(path: String, char_name: String, global: bool, tree_item: TreeItem):
 	print("char loading")
@@ -75,11 +95,28 @@ func load_char(path: String, char_name: String, global: bool, tree_item: TreeIte
 	if save == null:
 		print("file open error - aborting")
 		return
-	attributes = save.get_var()
+	get_char_data(save)
 	save.close()
 	
 	tree_item.set_meta("character", self)
-	print("char loaded --- name: " + self.name + ", global: " + str(self.global) + ", attributes: " + str(attributes.size()))
+	#print("char loaded --- name: " + self.name + ", global: " + str(self.global) + ", attributes: " + str(attributes.size()))
+	
+func get_char_data(save: FileAccess):
+	name = save.get_var()
+	attributes = save.get_var()
+	global = save.get_var()
+	singleton = save.get_var()
+	token_shape = save.get_var()
+	token_size = save.get_var()
+	token_scale = save.get_var()
+	token_outline_width = save.get_var()
+	token_outline_color = save.get_var()
+	token_outline_faction_color = save.get_var()
+	var texture_path = save.get_var()
+	print("load texture path: ==============================================>", texture_path)
+	token_texture = load(texture_path)
+	token_texture_offset = save.get_var()
+	token_texture_scale = save.get_var()
 	
 func get_path_to_save(include_name: bool = true):
 	var base_path: String #character folder
@@ -96,12 +133,14 @@ func get_path_to_save(include_name: bool = true):
 		path = ""
 	var item = tree_item.get_parent()
 	var root = tree_item.get_tree().get_root()
-	while item != root:
+	while item.get_parent() != root:
 		print("path =======> " + item.get_text(0))
 		path = item.get_text(0) + "/" + path
 		item = item.get_parent()
-		if global:
-			if item.get_parent() == root: #first folder Global - not actual folder
-				break
 	print("found path: " + path)
 	return base_path + "/" + path
+	
+func delete():
+	var path = get_path_to_save(true)
+	OS.move_to_trash(ProjectSettings.globalize_path(path)) #TODO might not work after project export: https://docs.godotengine.org/en/stable/classes/class_os.html#class-os-method-move-to-trash
+	

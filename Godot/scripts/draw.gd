@@ -54,8 +54,11 @@ var mouse_pos = Vector2(0,0)
 
 var last_event_pos = Vector2(-1,-1)
 
+var unshaded_material: CanvasItemMaterial
+
 @export var layers_root: Node2D = null
 
+@onready var layer_tree = $"../CanvasLayer/Layers/Tree"
 @onready var tool_panel_object_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Object"
 @onready var tool_panel_map_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Map"
 
@@ -65,6 +68,8 @@ func _ready():
 	tool_panel_object_menu.connect("object_change", _on_object_change_signal)
 	#edited fov opacity in map options -> update all fov objects
 	tool_panel_map_menu.connect("fov_opacity_changed", _on_fov_opacity_changed_signal)
+	
+	unshaded_material = load("res://materials/canvas_item_material_unshaded.tres")
 
 func _unhandled_input(event):
 #	print_tree_pretty() #DEBUG TODO remove
@@ -198,7 +203,10 @@ func _unhandled_input(event):
 			for child in lines_children:
 				if "character" in child: #if character token
 					child = child.get_child(0)
-				if child.is_class("Node2D"):
+				if child.is_class("Node2D"): #inherits from Node2D
+					if Globals.select_recursive:
+						if child.get_class() == "Node2D": #is Node2D -> Layer
+							lines_children.append_array(child.get_children())
 					continue
 				if child.rotation == 0: #no rotation - faster
 					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
@@ -283,52 +291,63 @@ func _unhandled_input(event):
 			print(selected)
 			#if nothing in dragged square -> get clicked
 			if selected.is_empty():
-				for x in range(lines_children.size()):
-					var child = lines_children[-x-1]
-					if "character" in child: #if character token
-						child = child.get_child(0)
-					if child.is_class("Node2D"):
-						continue
-#					print("mouse pos: ", mouse_pos)
-#					print("pos: ", child.position)
-#					print("size: ", child.size)
-#					print("scale: ", child.scale)
-					if child.rotation == 0:
-						if child.scale.x < 0 and child.scale.y < 0: #flipped object
-							if child.position.x >= mouse_pos.x and child.position.y >= mouse_pos.y:
-								if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
-									if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
-										selected.append(child)
-										break
-						elif child.scale.x < 0: #flipped x
-							if child.position.x >= mouse_pos.x and child.position.y <= mouse_pos.y:
-								if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
-									if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
-										selected.append(child)
-										break
-						elif child.scale.y < 0: #flipped y
-							if child.position.x <= mouse_pos.x and child.position.y >= mouse_pos.y:
-								if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-									if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
-										selected.append(child)
-										break
-						else: #not flipped
-							if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
-								if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-									if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
-										selected.append(child)
-										break
-					else: #calculate with rotation
-						var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
-						var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
-						var top_left = child.position
-						var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
-						var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
-						var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
-						print(top_left, top_right, bottom_right, bottom_left)
-						if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
-							selected.append(child)
-							break
+				lines_children = Globals.draw_layer.get_children()
+				lines_children.reverse()
+				var array_list = [lines_children]
+				if Globals.select_recursive:
+					var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
+					for treeitem in treeitem_array:
+						lines_children = treeitem.get_meta("draw_layer").get_children()
+						lines_children.reverse()
+						array_list.append(lines_children)
+				for array in array_list:
+					if selected.size() != 0:
+						break
+					for child in array:
+						if "character" in child: #if character token
+							child = child.get_child(0)
+						if child.is_class("Node2D"): #inherits from Node2D
+							continue
+	#					print("mouse pos: ", mouse_pos)
+	#					print("pos: ", child.position)
+	#					print("size: ", child.size)
+	#					print("scale: ", child.scale)
+						if child.rotation == 0:
+							if child.scale.x < 0 and child.scale.y < 0: #flipped object
+								if child.position.x >= mouse_pos.x and child.position.y >= mouse_pos.y:
+									if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
+										if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
+											selected.append(child)
+											break
+							elif child.scale.x < 0: #flipped x
+								if child.position.x >= mouse_pos.x and child.position.y <= mouse_pos.y:
+									if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
+										if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+											selected.append(child)
+											break
+							elif child.scale.y < 0: #flipped y
+								if child.position.x <= mouse_pos.x and child.position.y >= mouse_pos.y:
+									if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+										if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
+											selected.append(child)
+											break
+							else: #not flipped
+								if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
+									if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
+										if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
+											selected.append(child)
+											break
+						else: #calculate with rotation
+							var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+							var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+							var top_left = child.position
+							var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+							var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+							var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+							print(top_left, top_right, bottom_right, bottom_left)
+							if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
+								selected.append(child)
+								break
 				if selected.is_empty():
 					select_box.set_begin(Vector2(0,0))
 					select_box.set_end(Vector2(0,0))
@@ -574,7 +593,7 @@ func _unhandled_input(event):
 						#just pressed - create objects
 						if pressed:
 							current_line = Line2D.new()
-							current_line.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_line.material = unshaded_material #ignore lighting
 							current_line.default_color = Globals.colorLines
 							current_line.width = min(Globals.lineWidth,3)
 							Globals.draw_layer.add_child(current_line)
@@ -586,7 +605,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
-							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_line.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -608,7 +627,7 @@ func _unhandled_input(event):
 						if pressed:
 							begin = mouse_pos
 							current_circle = CustomCircle.new()
-							current_circle.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_circle.material = unshaded_material #ignore lighting
 							current_circle.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_circle.set_position(mouse_pos)
 							current_circle.center = begin
@@ -619,7 +638,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
-							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -643,7 +662,7 @@ func _unhandled_input(event):
 						if pressed:
 							begin = mouse_pos
 							current_arc = CustomArc.new()
-							current_arc.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_arc.material = unshaded_material #ignore lighting
 							current_arc.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
@@ -655,7 +674,7 @@ func _unhandled_input(event):
 							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_rect.set_size(Vector2(0,0))
 							current_label = Label.new()
-							current_label.material = load("res://materials/canvas_item_material_unshaded.tres") #ignore lighting
+							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
@@ -734,6 +753,7 @@ func _unhandled_input(event):
 						style.border_color = Color.CORNSILK
 						style.set_border_width_all(2)
 						select_box.add_theme_stylebox_override("panel", style)
+						select_box.material = unshaded_material
 						select_box.connect("mouse_entered", _on_select_mouse_entered)
 						select_box.connect("mouse_exited", _on_select_mouse_exited)
 						$Select.add_child(select_box)
@@ -1123,6 +1143,7 @@ func create_handle(preset: Control.LayoutPreset, s: float):
 	style.set_border_width_all(s/5)
 	style.set_corner_radius_all(s)
 	current_panel.add_theme_stylebox_override("panel", style)
+	current_panel.material = unshaded_material
 	select_box.add_child(current_panel)
 	
 func _tl_handle_mouse_entered():

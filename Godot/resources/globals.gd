@@ -16,6 +16,7 @@ var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
 var measureAngle = 30
 var snappingFraction = 1
+var select_recursive = true
 var tool = "rect"
 var colorLines = Color(0,0,0,1)
 var colorBack = Color(1,1,1,1)
@@ -27,3 +28,5 @@ var fontColor = Color(0,0,0,1)
 var fontSize = 10
 
 var mouseOverButton = false
+
+var tokenShapeDict = {"Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(0,1)]), "Pointed Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,0.8), Vector2(0.5,1), Vector2(0,0.8)])}

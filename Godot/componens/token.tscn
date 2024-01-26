@@ -21,6 +21,7 @@ mouse_filter = 1
 script = ExtResource("1_8ye4b")
 
 [node name="TokenPolygon" type="Control" parent="."]
+texture_repeat = 1
 layout_mode = 1
 anchors_preset = 0
 mouse_filter = 1

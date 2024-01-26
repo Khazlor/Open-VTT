@@ -66,8 +66,6 @@ func _process(delta):
 	
 func _on_child_exiting_tree(node):
 	if node == self.get_child(-1): #first node - rest are still in tree - save layers
-		print("tree: ", self.get_tree())
-		print("tree 2 : ", self.get_child(0).get_tree())
 		#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
 		get_viewport().set_embedding_subwindows(true)
 		#clear tokens list in map
@@ -77,7 +75,6 @@ func _on_child_exiting_tree(node):
 		var saved_layers = PackedScene.new()
 		saved_layers.pack($Draw/Layers);
 		Globals.map.save(saved_layers)
-		print("tree: ", get_tree())
 	
 	
 func _on_tree_exiting():
@@ -92,16 +89,10 @@ func _on_maps_back_button_pressed():
 	
 #sets owner of node and all its children and subchildren
 func set_owner_on_self_and_children(node, owner: Node2D):
-	print("node, path: ", node, node.is_inside_tree(), node.get_tree(), node.get_path())
 	if "character" in node: #character token - saving and loading broken - https://github.com/godotengine/godot/issues/68666 - saving separately
 		#Globals.map.tokens.append(node) - now filled during token creation and loading
 		return
 	node.set_owner(owner)
-	var meta = node.get_meta("item_name")
-	if meta != null:
-		print(meta, node.owner)
-	else:
-		print(node, node.owner)
 	for child in node.get_children(true):
 		set_owner_on_self_and_children(child, owner)
 		

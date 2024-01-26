@@ -14,6 +14,7 @@ enum {BEFORE = -1, ON = 0, AFTER = 1}
 
 signal moved(item, to_item, shift)
 
+var global_item: TreeItem
 
 func _ready():
 	hide_root = true
@@ -68,7 +69,10 @@ func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 		item.set_meta("character", character)
 		character.name = item_name
 		character.tree_item = item
-#		character.global = true
+		if is_ancestor(global_item, item):
+			character.global = true
+		else:
+			character.global = false
 		character.save(true)
 		#if conflict changed name
 		item.set_text(0, character.name)
@@ -85,6 +89,13 @@ func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 #	print("created item = " + item_name + ": " + str(draw_layer.get_index()))
 	return item
 
+
+func is_ancestor(ancestor: TreeItem, descendant: TreeItem):
+	while descendant != null:
+		descendant = descendant.get_parent()
+		if descendant == ancestor:
+			return true
+	return false
 
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map
@@ -203,26 +214,29 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 func load_characters():
 	#locals
 	var dir = DirAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters")
+	var item:TreeItem = add_new_item("Campaign", get_root(), false)
+	item.erase_button(0, 1)
 	if dir != null:
-		load_characters_in_dir(dir, "", null, false)
+		load_characters_in_dir(dir, "", item, false)
+	item = add_new_item("Globals", get_root(), false)
+	global_item = item
+	item.erase_button(0, 1)
 	#globals
 	dir = DirAccess.open("res://saves/Characters")
 	if dir != null:
-		load_characters_in_dir(dir, "Global", get_root(), true)
-	if get_root().get_child_count() == 0:
-		hide_root = false
+		load_characters_in_dir(dir, "", item, true)
 
 #loads characters in dir and it's subdirs
 func load_characters_in_dir(dir: DirAccess, char_name: String, parent_item: TreeItem, global: bool):
 	#load character
 	var item: TreeItem
-	if parent_item != null:
+	if not char_name.is_empty():
 		item = add_new_item(char_name, parent_item, false)
 		var char = Character.new()
 		char.load_char(dir.get_current_dir(), char_name, global, item)
 		item.collapsed = true
 	else:
-		item = get_root()
+		item = parent_item
 	#subdirs
 	var dirs = dir.get_directories()
 	for d in dirs:
