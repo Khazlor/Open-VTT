@@ -16,17 +16,7 @@ var lineWidth: float
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	if Globals.tokenShapeDict.has(character.token_shape):
-		shapePointArray = Globals.tokenShapeDict[character.token_shape]
-	else:
-		shapePointArray.append(Vector2(0,0))
-		shapePointArray.append(Vector2(1,0))
-		shapePointArray.append(Vector2(1,1))
-		shapePointArray.append(Vector2(0,1))
-	if size == Vector2(0,0): #new
-		update_token()
-	else:
-		scale_shape_to_size()
+	update_token(true)
 	character.token_changed.connect(update_token)
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -42,7 +32,16 @@ func _draw(): #draw polygon and polyline
 	
 
 #updates sizes of polygon based on token
-func update_token():
+func update_token(shape: bool):
+	if shape:
+		if Globals.tokenShapeDict.has(character.token_shape):
+			shapePointArray = Globals.tokenShapeDict[character.token_shape]
+		else:
+			shapePointArray.clear()
+			shapePointArray.append(Vector2(0,0))
+			shapePointArray.append(Vector2(1,0))
+			shapePointArray.append(Vector2(1,1))
+			shapePointArray.append(Vector2(0,1))
 	custom_minimum_size = character.token_size
 	size = character.token_size
 	scale = character.token_scale

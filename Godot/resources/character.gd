@@ -20,9 +20,13 @@ class_name Character
 @export var token_texture_offset: Vector2 = Vector2(0,0)
 @export var token_texture_scale: Vector2 = Vector2(1,1)
 
+@export var bars = [] #list of all character bars
+
 var tree_item: TreeItem
 
 signal token_changed()
+signal bars_changed()
+signal attr_updated(attr: StringName)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -80,6 +84,7 @@ func store_char_data(save: FileAccess):
 		print("save texture path: ==============================================> :(")
 	save.store_var(token_texture_offset)
 	save.store_var(token_texture_scale)
+	save.store_var(bars)
 	
 func load_char(path: String, char_name: String, global: bool, tree_item: TreeItem):
 	print("char loading")
@@ -117,6 +122,7 @@ func get_char_data(save: FileAccess):
 	token_texture = load(texture_path)
 	token_texture_offset = save.get_var()
 	token_texture_scale = save.get_var()
+	bars = save.get_var()
 	
 func get_path_to_save(include_name: bool = true):
 	var base_path: String #character folder

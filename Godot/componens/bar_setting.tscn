@@ -1,0 +1,111 @@
+[gd_scene load_steps=6 format=3 uid="uid://cmschhcpok2l7"]
+
+[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="1_f6xe4"]
+[ext_resource type="Script" path="res://scripts/bar_setting.gd" id="1_uxv8r"]
+[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="2_ejgyu"]
+[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="3_yucpo"]
+[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="4_rxc0j"]
+
+[node name="bar_setting" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 86.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_uxv8r")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BarName" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bar"
+
+[node name="AddButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("1_f6xe4")
+
+[node name="MoveUpButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("2_ejgyu")
+
+[node name="MoveDownButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("3_yucpo")
+
+[node name="Spacer" type="Control" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="RemoveButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("4_rxc0j")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="FlowContainer" type="FlowContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer"]
+layout_mode = 2
+text = "Bar Color: "
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Bar Size: "
+
+[node name="SizeSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3"]
+layout_mode = 2
+text = " Atrribute: "
+
+[node name="AtrributeLineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer4"]
+layout_mode = 2
+text = " out of Atrribute: "
+
+[node name="Attribute2LineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer4"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_add_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveUpButton" to="." method="_on_move_up_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveDownButton" to="." method="_on_move_down_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="picker_created" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_picker_created"]
+[connection signal="value_changed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/SizeSpinBox" to="." method="_on_size_spin_box_value_changed"]
+[connection signal="text_submitted" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/AtrributeLineEdit" to="." method="_on_atrribute_line_edit_text_submitted"]
+[connection signal="text_submitted" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer4/Attribute2LineEdit" to="." method="_on_attribute_2_line_edit_text_submitted"]
