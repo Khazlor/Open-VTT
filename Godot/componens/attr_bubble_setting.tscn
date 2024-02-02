@@ -1,0 +1,116 @@
+[gd_scene load_steps=6 format=3 uid="uid://w2r2x0j017ef"]
+
+[ext_resource type="Script" path="res://scripts/attr_bubble_setting.gd" id="1_ux7i5"]
+[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_w7m4t"]
+[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="3_f7pm0"]
+[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="4_rc88k"]
+[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="5_ueqt6"]
+
+[node name="attr_bubble_setting" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 86.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_ux7i5")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="AttrName" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Attribute_name"
+
+[node name="AddButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("2_w7m4t")
+
+[node name="MoveUpButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("3_f7pm0")
+
+[node name="MoveDownButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("4_rc88k")
+
+[node name="Spacer" type="Control" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="RemoveButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("5_ueqt6")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="FlowContainer" type="FlowContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer"]
+layout_mode = 2
+text = "Editable: "
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2"]
+layout_mode = 2
+text = " Icon: "
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="IconTextureButton" type="TextureButton" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer"]
+custom_minimum_size = Vector2(35, 0)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/MarginContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3"]
+layout_mode = 2
+text = " Background Image: "
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="ImageTextureButton" type="TextureButton" parent="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer"]
+custom_minimum_size = Vector2(35, 0)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TokenImageFileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+size = Vector2i(400, 400)
+always_on_top = true
+ok_button_text = "Open"
+file_mode = 0
+show_hidden_files = true
+
+[connection signal="text_submitted" from="VBoxContainer/HBoxContainer/AttrName" to="." method="_on_attr_name_text_submitted"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_add_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveUpButton" to="." method="_on_move_up_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveDownButton" to="." method="_on_move_down_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="toggled" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/CheckBox" to="." method="_on_check_box_toggled"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton" to="." method="_on_icon_texture_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton" to="." method="_on_image_texture_button_pressed"]
+[connection signal="file_selected" from="TokenImageFileDialog" to="." method="_on_token_image_file_dialog_file_selected"]

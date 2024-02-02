@@ -21,11 +21,13 @@ class_name Character
 @export var token_texture_scale: Vector2 = Vector2(1,1)
 
 @export var bars = [] #list of all character bars
+@export var attr_bubbles = [] #list of character attributes that are displayed in bubbles
 
 var tree_item: TreeItem
 
 signal token_changed()
 signal bars_changed()
+signal attr_bubbles_changed()
 signal attr_updated(attr: StringName)
 
 # Called when the node enters the scene tree for the first time.
@@ -85,6 +87,7 @@ func store_char_data(save: FileAccess):
 	save.store_var(token_texture_offset)
 	save.store_var(token_texture_scale)
 	save.store_var(bars)
+	save.store_var(attr_bubbles)
 	
 func load_char(path: String, char_name: String, global: bool, tree_item: TreeItem):
 	print("char loading")
@@ -123,6 +126,13 @@ func get_char_data(save: FileAccess):
 	token_texture_offset = save.get_var()
 	token_texture_scale = save.get_var()
 	bars = save.get_var()
+	var a = save.get_var()
+	if a is Array:
+		attr_bubbles = a
+		return null
+	else:
+		return a
+	
 	
 func get_path_to_save(include_name: bool = true):
 	var base_path: String #character folder

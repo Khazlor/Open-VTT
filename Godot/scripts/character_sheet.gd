@@ -9,11 +9,14 @@ var SelectedEdit
 var character: Character
 
 var bar_setting = load("res://componens/bar_setting.tscn")
+var attr_bubble_setting = load("res://componens/attr_bubble_setting.tscn")
 
 @onready var name_line_edit = $TabContainer/Attributes/MarginContainer/VBoxContainer/FlowContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/VBoxContainer
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var bars = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/BarsVBoxContainer
+@onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
+
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
 
@@ -123,12 +126,18 @@ func load_character():
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox.value = character.token_texture_scale.y
 	
+	#bars
 	for bar_data in character.bars:
 		var bar = bar_setting.instantiate()
 		bar.bar_dict = bar_data
 		bars.add_child(bar)
 	character.emit_signal("bars_changed")
-
+	
+	#attr_bubbles
+	for attr_data in character.attr_bubbles:
+		var attr = attr_bubble_setting.instantiate()
+		attr.attr_dict = attr_data
+		attr_bubbles.add_child(attr)
 # ================================= section of token editor =====================================
 
 
@@ -222,4 +231,11 @@ func _on_attr_val_text_changed():
 	var new_text = SelectedEdit.text
 	character.attributes[attr] = new_text
 	character.emit_signal("attr_updated", attr)
+	
+# Attribute Bubble settings
+func _on_add_attr_button_pressed():
+	var attr = attr_bubble_setting.instantiate()
+	character.attr_bubbles.insert(0, attr.attr_dict)
+	attr_bubbles.add_child(attr)
+	character.emit_signal("attr_bubbles_changed")
 

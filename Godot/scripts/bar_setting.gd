@@ -1,4 +1,4 @@
-extends Control
+extends PanelContainer
 
 @onready var character_sheet = $"../../../../../../../../"
 

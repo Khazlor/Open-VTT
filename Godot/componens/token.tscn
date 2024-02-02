@@ -1,7 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://0gfii8buhxxb"]
+[gd_scene load_steps=8 format=3 uid="uid://0gfii8buhxxb"]
 
 [ext_resource type="Script" path="res://scripts/token.gd" id="1_8ye4b"]
 [ext_resource type="Script" path="res://componens/CustomPolygon.gd" id="2_pj8py"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_hvloq"]
+light_mode = 1
 
 [sub_resource type="Gradient" id="Gradient_v27he"]
 offsets = PackedFloat32Array(0.375, 0.716667)
@@ -13,6 +16,12 @@ width = 1024
 height = 1024
 fill = 1
 fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_y5d42"]
+light_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_51r7f"]
+light_mode = 1
 
 [node name="Token" type="Control"]
 layout_mode = 3
@@ -35,71 +44,12 @@ update_scale = false
 [node name="UI" type="Node2D" parent="."]
 
 [node name="Bars" type="VBoxContainer" parent="UI"]
+material = SubResource("CanvasItemMaterial_hvloq")
 offset_right = 39.43
 offset_bottom = 20.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
 alignment = 2
-
-[node name="bar" type="ProgressBar" parent="UI/Bars"]
-modulate = Color(1, 0, 0, 1)
-layout_mode = 2
-mouse_filter = 1
-theme_override_font_sizes/font_size = 15
-max_value = 10.0
-value = 7.0
-allow_greater = true
-allow_lesser = true
-show_percentage = false
-
-[node name="Label" type="Label" parent="UI/Bars/bar"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -19.5
-offset_top = -5.5
-offset_right = 19.5
-offset_bottom = 5.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 5
-text = "5/10"
-horizontal_alignment = 1
-vertical_alignment = 1
-max_lines_visible = 1
-
-[node name="bar2" type="ProgressBar" parent="UI/Bars"]
-modulate = Color(1, 0, 0, 1)
-layout_mode = 2
-mouse_filter = 1
-theme_override_font_sizes/font_size = 15
-max_value = 10.0
-value = 7.0
-allow_greater = true
-allow_lesser = true
-show_percentage = false
-
-[node name="Label" type="Label" parent="UI/Bars/bar2"]
-offset_right = 39.0
-offset_bottom = 11.0
-theme_override_font_sizes/font_size = 5
-text = "5/10"
-horizontal_alignment = 1
-max_lines_visible = 1
-
-[node name="bar3" type="ProgressBar" parent="UI/Bars"]
-modulate = Color(1, 0, 0, 1)
-layout_mode = 2
-mouse_filter = 1
-theme_override_font_sizes/font_size = 15
-max_value = 10.0
-value = 7.0
-allow_greater = true
-allow_lesser = true
-show_percentage = false
 
 [node name="FovLight" type="PointLight2D" parent="UI"]
 range_z_min = -4096
@@ -112,3 +62,17 @@ shadow_color = Color(0, 0, 0, 1)
 texture = SubResource("GradientTexture2D_sp4t2")
 texture_scale = 10.0
 metadata/fov = false
+
+[node name="AttrBubbles" type="VBoxContainer" parent="UI"]
+material = SubResource("CanvasItemMaterial_y5d42")
+clip_contents = true
+scale = Vector2(0.8, 0.8)
+
+[node name="BarBubbles" type="VBoxContainer" parent="UI"]
+material = SubResource("CanvasItemMaterial_51r7f")
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+grow_horizontal = 0
+
+[node name="Timer" type="Timer" parent="UI"]

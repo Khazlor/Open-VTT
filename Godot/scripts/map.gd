@@ -11,7 +11,6 @@ func _ready():
 	#light
 	get_viewport().set_canvas_cull_mask_bit(2, false)
 	
-	
 	randomize()
 	var layers = $Draw/Layers
 	var tree = $CanvasLayer/Layers/Tree
