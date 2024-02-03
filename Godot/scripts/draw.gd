@@ -26,7 +26,7 @@ var min_max_x_y: Vector4 # min_x min_y max_x max_y
 #select
 var select_box: Panel #visual setection box
 var selected = [] #list of selected items
-var selected_tokens = [] #list of selected tokens - for changing fov opacity
+var selected_tokens = [] #list of selected tokens - for changing fov opacity and visibility of UI
 var mouse_over_selected = false
 var selected_creating = false
 var selected_dragging = false
@@ -288,7 +288,6 @@ func _unhandled_input(event):
 									min_x = min.x
 								if min.y < min_y:
 									min_y = min.y
-			print(selected)
 			#if nothing in dragged square -> get clicked
 			if selected.is_empty():
 				lines_children = Globals.draw_layer.get_children()
@@ -348,12 +347,7 @@ func _unhandled_input(event):
 							if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
 								selected.append(child)
 								break
-				if selected.is_empty():
-					select_box.set_begin(Vector2(0,0))
-					select_box.set_end(Vector2(0,0))
-					return
-			
-			
+				
 			#if only single item selected - affect select box by item rotation
 			if selected.size() == 1:
 				print("one item")
@@ -388,16 +382,20 @@ func _unhandled_input(event):
 				select_box.set_end(Vector2(max_x, max_y))
 				select_box.rotation = 0
 #				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
-			print(selected)
-			#set selected token fov opacity to 1, reset unselected token opacity
-			for token in selected_tokens:
-				token.fov.color.a = Globals.new_map.fov_opacity
+
+			for token in selected_tokens: #reset unselected token opacity and UI visibility
+				token.unselect()
 			selected_tokens.clear()
-			for object in selected:
+			for object in selected: #set selected token opacity and UI visibility
 				if "character" in object: #token
 					var token = object.get_parent()
 					selected_tokens.append(token)
-					token.fov.color.a = 1.0
+					token.select()
+					
+			if selected.is_empty():
+				select_box.queue_free()
+				return
+					
 			#control points - handles
 			create_handle(Control.PRESET_TOP_LEFT, 15)
 			current_panel.connect("mouse_entered", _tl_handle_mouse_entered)

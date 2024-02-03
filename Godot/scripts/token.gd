@@ -228,3 +228,19 @@ func on_le_focus_entered():
 #update position after timer has run out
 func timer_update():
 	UI_set_position()
+	
+#set fov opacity and UI visibility for selected token
+func select():
+	print("select")
+	bars.use_parent_material = true
+	fov.color.a = 1.0
+	attr_bubbles.visible = true
+	bar_bubbles.visible = true
+	
+#set fov opacity and UI visibility for unselected token
+func unselect():
+	print("unselect")
+	bars.use_parent_material = false
+	fov.color.a = Globals.map.fov_opacity
+	attr_bubbles.visible = false
+	bar_bubbles.visible = false
