@@ -18,7 +18,6 @@ var max_attr: String
 # Called even before ready
 func _enter_tree():
 	token_polygon = $TokenPolygon
-	print(token_polygon.size)
 	token_polygon.character = character
 
 # Called when the node enters the scene tree for the first time.
@@ -60,7 +59,6 @@ func get_center_offset():
 	return center
 	
 func change_bars():
-	print(attr_bubbles.size.x)
 	var flatstyle = StyleBoxFlat.new()
 	for child in bars.get_children():
 		child.queue_free()
@@ -231,7 +229,6 @@ func timer_update():
 	
 #set fov opacity and UI visibility for selected token
 func select():
-	print("select")
 	bars.use_parent_material = true
 	fov.color.a = 1.0
 	attr_bubbles.visible = true
@@ -239,7 +236,6 @@ func select():
 	
 #set fov opacity and UI visibility for unselected token
 func unselect():
-	print("unselect")
 	bars.use_parent_material = false
 	fov.color.a = Globals.map.fov_opacity
 	attr_bubbles.visible = false

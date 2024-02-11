@@ -16,13 +16,11 @@ func _ready():
 	var tree = $CanvasLayer/Layers/Tree
 	#load
 	if Globals.new_map.saved_layers != null:
-		print("load")
 		layers.replace_by(Globals.new_map.saved_layers.instantiate())
 		layers = $Draw/Layers #get new $Draw/Layers
 		#load tokens
 		for i in Globals.new_map.tokens.size():
 			var parent = get_node(Globals.new_map.token_paths[i])
-			print(Globals.new_map.token_paths[i])
 			if Globals.new_map.token_paths[i].is_empty():
 				print("path is empty")
 			parent.add_child(Globals.new_map.tokens[i])

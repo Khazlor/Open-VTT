@@ -26,5 +26,4 @@ func _on_gui_input(event):
 		get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 	elif event.is_action_pressed("mouseright"):
 		Globals.campaign = campaign
-		print("right")
 		emit_signal("campaigncard_right_click", campaign, self)

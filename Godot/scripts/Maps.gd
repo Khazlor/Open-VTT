@@ -115,8 +115,6 @@ func _on_apply_button_pressed():
 
 func _on_cancel_button_pressed():
 	popup.hide()
-	print(popup.is_transient())
-	print(popup.is_exclusive())
 	
 
 

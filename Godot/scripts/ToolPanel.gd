@@ -25,7 +25,6 @@ func _process(delta):
 
 func _on_tree_item_activated():
 	#tree.edit_selected(true) # edit name - instead open
-	print("opening character sheet")
 	var ch_sh = char_sheet.instantiate()
 	ch_sh.character = tree.get_selected().get_meta("character")
 	add_child(ch_sh)

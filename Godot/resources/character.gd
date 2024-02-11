@@ -22,6 +22,8 @@ class_name Character
 
 @export var bars = [] #list of all character bars
 @export var attr_bubbles = [] #list of character attributes that are displayed in bubbles
+@export var macros = {} #dict of all macros
+var macros_in_bar = {} #dict of all macros in action bar
 
 var tree_item: TreeItem
 
@@ -29,6 +31,7 @@ signal token_changed()
 signal bars_changed()
 signal attr_bubbles_changed()
 signal attr_updated(attr: StringName)
+signal macro_bar_changed(macro, macro2)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -41,7 +44,6 @@ func _process(delta):
 
 #save character resource to file
 func save(resolve_conflict: bool = false):
-	print("saving char: " + name)
 	#get full path to save
 	var path = get_path_to_save()
 	if resolve_conflict:
@@ -52,10 +54,8 @@ func save(resolve_conflict: bool = false):
 			path = path_old + "_" + str(i)
 		if i != 0:
 			name = name + "_" + str(i)
-		print("modified path: " + path)
 	if not DirAccess.dir_exists_absolute(path):
 		DirAccess.make_dir_recursive_absolute(path)
-	print("trying to open file: " + path + "/" + name)
 	if not DirAccess.dir_exists_absolute(path):
 		print("folder does not exist: " + path)
 	var save = FileAccess.open(path + "/" + name, FileAccess.WRITE)
@@ -65,7 +65,6 @@ func save(resolve_conflict: bool = false):
 		return
 	store_char_data(save)
 	save.close()
-	print("saving char: " + name + " finished")
 	
 func store_char_data(save: FileAccess):
 	save.store_var(name)
@@ -80,18 +79,15 @@ func store_char_data(save: FileAccess):
 	save.store_var(token_outline_faction_color)
 	if token_texture != null:
 		save.store_var(token_texture.resource_path)
-		print("save texture path: ==============================================>", token_texture.resource_path)
 	else:
 		save.store_var("")
-		print("save texture path: ==============================================> :(")
 	save.store_var(token_texture_offset)
 	save.store_var(token_texture_scale)
 	save.store_var(bars)
 	save.store_var(attr_bubbles)
+	save.store_var(macros)
 	
 func load_char(path: String, char_name: String, global: bool, tree_item: TreeItem):
-	print("char loading")
-	
 	if not FileAccess.file_exists(path + "/" + char_name):
 		return #no save to load
 		
@@ -121,17 +117,12 @@ func get_char_data(save: FileAccess):
 	token_outline_color = save.get_var()
 	token_outline_faction_color = save.get_var()
 	var texture_path = save.get_var()
-	print("load texture path: ==============================================>", texture_path)
 	token_texture = load(texture_path)
 	token_texture_offset = save.get_var()
 	token_texture_scale = save.get_var()
 	bars = save.get_var()
-	var a = save.get_var()
-	if a is Array:
-		attr_bubbles = a
-		return null
-	else:
-		return a
+	attr_bubbles = save.get_var()
+	macros = save.get_var()
 	
 	
 func get_path_to_save(include_name: bool = true):
@@ -150,10 +141,8 @@ func get_path_to_save(include_name: bool = true):
 	var item = tree_item.get_parent()
 	var root = tree_item.get_tree().get_root()
 	while item.get_parent() != root:
-		print("path =======> " + item.get_text(0))
 		path = item.get_text(0) + "/" + path
 		item = item.get_parent()
-	print("found path: " + path)
 	return base_path + "/" + path
 	
 func delete():

@@ -49,7 +49,6 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 	#if tree was empty, hide root
 	if hide_root == false:
 		hide_root = true
-	print("creating item: " + item_name)
 	var item
 	if parent == null: 
 		item = create_item(null, 0)

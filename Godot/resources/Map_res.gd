@@ -34,7 +34,6 @@ var token_paths = []
 var token_indexes = []
 
 func save(packed_layers: PackedScene):
-	print("saving")
 	saved_layers = packed_layers
 	if saved_layers == null:
 		print("saved layers is null")
@@ -60,11 +59,9 @@ func save_map():
 	for token in tokens:
 		save_token(map_save, token)
 	map_save.close()
-	print("save completed")
 	
 
 func load_map(map_name):
-	print("map loading")
 	self.map_name = map_name
 	if not FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
 		return #no save to load
@@ -87,13 +84,11 @@ func load_map(map_name):
 	for i in token_count:
 		load_token(map_save)
 	map_save.close()
-	print("map loaded")
 	
 	return 
 
 
 func save_token(save_file: FileAccess, token: Control):
-	print("token saving")
 	save_file.store_var(token.character.singleton)
 	if token.character.singleton == false: #store character in token
 		token.character.store_char_data(save_file)
@@ -101,14 +96,10 @@ func save_token(save_file: FileAccess, token: Control):
 	save_file.store_var(token.get_index())
 	save_file.store_var(token.token_polygon.position)
 	save_file.store_var(token.token_polygon.size)
-	print("token size saving: ",token.token_polygon.size)
 	save_file.store_var(token.token_polygon.scale)
-	print("token scale saving: ",token.token_polygon.scale)
 	save_file.store_var(token.token_polygon.rotation)
-	print("token saved")
 	
 func load_token(save_file: FileAccess):
-	print("token loading")
 	var token = token_comp.instantiate()
 	var character = Character.new()
 	character.singleton = save_file.get_var()
@@ -117,15 +108,12 @@ func load_token(save_file: FileAccess):
 	else:
 		pass #link token to character TODO
 	var path: NodePath = save_file.get_var()
-	print("path: ", path)
 	var index: int = save_file.get_var()
 	var token_polygon = token.get_child(0)
 	token_polygon.position = save_file.get_var()
 	token_polygon.custom_minimum_size = save_file.get_var()
 	token_polygon.size = token_polygon.custom_minimum_size
-	print("token size loading: ",token_polygon.size)
 	token_polygon.scale = save_file.get_var()
-	print("token scale loading: ",token_polygon.scale)
 	token_polygon.rotation = save_file.get_var()
 	tokens.append(token)
 	token_paths.append(path)
@@ -133,7 +121,6 @@ func load_token(save_file: FileAccess):
 	#set character in token
 	token.character = character
 	token_polygon.character = character
-	print("token loaded")
 
 func add_token(token):
 	tokens.append(token)

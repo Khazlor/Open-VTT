@@ -25,5 +25,4 @@ func _make_custom_tooltip(for_text):
 	tooltip.text = for_text
 	var size:Vector2 = tooltip.get_theme_font("normal_font").get_string_size(text_without_tags) # calculating size - fit content not working - probably godot bug - TODO: update after godot fix 
 	tooltip.custom_minimum_size = size
-	print("width: " + str(tooltip.get_content_width()))
 	return tooltip

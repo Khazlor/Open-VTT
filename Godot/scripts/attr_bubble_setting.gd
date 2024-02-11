@@ -20,10 +20,10 @@ func _ready():
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/CheckBox.button_pressed = attr_dict["edit"]
 	var image = load(attr_dict["icon"])
 	if image != null:
-		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = load(attr_dict["icon"])
+		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = image
 	image = load(attr_dict["image"])
 	if image != null:
-		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = load(attr_dict["image"])
+		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = image
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

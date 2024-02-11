@@ -10,9 +10,11 @@ var character: Character
 
 var bar_setting = load("res://componens/bar_setting.tscn")
 var attr_bubble_setting = load("res://componens/attr_bubble_setting.tscn")
+var macro_setting = load("res://componens/macro_setting.tscn")
 
-@onready var name_line_edit = $TabContainer/Attributes/MarginContainer/VBoxContainer/FlowContainer/Name_LineEdit
-@onready var attribute_list = $TabContainer/Attributes/MarginContainer/VBoxContainer
+@onready var name_line_edit = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/FlowContainer/Name_LineEdit
+@onready var attribute_list = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer
+@onready var macro_list = $TabContainer/Attributes/MarginContainer2/VBoxContainer/MacroVBoxContainer
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var bars = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/BarsVBoxContainer
 @onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
@@ -28,8 +30,6 @@ func _enter_tree():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	load_character()
-	print("sheet")
-	
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -76,7 +76,8 @@ func _on_add_attribute_button_pressed():
 		return
 	character.attributes[name_line_edit.text] = ""
 	add_attribute_to_attribute_list(name_line_edit.text, "")
-	
+
+
 func add_attribute_to_attribute_list(name: String, value: String):
 	var flow = HBoxContainer.new()
 	var text_edit = LineEdit.new()
@@ -97,15 +98,34 @@ func add_attribute_to_attribute_list(name: String, value: String):
 	text_edit.connect("text_changed", _on_attr_val_text_changed)
 	flow.add_child(text_edit)
 	attribute_list.add_child(flow)
-	
+
+
+func _on_add_macro_button_pressed():
+	var new_marco_setting = macro_setting.instantiate()
+	new_marco_setting.character_sheet = self
+	var name = new_marco_setting.get_valid_macro_name(new_marco_setting.macro_dict["name"])
+	new_marco_setting.macro_dict["name"] = name
+	if macro_list.get_child_count() != 0:
+		new_marco_setting.macro_dict["ord"] = macro_list.get_child(macro_list.get_child_count() - 1).macro_dict["ord"] + 1
+	macro_list.add_child(new_marco_setting)
+	character.macros[name] = new_marco_setting.macro_dict
+
 #loads character from resource to character sheet
 func load_character():
 	#name
 	title = character.name + " - Character sheet"
 	#attributes
 	for attribute in character.attributes:
-		print(attribute + " ==> " + character.attributes[attribute])
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
+		
+	#macros
+	for macro_dict_key in character.macros:
+		var macro = macro_setting.instantiate()
+		macro.macro_dict = character.macros[macro_dict_key]
+		macro_list.add_child(macro)
+	#order macross
+	for macro in macro_list.get_children():
+		macro_list.move_child(macro, macro.macro_dict["ord"])
 		
 	#load token settings
 	for entry in Globals.tokenShapeDict:

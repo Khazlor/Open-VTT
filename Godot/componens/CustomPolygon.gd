@@ -49,7 +49,6 @@ func update_token(shape: bool):
 	queue_redraw()
 	
 func scale_shape_to_size():
-	print("scaling custom polygon token")
 	ScaledPointArray.clear()
 	for point in shapePointArray:
 		ScaledPointArray.append(point * size)

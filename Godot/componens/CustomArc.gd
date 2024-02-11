@@ -30,7 +30,6 @@ func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/
 	var angle = angle_direction-deg_to_rad(angle_size)/2
 	var angle_shift_rad = deg_to_rad(4)
 	var pointArray: PackedVector2Array
-	print("center pos ",center, self.position)
 	pointArray.append(Vector2(0,0))
 	pointArray.append(Vector2(radius * cos(angle), radius * sin(angle)))
 	for i in range(angle_size/4):

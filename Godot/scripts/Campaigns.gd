@@ -72,7 +72,6 @@ func _add_campaigncard(campaign: Campaign_res):
 	$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/CampaignGrid.add_child(campaigncard)
 	
 func _on_campaigncard_right_click(campaign: Campaign_res, campaigncard):
-	print("hej")
 	self.campaign = campaign
 	self.campaigncard = campaigncard
 	

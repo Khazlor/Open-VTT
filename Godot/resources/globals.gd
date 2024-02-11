@@ -12,6 +12,8 @@ var new_map: Map_res
 var draw_layer: Node2D
 var drag_drop_canvas_layer: CanvasLayer #for dragging characters to map
 
+var roll_panel: Control
+
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
 var measureAngle = 30

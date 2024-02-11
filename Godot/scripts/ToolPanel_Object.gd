@@ -67,7 +67,6 @@ func _on_radius_spin_box_value_changed(value):
 
 
 func _on_color_picker_button_color_changed(color):
-	print("color changed")
 	emit_signal("object_change", 15, color)
 
 
