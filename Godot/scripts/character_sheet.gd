@@ -14,7 +14,7 @@ var macro_setting = load("res://componens/macro_setting.tscn")
 
 @onready var name_line_edit = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/FlowContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer
-@onready var macro_list = $TabContainer/Attributes/MarginContainer2/VBoxContainer/MacroVBoxContainer
+@onready var macro_list = $TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/MacroVBoxContainer
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var bars = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/BarsVBoxContainer
 @onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
@@ -132,7 +132,6 @@ func load_character():
 		shape.add_item(entry)
 		if entry == character.token_shape:
 			shape.select(shape.item_count-1)
-	shape.get_child(0, true).always_on_top = true #set option button popup to be always on top - otherwise behind character sheet
 	token.custom_minimum_size = character.token_size
 	token.select()
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox.value = character.token_size.x
@@ -146,6 +145,8 @@ func load_character():
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox.value = character.token_texture_offset.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox.value = character.token_texture_scale.y
+	
+	print(character.macros, " -----", character.macros_in_bar)
 	
 	#bars
 	for bar_data in character.bars:

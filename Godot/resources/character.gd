@@ -23,7 +23,7 @@ class_name Character
 @export var bars = [] #list of all character bars
 @export var attr_bubbles = [] #list of character attributes that are displayed in bubbles
 @export var macros = {} #dict of all macros
-var macros_in_bar = {} #dict of all macros in action bar
+@export var macros_in_bar = {} #dict of all macros in action bar
 
 var tree_item: TreeItem
 
@@ -123,6 +123,9 @@ func get_char_data(save: FileAccess):
 	bars = save.get_var()
 	attr_bubbles = save.get_var()
 	macros = save.get_var()
+	for macro in macros: #fill macros_in_bar
+		if macros[macro]["in_bar"] == true:
+			macros_in_bar[macro] = macros[macro]
 	
 	
 func get_path_to_save(include_name: bool = true):

@@ -72,21 +72,8 @@ func _input(event):
 				return
 			textEdit.connect("text_changed", remove_break) #deletes linebreak added by submitting - will occur after this function
 			#execute command
-			execute_command(textEdit.text)
-
-
-func execute_command(text_in: String):
-	create_roll_panel()
-	var is_roll_section = false #start with non-roll section -> get_roll_sections()
-	var roll_sections = get_roll_sections(text_in)
-	for roll_section in roll_sections:
-		if is_roll_section:
-			evaluate_roll(roll_section)
-			is_roll_section = false
-		else: #not roll section - append text to result
-			result_node.append_text(roll_section)
-			is_roll_section = true
-		
+			await execute_roll(textEdit.text, null, null)
+	
 		
 func create_roll_panel():
 	roll_panel_item = roll_panel_item_template.instantiate()
@@ -317,40 +304,39 @@ func remove_break():
 	
 
 #returs array of alternating sections and roll_sections - starts with non-roll section
-func get_roll_sections(text_in: String, character: Character = null, targets = []):
-	var i = text_in.find("/r")
-	var sections = []
-	var len = 0
-	while i != -1:
-		print(len, " ", i)
-		var section = text_in.substr(len, i - len) #section between roll_sections
-		print("section: ", section)
-		sections.append(section)
-		
-		len = text_in.find("//", i)
-		if len == -1: #to the end of string
-			section = text_in.substr(i + 2, -1)
-			sections.append(section)
-			break
-		else:
-			section = text_in.substr(i + 2, len - (i + 2))
-			len += 2
-			i = text_in.find("/r", len)
-			print(section, i)
-			sections.append(section)
-			
-	if len != -1: #non roll section at end
-		var section = text_in.substr(len, -1)
-		sections.append(section)
-	print("sections: ", sections)
-	return sections
+#func get_roll_sections(text_in: String, character: Character = null, targets = []):
+#	var i = text_in.find("/r")
+#	var sections = []
+#	var len = 0
+#	while i != -1:
+#		print(len, " ", i)
+#		var section = text_in.substr(len, i - len) #section between roll_sections
+#		print("section: ", section)
+#		sections.append(section)
+#
+#		len = text_in.find("//", i)
+#		if len == -1: #to the end of string
+#			section = text_in.substr(i + 2, -1)
+#			sections.append(section)
+#			break
+#		else:
+#			section = text_in.substr(i + 2, len - (i + 2))
+#			len += 2
+#			i = text_in.find("/r", len)
+#			print(section, i)
+#			sections.append(section)
+#
+#	if len != -1: #non roll section at end
+#		var section = text_in.substr(len, -1)
+#		sections.append(section)
+#	print("sections: ", sections)
+#	return sections
 	
 #executes macro by character to all targets
 # basic syntax:
 # $hp = token.hp
 # @hp = target.hp
 func execute_macro(text_in: String, character: Character = null, targets = []):
-	var is_roll_section = false #start with non-roll section -> get_roll_sections()
 	if targets.is_empty(): #roll once
 		await execute_roll(text_in, character, null)
 	else: #roll for each target - TODO probably do not create roll panel for each
@@ -562,7 +548,7 @@ func replace_attr(text_in, macro: String, i: int, character: Character = null, t
 
 
 func replace_macro(text_in, attr: String, i: int, character: Character = null, target: Character = null):
-	if attr[0] == "#": #character macro
+	if attr[0] == "#" and character != null: #character macro
 		if character.macros.has(attr.substr(1)):
 			print("macro found")
 			replace_text(text_in, character.macros[attr.substr(1)]["text"], i, attr.length())

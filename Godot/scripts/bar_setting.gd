@@ -83,7 +83,3 @@ func _on_atrribute_line_edit_text_submitted(new_text):
 func _on_attribute_2_line_edit_text_submitted(new_text):
 	bar_dict["attr2"] = new_text
 	character_sheet.character.emit_signal("bars_changed")
-
-
-func _on_color_picker_button_picker_created(): #move in front of character sheet
-	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/ColorPickerButton.get_child(0, true).always_on_top = true

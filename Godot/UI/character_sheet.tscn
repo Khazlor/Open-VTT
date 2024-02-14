@@ -10,7 +10,6 @@
 title = "Name - Character sheet"
 position = Vector2i(0, 36)
 size = Vector2i(700, 700)
-always_on_top = true
 theme_override_font_sizes/title_font_size = 0
 script = ExtResource("1_bacpi")
 
@@ -66,23 +65,26 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Attributes/MarginContainer2"]
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Attributes/MarginContainer2"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Attributes/MarginContainer2/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Attributes/MarginContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TabContainer/Attributes/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Macros"
 
-[node name="AddMacroButton" type="Button" parent="TabContainer/Attributes/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="AddMacroButton" type="Button" parent="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 icon = ExtResource("2_jwo46")
 
-[node name="MacroVBoxContainer" type="VBoxContainer" parent="TabContainer/Attributes/MarginContainer2/VBoxContainer"]
+[node name="MacroVBoxContainer" type="VBoxContainer" parent="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="Token" type="HSplitContainer" parent="TabContainer"]
@@ -389,7 +391,7 @@ show_hidden_files = true
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/FlowContainer/Add_Attribute_Button" to="." method="_on_add_attribute_button_pressed"]
-[connection signal="pressed" from="TabContainer/Attributes/MarginContainer2/VBoxContainer/HBoxContainer/AddMacroButton" to="." method="_on_add_macro_button_pressed"]
+[connection signal="pressed" from="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer/AddMacroButton" to="." method="_on_add_macro_button_pressed"]
 [connection signal="item_selected" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton" to="." method="_on_option_button_item_selected"]
 [connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox" to="." method="_on_shape_size_x_spin_box_value_changed"]
 [connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox" to="." method="_on_shape_size_y_spin_box_value_changed"]

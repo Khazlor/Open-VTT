@@ -105,7 +105,6 @@ size_flags_horizontal = 3
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveDownButton" to="." method="_on_move_down_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="color_changed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
-[connection signal="picker_created" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_picker_created"]
 [connection signal="value_changed" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/SizeSpinBox" to="." method="_on_size_spin_box_value_changed"]
 [connection signal="text_submitted" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/AtrributeLineEdit" to="." method="_on_atrribute_line_edit_text_submitted"]
 [connection signal="text_submitted" from="VBoxContainer/MarginContainer/FlowContainer/HBoxContainer4/Attribute2LineEdit" to="." method="_on_attribute_2_line_edit_text_submitted"]

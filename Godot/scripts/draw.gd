@@ -391,7 +391,7 @@ func _unhandled_input(event):
 					var token = object.get_parent()
 					selected_tokens.append(token)
 					token.select()
-					
+			Globals.action_bar.fill_action_bar(selected_tokens) #fill action bar based on selected tokens
 			if selected.is_empty():
 				select_box.queue_free()
 				return

@@ -30,7 +30,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Macro name"
 
-[node name="TextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+[node name="IconTextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(35, 0)
 layout_mode = 2
 texture_normal = ExtResource("2_dut1p")
@@ -83,7 +83,139 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="TextEdit" type="TextEdit" parent="VBoxContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackgroundColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer"]
+layout_mode = 2
+color = Color(0.694118, 0.203922, 0.137255, 1)
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_constants/line_spacing = 10
+theme_override_font_sizes/font_size = 17
+text = "Background"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 1
+
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+color = Color(0.74902, 0.313726, 0, 1)
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_constants/line_spacing = 10
+theme_override_font_sizes/font_size = 17
+text = "Border"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 1
+
+[node name="PanelContainer3" type="PanelContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3"]
+layout_mode = 2
+color = Color(0.94902, 0.737255, 0.211765, 1)
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_constants/line_spacing = 10
+theme_override_font_sizes/font_size = 17
+text = "Text"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 1
+
+[node name="PanelContainer4" type="PanelContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextBorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_constants/line_spacing = 10
+theme_override_font_sizes/font_size = 17
+text = "Text Border"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 1
+
+[node name="FlowContainer" type="FlowContainer" parent="VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ButtonTextLineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/minimum_character_width = 6
+placeholder_text = "ButtonText"
+
+[node name="IconAlignmentHboxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer"]
+layout_mode = 2
+text = "Icon:"
+
+[node name="IconAlignmentOptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer"]
+layout_mode = 2
+item_count = 4
+selected = 1
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Left"
+popup/item_1/id = 1
+popup/item_2/text = "Center"
+popup/item_2/id = 2
+popup/item_3/text = "Right"
+popup/item_3/id = 3
+
+[node name="TextSizeHboxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer"]
+layout_mode = 2
+text = "Text Size:"
+
+[node name="TextSizeSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer"]
+layout_mode = 2
+min_value = 1.0
+value = 39.0
+
+[node name="IconSizeHboxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconSizeHboxContainer"]
+layout_mode = 2
+text = "Icon:"
+
+[node name="IconSizeSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconSizeHboxContainer"]
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="VBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 placeholder_text = "Macro command"
 scroll_fit_content_height = true
@@ -97,6 +229,7 @@ file_mode = 0
 show_hidden_files = true
 
 [connection signal="text_submitted" from="VBoxContainer/HBoxContainer/MacroName" to="." method="_on_macro_name_text_submitted"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/IconTextureButton" to="." method="_on_icon_texture_button_pressed"]
 [connection signal="toggled" from="VBoxContainer/HBoxContainer/CheckBox" to="." method="_on_check_box_toggled"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_add_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/MoveUpButton" to="." method="_on_move_up_button_pressed"]
@@ -104,5 +237,13 @@ show_hidden_files = true
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/EditButton" to="." method="_on_edit_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RollButton" to="." method="_on_roll_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
-[connection signal="text_changed" from="VBoxContainer/MarginContainer/TextEdit" to="." method="_on_text_edit_text_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/BackgroundColorPickerButton" to="." method="_on_background_color_picker_button_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/BorderColorPickerButton" to="." method="_on_border_color_picker_button_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3/TextColorPickerButton" to="." method="_on_text_color_picker_button_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/TextBorderColorPickerButton" to="." method="_on_text_border_color_picker_button_color_changed"]
+[connection signal="text_changed" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/ButtonTextLineEdit" to="." method="_on_button_text_line_edit_text_changed"]
+[connection signal="item_selected" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer/IconAlignmentOptionButton" to="." method="_on_icon_alignment_option_button_item_selected"]
+[connection signal="value_changed" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer/TextSizeSpinBox" to="." method="_on_text_size_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconSizeHboxContainer/IconSizeSpinBox" to="." method="_on_icon_size_spin_box_value_changed"]
+[connection signal="text_changed" from="VBoxContainer/MarginContainer/VBoxContainer/TextEdit" to="." method="_on_text_edit_text_changed"]
 [connection signal="file_selected" from="ImageFileDialog" to="." method="_on_token_image_file_dialog_file_selected"]

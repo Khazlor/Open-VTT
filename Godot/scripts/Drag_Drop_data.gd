@@ -29,7 +29,9 @@ func _drop_data(position, data):
 		if character.singleton: #character with linked attributes
 			token.character = character
 		else:
+			print("macros original: ", character.macros_in_bar)
 			token.character = character.duplicate(true)
+			print("macros after dupl: ", token.character.macros_in_bar)
 			token.character.token_texture = load(character.token_texture.resource_path) # duplicate removes resource path from loaded texture
 		Globals.draw_layer.add_child(token)
 		Globals.map.add_token(token)

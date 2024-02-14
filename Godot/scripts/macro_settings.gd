@@ -1,6 +1,6 @@
 extends PanelContainer
 
-@onready var character_sheet = $"../../../../../../"
+@onready var character_sheet = $"../../../../../../../"
 
 var macro_dict = {
 	"name": "macro",
@@ -8,23 +8,36 @@ var macro_dict = {
 	"text": "",
 	"in_bar": false,
 	"ord": 0, #for ordering
+	"colors": [Color(0.7, 0.2, 0.13, 1), Color(0.75, 0.3, 0, 1), Color(0.95, 0.75, 0.2, 1), Color(0, 0, 0, 1)],
+	"b_text": "",
+	"b_icon": 0,
+	"b_text_size": 39,
+	"b_icon_size": 50,
 	}
 
 @onready var parent = self.get_parent()
 
 @onready var dialog = $ImageFileDialog
 @onready var name_le = $VBoxContainer/HBoxContainer/MacroName
-@onready var te = $VBoxContainer/MarginContainer/TextEdit
+@onready var te = $VBoxContainer/MarginContainer/VBoxContainer/TextEdit
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	
 	$VBoxContainer/HBoxContainer/MacroName.text = macro_dict["name"]
 	var image = load(macro_dict["icon"])
 	if image != null:
-		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = image
-		$VBoxContainer/HBoxContainer/CheckBox.pressed = macro_dict["in_bar"]
+		$VBoxContainer/HBoxContainer/IconTextureButton.texture_normal = image
+	$VBoxContainer/HBoxContainer/CheckBox.button_pressed = macro_dict["in_bar"]
 	te.text = macro_dict["text"]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/BackgroundColorPickerButton.color = macro_dict["colors"][0]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/BorderColorPickerButton.color = macro_dict["colors"][1]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3/TextColorPickerButton.color = macro_dict["colors"][2]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/TextBorderColorPickerButton.color = macro_dict["colors"][3]
+	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/ButtonTextLineEdit.text = macro_dict["b_text"]
+	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer/IconAlignmentOptionButton.selected = macro_dict["b_icon"]
+	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer/TextSizeSpinBox.value = macro_dict["b_text_size"]
+	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconSizeHboxContainer/IconSizeSpinBox.value = macro_dict["b_icon_size"]
+	
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -107,7 +120,7 @@ func _on_icon_texture_button_pressed():
 
 func _on_token_image_file_dialog_file_selected(path):
 	macro_dict["icon"] = path
-	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = load(path)
+	$VBoxContainer/HBoxContainer/IconTextureButton.texture_normal = load(path)
 	if macro_dict["in_bar"]:
 			character_sheet.character.emit_signal("macro_bar_changed", macro_dict)
 
@@ -133,3 +146,37 @@ func _on_edit_button_pressed():
 func _on_roll_button_pressed():
 	print("macro call")
 	Globals.roll_panel.execute_macro(macro_dict["text"], character_sheet.character)
+
+
+func _on_button_text_line_edit_text_changed(new_text):
+	macro_dict["b_text"] = new_text
+	#TODO call change
+
+func _on_icon_alignment_option_button_item_selected(index):
+	macro_dict["b_icon"] = index
+	#TODO call change
+	
+func _on_text_size_spin_box_value_changed(value):
+	macro_dict["b_text_size"] = value
+	#TODO call change
+
+func _on_icon_size_spin_box_value_changed(value):
+	macro_dict["b_icon_size"] = value
+	#TODO call change
+
+func _on_background_color_picker_button_color_changed(color):
+	macro_dict["colors"][0] = color
+	#TODO call change
+
+func _on_border_color_picker_button_color_changed(color):
+	macro_dict["colors"][1] = color
+	#TODO call change
+
+func _on_text_color_picker_button_color_changed(color):
+	macro_dict["colors"][2] = color
+	#TODO call change
+
+func _on_text_border_color_picker_button_color_changed(color):
+	macro_dict["colors"][3] = color
+	#TODO call change
+
