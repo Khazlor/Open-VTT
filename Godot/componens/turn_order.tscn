@@ -1,0 +1,90 @@
+[gd_scene load_steps=7 format=3 uid="uid://cjbqnevfe7uwf"]
+
+[ext_resource type="PackedScene" uid="uid://yo0hr5l8yrdj" path="res://componens/turn_order_item.tscn" id="1_58qw5"]
+[ext_resource type="Texture2D" uid="uid://bxvo2i18km0al" path="res://icons/Back.svg" id="1_83hpv"]
+[ext_resource type="Script" path="res://scripts/turn_order.gd" id="1_u7nqp"]
+[ext_resource type="Texture2D" uid="uid://2sbeb2nihtia" path="res://icons/Forward.svg" id="2_2vgin"]
+[ext_resource type="Texture2D" uid="uid://bxkk3rr8hix0u" path="res://icons/Clear.svg" id="2_71o5p"]
+[ext_resource type="Texture2D" uid="uid://som4b6ic8qft" path="res://icons/Sort.svg" id="3_7q6rs"]
+
+[node name="TurnOrder" type="Window"]
+title = "Turn Order"
+position = Vector2i(0, 36)
+size = Vector2i(200, 500)
+script = ExtResource("1_u7nqp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+light_mask = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="ClearButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Clear"
+icon = ExtResource("2_71o5p")
+
+[node name="SortButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sort"
+icon = ExtResource("3_7q6rs")
+icon_alignment = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TurnOrderItem" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
+layout_mode = 2
+
+[node name="TurnOrderItem2" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
+layout_mode = 2
+
+[node name="TurnOrderItem3" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
+layout_mode = 2
+
+[node name="TurnOrderItem4" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
+layout_mode = 2
+
+[node name="TurnOrderItem5" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
+layout_mode = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer2"]
+layout_mode = 2
+
+[node name="PrevButton" type="Button" parent="VBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Prev"
+icon = ExtResource("1_83hpv")
+
+[node name="NextButton" type="Button" parent="VBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Next"
+icon = ExtResource("2_2vgin")
+icon_alignment = 2
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/ClearButton" to="." method="_on_clear_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/SortButton" to="." method="_on_sort_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelContainer2/HBoxContainer/PrevButton" to="." method="_on_prev_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelContainer2/HBoxContainer/NextButton" to="." method="_on_next_button_pressed"]

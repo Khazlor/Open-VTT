@@ -70,6 +70,9 @@ func _ready():
 	tool_panel_map_menu.connect("fov_opacity_changed", _on_fov_opacity_changed_signal)
 	
 	unshaded_material = load("res://materials/canvas_item_material_unshaded.tres")
+	
+	#selected token in turn order:
+	Globals.turn_order.connect("token_turn_selected", select_token)
 
 func _unhandled_input(event):
 #	print_tree_pretty() #DEBUG TODO remove
@@ -288,6 +291,7 @@ func _unhandled_input(event):
 									min_x = min.x
 								if min.y < min_y:
 									min_y = min.y
+				min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
 			#if nothing in dragged square -> get clicked
 			if selected.is_empty():
 				lines_children = Globals.draw_layer.get_children()
@@ -348,70 +352,7 @@ func _unhandled_input(event):
 								selected.append(child)
 								break
 				
-			#if only single item selected - affect select box by item rotation
-			if selected.size() == 1:
-				print("one item")
-				var s = selected[0]
-				select_box.rotation = s.rotation
-				var vect = s.size*s.scale #size cannot be negative
-				if vect.x < 0:
-					vect.x = vect.x * -1
-				if vect.y < 0:
-					vect.y = vect.y * -1
-				select_box.size = vect
-				if s.scale.x < 0 and s.scale.y < 0: #object flipped
-					var distance = Vector2(0,0).distance_to(s.size * s.scale)
-					var angle = Vector2(0,0).angle_to_point(s.size * s.scale) + s.rotation
-					print("dis: ", distance, " ang: ", angle)
-					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
-				elif s.scale.x < 0: #object x flipped
-					var distance = s.size.x * s.scale.x
-					var angle = s.rotation
-					print("dis: ", distance, " ang: ", angle)
-					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
-				elif s.scale.y < 0: #object y flipped
-					var distance = s.size.y * s.scale.y
-					var angle = deg_to_rad(90) + s.rotation
-					print("dis: ", distance, " ang: ", angle)
-					select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
-				else: #object not flipped
-					select_box.position = s.position
-				
-			else:
-				select_box.set_begin(Vector2(min_x, min_y))
-				select_box.set_end(Vector2(max_x, max_y))
-				select_box.rotation = 0
-#				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
-
-			for token in selected_tokens: #reset unselected token opacity and UI visibility
-				token.unselect()
-			selected_tokens.clear()
-			for object in selected: #set selected token opacity and UI visibility
-				if "character" in object: #token
-					var token = object.get_parent()
-					selected_tokens.append(token)
-					token.select()
-			Globals.action_bar.fill_action_bar(selected_tokens) #fill action bar based on selected tokens
-			if selected.is_empty():
-				select_box.queue_free()
-				return
-					
-			#control points - handles
-			create_handle(Control.PRESET_TOP_LEFT, 15)
-			current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
-			current_panel.connect("mouse_exited", _tl_handle_mouse_exited)
-			create_handle(Control.PRESET_BOTTOM_LEFT, 15)
-			current_panel.connect("mouse_entered", _bl_handle_mouse_entered)
-			current_panel.connect("mouse_exited", _bl_handle_mouse_exited)
-			create_handle(Control.PRESET_TOP_RIGHT, 15)
-			current_panel.connect("mouse_entered", _tr_handle_mouse_entered)
-			current_panel.connect("mouse_exited", _tr_handle_mouse_exited)
-			create_handle(Control.PRESET_BOTTOM_RIGHT, 15)
-			current_panel.connect("mouse_entered", _br_handle_mouse_entered)
-			current_panel.connect("mouse_exited", _br_handle_mouse_exited)
-			create_handle(Control.PRESET_CENTER_TOP, 20)
-			current_panel.connect("mouse_entered", _rotate_handle_mouse_entered)
-			current_panel.connect("mouse_exited", _rotate_handle_mouse_exited)
+			select_objects()
 		#circle or rect drawing finished
 		if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
 			if current_panel == null:
@@ -741,20 +682,7 @@ func _unhandled_input(event):
 						#remove old select
 						if select_box != null:
 							select_box.queue_free()
-						select_box = Panel.new()
-						select_box.mouse_filter = Control.MOUSE_FILTER_PASS
-						begin = mouse_pos
-						select_box.set_begin(begin)
-						select_box.set_end(begin)
-						var style = StyleBoxFlat.new()
-						style.bg_color = Color(0.5,0.5,1,0.2)
-						style.border_color = Color.CORNSILK
-						style.set_border_width_all(2)
-						select_box.add_theme_stylebox_override("panel", style)
-						select_box.material = unshaded_material
-						select_box.connect("mouse_entered", _on_select_mouse_entered)
-						select_box.connect("mouse_exited", _on_select_mouse_exited)
-						$Select.add_child(select_box)
+						create_select_box(mouse_pos)
 	#					else:
 	#						selected.clear()
 	#						current_panel = $Select.get_child(0)
@@ -1004,6 +932,76 @@ func _unhandled_input(event):
 			ch_sh.position = get_viewport().get_mouse_position()
 			add_child(ch_sh)
 		
+#sets select box size to selection size, selects tokens
+func select_objects():
+	if select_box == null:
+		create_select_box(mouse_pos)
+	if selected.size() == 1:
+		print("one item")
+		var s = selected[0]
+		select_box.rotation = s.rotation
+		var vect = s.size*s.scale #size cannot be negative
+		if vect.x < 0:
+			vect.x = vect.x * -1
+		if vect.y < 0:
+			vect.y = vect.y * -1
+		select_box.size = vect
+		if s.scale.x < 0 and s.scale.y < 0: #object flipped
+			var distance = Vector2(0,0).distance_to(s.size * s.scale)
+			var angle = Vector2(0,0).angle_to_point(s.size * s.scale) + s.rotation
+			print("dis: ", distance, " ang: ", angle)
+			select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+		elif s.scale.x < 0: #object x flipped
+			var distance = s.size.x * s.scale.x
+			var angle = s.rotation
+			print("dis: ", distance, " ang: ", angle)
+			select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+		elif s.scale.y < 0: #object y flipped
+			var distance = s.size.y * s.scale.y
+			var angle = deg_to_rad(90) + s.rotation
+			print("dis: ", distance, " ang: ", angle)
+			select_box.position = Vector2(s.position.x + distance * cos(angle), s.position.y + distance * sin(angle))
+		else: #object not flipped
+			select_box.position = s.position
+		
+	else:
+		print(min_max_x_y)
+		select_box.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
+		select_box.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
+		select_box.rotation = 0
+	#				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
+
+	for token in selected_tokens: #reset unselected token opacity and UI visibility
+		token.unselect()
+	selected_tokens.clear()
+	for object in selected: #set selected token opacity and UI visibility
+		if "character" in object: #token
+			var token = object.get_parent()
+			selected_tokens.append(token)
+			token.select()
+	Globals.action_bar.fill_action_bar(selected_tokens) #fill action bar based on selected tokens
+	if selected.is_empty():
+		select_box.queue_free()
+		return
+			
+	#control points - handles
+	create_handle(Control.PRESET_TOP_LEFT, 15)
+	current_panel.connect("mouse_entered", _tl_handle_mouse_entered)
+	current_panel.connect("mouse_exited", _tl_handle_mouse_exited)
+	create_handle(Control.PRESET_BOTTOM_LEFT, 15)
+	current_panel.connect("mouse_entered", _bl_handle_mouse_entered)
+	current_panel.connect("mouse_exited", _bl_handle_mouse_exited)
+	create_handle(Control.PRESET_TOP_RIGHT, 15)
+	current_panel.connect("mouse_entered", _tr_handle_mouse_entered)
+	current_panel.connect("mouse_exited", _tr_handle_mouse_exited)
+	create_handle(Control.PRESET_BOTTOM_RIGHT, 15)
+	current_panel.connect("mouse_entered", _br_handle_mouse_entered)
+	current_panel.connect("mouse_exited", _br_handle_mouse_exited)
+	create_handle(Control.PRESET_CENTER_TOP, 20)
+	current_panel.connect("mouse_entered", _rotate_handle_mouse_entered)
+	current_panel.connect("mouse_exited", _rotate_handle_mouse_exited)
+	
+	
 func _on_select_mouse_entered():
 	print("mouse over selected")
 	mouse_over_selected = true
@@ -1509,3 +1507,22 @@ func _on_fov_opacity_changed_signal(value):
 			if not selected_tokens.has(token):
 				token.fov.color.a = value
 	
+func select_token(token):
+	selected = [token.token_polygon]
+	select_objects()
+	
+func create_select_box(position):
+	select_box = Panel.new()
+	select_box.mouse_filter = Control.MOUSE_FILTER_PASS
+	begin = position
+	select_box.set_begin(begin)
+	select_box.set_end(begin)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.5,0.5,1,0.2)
+	style.border_color = Color.CORNSILK
+	style.set_border_width_all(2)
+	select_box.add_theme_stylebox_override("panel", style)
+	select_box.material = unshaded_material
+	select_box.connect("mouse_entered", _on_select_mouse_entered)
+	select_box.connect("mouse_exited", _on_select_mouse_exited)
+	$Select.add_child(select_box)

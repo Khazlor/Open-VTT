@@ -13,6 +13,8 @@ var macro_dict = {
 	"b_icon": 0,
 	"b_text_size": 39,
 	"b_icon_size": 50,
+	"border": 5,
+	"text_border": 5,
 	}
 
 @onready var parent = self.get_parent()
@@ -30,13 +32,18 @@ func _ready():
 	$VBoxContainer/HBoxContainer/CheckBox.button_pressed = macro_dict["in_bar"]
 	te.text = macro_dict["text"]
 	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/BackgroundColorPickerButton.color = macro_dict["colors"][0]
-	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/BorderColorPickerButton.color = macro_dict["colors"][1]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderColorPickerButton.color = macro_dict["colors"][1]
 	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3/TextColorPickerButton.color = macro_dict["colors"][2]
-	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/TextBorderColorPickerButton.color = macro_dict["colors"][3]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderColorPickerButton.color = macro_dict["colors"][3]
 	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/ButtonTextLineEdit.text = macro_dict["b_text"]
 	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer/IconAlignmentOptionButton.selected = macro_dict["b_icon"]
 	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer/TextSizeSpinBox.value = macro_dict["b_text_size"]
 	$VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconSizeHboxContainer/IconSizeSpinBox.value = macro_dict["b_icon_size"]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderSpinBox.value = macro_dict["border"]
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderSpinBox.value = macro_dict["text_border"]
+	#reduce spinbox size
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderSpinBox.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
+	$VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderSpinBox.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
 	
 
 
@@ -180,3 +187,10 @@ func _on_text_border_color_picker_button_color_changed(color):
 	macro_dict["colors"][3] = color
 	#TODO call change
 
+func _on_border_spin_box_value_changed(value):
+	macro_dict["border"] = value
+	#TODO call change
+
+func _on_text_border_spin_box_value_changed(value):
+	macro_dict["text_border"] = value
+	#TODO call change

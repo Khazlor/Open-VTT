@@ -12,6 +12,8 @@ var bar_bubbles: VBoxContainer
 var fov: PointLight2D
 var timer: Timer
 
+var in_turn_order: PanelContainer
+
 var edited_attr: String
 var max_attr: String
 
@@ -115,6 +117,12 @@ func update_bars(attr: StringName):
 		var attr_bubble = character.attr_bubbles[i]
 		if attr_bubble["name"] == attr:
 			attr_bubbles.get_child(i).get_meta("text").text = character.attributes[attr]
+	#update initiative
+	if attr == "initiative":
+		if in_turn_order == null:
+			in_turn_order = Globals.turn_order.create_item(self)
+		else:
+			in_turn_order.update() #TODO
 			
 func change_attr_bubbles():
 	for child in attr_bubbles.get_children():

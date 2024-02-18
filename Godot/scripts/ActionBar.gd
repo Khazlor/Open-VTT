@@ -25,9 +25,7 @@ func fill_action_bar(selected_tokens = []):
 		stylebox.bg_color = colors[0]
 		stylebox.border_color = colors[1]
 		stylebox.set_corner_radius_all(5)
-		stylebox.set_border_width_all(5)
-		stylebox.expand_margin_left = 3
-		stylebox.expand_margin_right = 3
+		stylebox.set_border_width_all(macro["border"])
 		stylebox.border_blend = true
 		var panel = PanelContainer.new()
 		panel.add_theme_stylebox_override("panel", stylebox)
@@ -36,7 +34,7 @@ func fill_action_bar(selected_tokens = []):
 		label.text = macro["b_text"]
 		label.add_theme_color_override("font_color", colors[2])
 		label.add_theme_color_override("font_outline_color", colors[3])
-		label.add_theme_constant_override("outline_size", 5)
+		label.add_theme_constant_override("outline_size", macro["text_border"])
 		label.add_theme_font_override("font", load("res://fonts/Seagram tfb.ttf"))
 		label.add_theme_font_size_override("font_size", macro["b_text_size"])
 		
@@ -57,6 +55,8 @@ func fill_action_bar(selected_tokens = []):
 				hb.add_child(label)
 				panel.add_child(hb)
 			elif i == 2: # 2 == center
+				tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
+				tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
 				panel.add_child(tr)
 				panel.add_child(label)
 			elif i == 3: # 3 == right

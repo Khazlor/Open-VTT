@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cpg6e2yfnrqhd"]
+[gd_scene load_steps=10 format=3 uid="uid://cpg6e2yfnrqhd"]
 
 [ext_resource type="Script" path="res://scripts/macro_settings.gd" id="1_3uj7i"]
 [ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_6uvel"]
@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="5_1h6ch"]
 [ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="6_0j6fc"]
 [ext_resource type="Texture2D" uid="uid://cht0csesjox1o" path="res://icons/RandomNumberGenerator.svg" id="7_qxque"]
+
+[sub_resource type="Theme" id="Theme_t3ywq"]
 
 [node name="macro_settings" type="PanelContainer"]
 anchors_preset = 10
@@ -112,12 +114,21 @@ text_overrun_behavior = 1
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
 layout_mode = 2
+
+[node name="BorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 color = Color(0.74902, 0.313726, 0, 1)
 
-[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
-layout_mode = 2
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderColorPickerButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_constants/line_spacing = 10
@@ -126,6 +137,12 @@ text = "Border"
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 1
+
+[node name="BorderSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+value = 5.0
+select_all_on_focus = true
 
 [node name="PanelContainer3" type="PanelContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -150,11 +167,20 @@ text_overrun_behavior = 1
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextBorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4"]
+[node name="TextBorderColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderColorPickerButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_constants/line_spacing = 10
@@ -163,6 +189,14 @@ text = "Text Border"
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 1
+
+[node name="TextBorderSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 8
+theme = SubResource("Theme_t3ywq")
+value = 5.0
+select_all_on_focus = true
 
 [node name="FlowContainer" type="FlowContainer" parent="VBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -238,9 +272,11 @@ show_hidden_files = true
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RollButton" to="." method="_on_roll_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/BackgroundColorPickerButton" to="." method="_on_background_color_picker_button_color_changed"]
-[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/BorderColorPickerButton" to="." method="_on_border_color_picker_button_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderColorPickerButton" to="." method="_on_border_color_picker_button_color_changed"]
+[connection signal="value_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/HBoxContainer/BorderSpinBox" to="." method="_on_border_spin_box_value_changed"]
 [connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3/TextColorPickerButton" to="." method="_on_text_color_picker_button_color_changed"]
-[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/TextBorderColorPickerButton" to="." method="_on_text_border_color_picker_button_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderColorPickerButton" to="." method="_on_text_border_color_picker_button_color_changed"]
+[connection signal="value_changed" from="VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4/HBoxContainer/TextBorderSpinBox" to="." method="_on_text_border_spin_box_value_changed"]
 [connection signal="text_changed" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/ButtonTextLineEdit" to="." method="_on_button_text_line_edit_text_changed"]
 [connection signal="item_selected" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/IconAlignmentHboxContainer/IconAlignmentOptionButton" to="." method="_on_icon_alignment_option_button_item_selected"]
 [connection signal="value_changed" from="VBoxContainer/MarginContainer/VBoxContainer/FlowContainer/TextSizeHboxContainer/TextSizeSpinBox" to="." method="_on_text_size_spin_box_value_changed"]
