@@ -1,7 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://shwkx1k388tb"]
+[gd_scene load_steps=11 format=3 uid="uid://shwkx1k388tb"]
 
 [ext_resource type="Script" path="res://scripts/ToolPanel.gd" id="1_57fim"]
+[ext_resource type="Script" path="res://scripts/ToolPanel_Items.gd" id="2_hdll0"]
 [ext_resource type="Script" path="res://scripts/character_tree.gd" id="2_nt2nq"]
+[ext_resource type="Script" path="res://scripts/item_tree.gd" id="3_6ctqh"]
 [ext_resource type="Script" path="res://scripts/CollapsibleContainer.gd" id="3_8bqlb"]
 [ext_resource type="Script" path="res://scripts/ToolPanel_Object.gd" id="3_oj6qf"]
 [ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="4_ev7tq"]
@@ -50,10 +52,46 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
+mouse_force_pass_scroll_events = false
 theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
 
+[node name="Items" type="MarginContainer" parent="TabContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+script = ExtResource("2_hdll0")
+
+[node name="Tree" type="Tree" parent="TabContainer/Items"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_force_pass_scroll_events = false
+script = ExtResource("3_6ctqh")
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="TabContainer/Items"]
+title = "Warning"
+initial_position = 1
+size = Vector2i(458, 110)
+ok_button_text = "Remove"
+
+[node name="Label" type="Label" parent="TabContainer/Items/ConfirmationDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 450.0
+offset_bottom = 61.0
+text = "Are you sure you want to remove item
+and all sub_items?"
+horizontal_alignment = 1
+
 [node name="Characters" type="MarginContainer" parent="TabContainer"]
+visible = false
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -577,6 +615,10 @@ offset_bottom = 61.0
 text = "Are you sure you want to delete character?"
 horizontal_alignment = 1
 
+[connection signal="button_clicked" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_button_clicked"]
+[connection signal="item_activated" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_item_activated"]
+[connection signal="tree_exiting" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_tree_exiting"]
+[connection signal="confirmed" from="TabContainer/Items/ConfirmationDialog" to="TabContainer/Items" method="_on_confirmation_dialog_confirmed"]
 [connection signal="button_clicked" from="TabContainer/Characters/Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="item_activated" from="TabContainer/Characters/Tree" to="." method="_on_tree_item_activated"]
 [connection signal="item_edited" from="TabContainer/Characters/Tree" to="." method="_on_tree_item_edited"]

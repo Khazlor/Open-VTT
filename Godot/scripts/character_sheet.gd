@@ -8,9 +8,12 @@ var SelectedEdit
 
 var character: Character
 
-var bar_setting = load("res://componens/bar_setting.tscn")
-var attr_bubble_setting = load("res://componens/attr_bubble_setting.tscn")
-var macro_setting = load("res://componens/macro_setting.tscn")
+var bar_setting = load("res://components/bar_setting.tscn")
+var attr_bubble_setting = load("res://components/attr_bubble_setting.tscn")
+var macro_setting = load("res://components/macro_setting.tscn")
+
+@onready var inventory_sheet = $TabContainer/Inventory/Inventory
+@onready var equipment_slot_settings = $TabContainer/Inventory/EquipSlotSettings
 
 @onready var name_line_edit = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/FlowContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer
@@ -31,13 +34,17 @@ func _enter_tree():
 func _ready():
 	load_character()
 	
+	character.connect("attr_modifier_applied", on_attr_modifier_applied)
+	character.apply_modifiers() #sets tooltips of modified attributes
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
 
 
 func _on_close_requested():
-	character.save()
+	if not character.save_as_token:
+		character.save()
 	print("closing subwindow")
 	if $PopupButton.visible == false:
 		print("closing popped up subwindow")
@@ -74,13 +81,14 @@ func _on_add_attribute_button_pressed():
 	if character.attributes.has(name_line_edit.text):
 		print("character already has " + name_line_edit.text + " attribute")
 		return
-	character.attributes[name_line_edit.text] = ""
-	add_attribute_to_attribute_list(name_line_edit.text, "")
+	character.attributes[name_line_edit.text] = ["", ""]
+	add_attribute_to_attribute_list(name_line_edit.text, ["", ""])
 
 
-func add_attribute_to_attribute_list(name: String, value: String):
+func add_attribute_to_attribute_list(name: String, value: Array):
 	var flow = HBoxContainer.new()
 	var text_edit = LineEdit.new()
+	#attribute name LineEdit
 	text_edit.text = name
 	text_edit.add_theme_stylebox_override("Normal", empty_style)
 	text_edit.size_flags_horizontal = text_edit.SIZE_EXPAND_FILL
@@ -89,13 +97,23 @@ func add_attribute_to_attribute_list(name: String, value: String):
 	text_edit.connect("focus_entered", on_edit_focus_entered)
 	text_edit.connect("text_submitted", _on_attr_name_edit_text_submitted)
 	flow.add_child(text_edit)
+	#attribute value TextEdit
 	text_edit = TextEdit.new()
-	text_edit.text = value
+	text_edit.text = value[0]
 	text_edit.size_flags_horizontal = text_edit.SIZE_EXPAND_FILL
 	text_edit.custom_minimum_size.y = 35
 	text_edit.scroll_fit_content_height = true
 	text_edit.connect("focus_entered", on_edit_focus_entered)
 	text_edit.connect("text_changed", _on_attr_val_text_changed)
+	flow.add_child(text_edit)
+	#modified attribute value TextEdit (attribute modified by attribute modifiers)
+	text_edit = TextEdit.new()
+	text_edit.text = value[1] #might be modified later
+	text_edit.editable = false
+	text_edit.size_flags_horizontal = text_edit.SIZE_EXPAND_FILL
+	text_edit.custom_minimum_size.y = 35
+	text_edit.scroll_fit_content_height = true
+	text_edit.tooltip_text = value[1]
 	flow.add_child(text_edit)
 	attribute_list.add_child(flow)
 
@@ -117,6 +135,7 @@ func load_character():
 	#attributes
 	for attribute in character.attributes:
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
+		
 		
 	#macros
 	for macro_dict_key in character.macros:
@@ -140,13 +159,14 @@ func load_character():
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox.value = character.token_scale.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderWidthSpinBox.value = character.token_outline_width
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderColorPickerButton.color = character.token_outline_color
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = character.token_texture
+	var texture = load(character.token_texture)
+	if texture != null:
+		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox.value = character.token_texture_offset.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox.value = character.token_texture_offset.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox.value = character.token_texture_scale.y
 	
-	print(character.macros, " -----", character.macros_in_bar)
 	
 	#bars
 	for bar_data in character.bars:
@@ -203,8 +223,10 @@ func _on_browse_image_button_pressed():
 
 
 func _on_token_image_file_dialog_file_selected(path):
-	character.token_texture = load(path)
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = character.token_texture
+	var texture = load(path)
+	character.token_texture = path
+	if texture != null:
+		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
 	character.emit_signal("token_changed", false)
 
 
@@ -238,8 +260,7 @@ func _on_add_bar_button_pressed():
 
 func _on_attr_name_edit_text_submitted(new_text):
 	var old_text = SelectedEdit.get_meta("attr")
-	if character.attributes.has(new_text): #already exists
-		character.attributes
+	if character.attributes.has(new_text): #already exists - set text back to old
 		SelectedEdit.text = old_text
 	else:
 		character.attributes[new_text] = character.attributes[old_text]
@@ -251,7 +272,8 @@ func on_edit_focus_entered():
 func _on_attr_val_text_changed():
 	var attr = SelectedEdit.get_parent().get_child(0).text
 	var new_text = SelectedEdit.text
-	character.attributes[attr] = new_text
+	character.attributes[attr][0] = new_text
+	character.apply_modifiers_to_attr(attr)
 	character.emit_signal("attr_updated", attr)
 	
 # Attribute Bubble settings
@@ -261,3 +283,12 @@ func _on_add_attr_button_pressed():
 	attr_bubbles.add_child(attr)
 	character.emit_signal("attr_bubbles_changed")
 
+func on_attr_modifier_applied(attribute: StringName, tooltip):
+	for attr in attribute_list.get_children():
+		var name_le = attr.get_child(0)
+		if name_le != null:
+			if name_le.get_meta("attr") == attribute:
+				attr.get_child(2).text = character.attributes[attribute][1]
+				print("set_tooltip: ", tooltip)
+				attr.get_child(2).tooltip_text = tooltip
+				return

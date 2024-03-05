@@ -5,7 +5,7 @@
 class_name Map_res
 extends Resource
 
-var token_comp = preload("res://componens/token.tscn") #token component
+var token_comp = preload("res://components/token.tscn") #token component
 
 @export var map_name = "Map Name"
 @export var map_desc = "Description"
@@ -71,7 +71,6 @@ func load_map(map_name):
 		print("file open error - aborting")
 		return
 	#load map
-	saved_layers
 	saved_layers = map_save.get_var(true)
 	map_desc = map_save.get_var()
 	grid_size = map_save.get_var()

@@ -11,7 +11,7 @@
 
 [node name="CharacterSheet" type="Window"]
 title = "Name - Character sheet"
-initial_position = 1
+position = Vector2i(0, 36)
 size = Vector2i(1000, 700)
 theme_override_font_sizes/title_font_size = 0
 script = ExtResource("1_bacpi")

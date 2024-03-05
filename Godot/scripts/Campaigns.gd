@@ -4,7 +4,7 @@
 
 extends Control
 
-const CampaignCard = preload("res://componens/campaigncard.tscn")
+const CampaignCard = preload("res://components/campaigncard.tscn")
 
 @onready var popup = $PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel
 

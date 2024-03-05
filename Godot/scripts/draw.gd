@@ -5,6 +5,7 @@
 extends Node2D
 
 var char_sheet = preload("res://UI/character_sheet.tscn")
+var inventory_sheet = preload("res://components/container_inventory.tscn")
 
 #drawing
 var pressed = false
@@ -114,6 +115,14 @@ func _unhandled_input(event):
 	#		return
 	#	else:
 	#		last_event_pos = event.position
+	
+		#double click - open character sheet if selected
+		if Globals.tool == "select" and event is InputEventMouseButton and event.double_click:
+			if selected.size() == 1:
+				if "character" in selected[0]: #single token - open character sheet
+					var ch_sh = char_sheet.instantiate()
+					ch_sh.character = selected[0].character
+					Globals.windows.add_child(ch_sh)
 
 		#button pressed or mouse moved
 		if Input.is_action_just_pressed("mouseleft") and Globals.mouseOverButton:
@@ -294,63 +303,9 @@ func _unhandled_input(event):
 				min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
 			#if nothing in dragged square -> get clicked
 			if selected.is_empty():
-				lines_children = Globals.draw_layer.get_children()
-				lines_children.reverse()
-				var array_list = [lines_children]
-				if Globals.select_recursive:
-					var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
-					for treeitem in treeitem_array:
-						lines_children = treeitem.get_meta("draw_layer").get_children()
-						lines_children.reverse()
-						array_list.append(lines_children)
-				for array in array_list:
-					if selected.size() != 0:
-						break
-					for child in array:
-						if "character" in child: #if character token
-							child = child.get_child(0)
-						if child.is_class("Node2D"): #inherits from Node2D
-							continue
-	#					print("mouse pos: ", mouse_pos)
-	#					print("pos: ", child.position)
-	#					print("size: ", child.size)
-	#					print("scale: ", child.scale)
-						if child.rotation == 0:
-							if child.scale.x < 0 and child.scale.y < 0: #flipped object
-								if child.position.x >= mouse_pos.x and child.position.y >= mouse_pos.y:
-									if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
-										if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
-											selected.append(child)
-											break
-							elif child.scale.x < 0: #flipped x
-								if child.position.x >= mouse_pos.x and child.position.y <= mouse_pos.y:
-									if child.position.x + child.size.x*child.scale.x <= mouse_pos.x:
-										if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
-											selected.append(child)
-											break
-							elif child.scale.y < 0: #flipped y
-								if child.position.x <= mouse_pos.x and child.position.y >= mouse_pos.y:
-									if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-										if child.position.y + child.size.y*child.scale.y <= mouse_pos.y:
-											selected.append(child)
-											break
-							else: #not flipped
-								if child.position.x <= mouse_pos.x and child.position.y <= mouse_pos.y:
-									if child.position.x + child.size.x*child.scale.x >= mouse_pos.x:
-										if child.position.y + child.size.y*child.scale.y >= mouse_pos.y:
-											selected.append(child)
-											break
-						else: #calculate with rotation
-							var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
-							var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
-							var top_left = child.position
-							var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
-							var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
-							var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
-							print(top_left, top_right, bottom_right, bottom_left)
-							if Geometry2D.is_point_in_polygon(mouse_pos, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
-								selected.append(child)
-								break
+				var clicked = get_clicked(mouse_pos)
+				if clicked != null:
+					selected.append(clicked)
 				
 			select_objects()
 		#circle or rect drawing finished
@@ -899,8 +854,11 @@ func _unhandled_input(event):
 								select_box.size.y = select_box.size.x
 								
 	elif event is InputEventKey:
-		if Input.is_action_just_pressed("Delete"): #delete selection
-			for child in selected:
+		print("key pressed")
+		if Input.is_action_just_pressed("Delete") or Input.is_action_just_pressed("ui_cut"): #delete or cut selection
+			if Input.is_action_just_pressed("ui_cut"):
+				copy_to_clipboard()
+			for child in selected: #delete
 				if "character" in child.get_parent(): #character token
 					child = child.get_parent()
 					Globals.new_map.remove_token(child)
@@ -925,13 +883,114 @@ func _unhandled_input(event):
 			mouse_over_tr = false
 			mouse_over_br = false
 			mouse_over_rotate = false
-		elif Input.is_action_just_pressed("Escape"): #go back to map selection
+			
+		elif Input.is_action_just_released("Escape"): #go back to map selection
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
-		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
-			var ch_sh = char_sheet.instantiate()
-			ch_sh.position = get_viewport().get_mouse_position()
-			add_child(ch_sh)
-		
+			
+		elif Input.is_action_just_released("I-pressed"): #open inventory TODO - get character from token
+			print("released I")
+			if not selected.is_empty():
+				print("released I - selected not empty")
+				var inv_sheet = inventory_sheet.instantiate()
+				inv_sheet.position = get_viewport().get_mouse_position()
+				inv_sheet.selected = selected
+				Globals.windows.add_child(inv_sheet)
+				
+		if Input.is_action_just_pressed("ui_copy"):
+			copy_to_clipboard()
+				
+		if Input.is_action_just_pressed("ui_paste"):
+			var c = Globals.clipboard_characters.size() - 1 #index for character array
+			var l = Globals.clipboard_lights.size() - 1 #index for light array
+			for i in range(Globals.clipboard_objects.size()-1, -1, -1): #iterate backwards
+				var new_object = Globals.clipboard_objects[i].duplicate(5)
+				if "character" in new_object: #character data not duplicated - needs to be set
+					new_object.character = Globals.clipboard_characters[c]
+					Globals.map.add_token(new_object)
+					c -= 1	
+				Globals.draw_layer.add_child(new_object)
+				if new_object.has_meta("light"): #light is a sibling of object - needs to be stored separately
+					var light = Globals.clipboard_lights[l].duplicate(5)
+					l -= 1
+					new_object.add_sibling(light)
+					var remote = get_object_light_remote(new_object)
+					remote.remote_path = remote.get_path_to(light)
+
+func copy_to_clipboard():
+	for object in Globals.clipboard_objects: # free old clipboard
+		object.queue_free()
+	for light in Globals.clipboard_lights: # free old clipboard
+		light.queue_free()
+	Globals.clipboard_objects.clear()
+	Globals.clipboard_characters.clear()
+	Globals.clipboard_lights.clear()
+	for object in selected: #fill clipboard
+		if "character" in object: #tokenpolygon - get token
+			object = object.get_parent()
+			#character data not duplicated - needs to be saved
+			if object.character.singleton:
+				Globals.clipboard_characters.append(object.character)
+			else:
+				Globals.clipboard_characters.append(object.character.duplicate(true))
+		if object.has_meta("light"): #light is a sibling of object - needs to be stored separately
+			var light = get_object_light(object).duplicate(5)
+			Globals.clipboard_lights.append(light)
+		Globals.clipboard_objects.append(object.duplicate(5))
+
+
+func get_clicked(mouse_position: Vector2):
+	var lines_children = Globals.draw_layer.get_children()
+	lines_children.reverse()
+	var array_list = [lines_children]
+	if Globals.select_recursive:
+		var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
+		for treeitem in treeitem_array:
+			lines_children = treeitem.get_meta("draw_layer").get_children()
+			lines_children.reverse()
+			array_list.append(lines_children)
+	for array in array_list:
+		for child in array:
+			if "character" in child: #if character token
+				child = child.get_child(0)
+			if child.is_class("Node2D"): #inherits from Node2D
+				continue
+#					print("mouse pos: ", mouse_position)
+#					print("pos: ", child.position)
+#					print("size: ", child.size)
+#					print("scale: ", child.scale)
+			if child.rotation == 0:
+				if child.scale.x < 0 and child.scale.y < 0: #flipped object
+					if child.position.x >= mouse_position.x and child.position.y >= mouse_position.y:
+						if child.position.x + child.size.x*child.scale.x <= mouse_position.x:
+							if child.position.y + child.size.y*child.scale.y <= mouse_position.y:
+								return child
+				elif child.scale.x < 0: #flipped x
+					if child.position.x >= mouse_position.x and child.position.y <= mouse_position.y:
+						if child.position.x + child.size.x*child.scale.x <= mouse_position.x:
+							if child.position.y + child.size.y*child.scale.y >= mouse_position.y:
+								return child
+				elif child.scale.y < 0: #flipped y
+					if child.position.x <= mouse_position.x and child.position.y >= mouse_position.y:
+						if child.position.x + child.size.x*child.scale.x >= mouse_position.x:
+							if child.position.y + child.size.y*child.scale.y <= mouse_position.y:
+								return child
+				else: #not flipped
+					if child.position.x <= mouse_position.x and child.position.y <= mouse_position.y:
+						if child.position.x + child.size.x*child.scale.x >= mouse_position.x:
+							if child.position.y + child.size.y*child.scale.y >= mouse_position.y:
+								return child
+			else: #calculate with rotation
+				var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+				var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+				var top_left = child.position
+				var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+				var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+				var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+				print(top_left, top_right, bottom_right, bottom_left)
+				if Geometry2D.is_point_in_polygon(mouse_position, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
+					return child
+	return null
+
 #sets select box size to selection size, selects tokens
 func select_objects():
 	if select_box == null:

@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://w2r2x0j017ef"]
 
-[ext_resource type="Script" path="res://scripts/attr_bubble_setting.gd" id="1_ux7i5"]
-[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_w7m4t"]
-[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="3_f7pm0"]
-[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="4_rc88k"]
-[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="5_ueqt6"]
+[ext_resource type="Script" path="res://scripts/attr_bubble_setting.gd" id="1_d7og3"]
+[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_ykpli"]
+[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="3_a8jmt"]
+[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="4_osn4a"]
+[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="5_1qfpj"]
 
 [node name="attr_bubble_setting" type="PanelContainer"]
 anchors_preset = 10
@@ -12,7 +12,7 @@ anchor_right = 1.0
 offset_bottom = 86.0
 grow_horizontal = 2
 size_flags_horizontal = 3
-script = ExtResource("1_ux7i5")
+script = ExtResource("1_d7og3")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -27,15 +27,15 @@ placeholder_text = "Attribute_name"
 
 [node name="AddButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("2_w7m4t")
+icon = ExtResource("2_ykpli")
 
 [node name="MoveUpButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("3_f7pm0")
+icon = ExtResource("3_a8jmt")
 
 [node name="MoveDownButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("4_rc88k")
+icon = ExtResource("4_osn4a")
 
 [node name="Spacer" type="Control" parent="VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(20, 0)
@@ -43,7 +43,7 @@ layout_mode = 2
 
 [node name="RemoveButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("5_ueqt6")
+icon = ExtResource("5_1qfpj")
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
 layout_mode = 2

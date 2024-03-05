@@ -1,6 +1,5 @@
-[gd_scene load_steps=7 format=3 uid="uid://cjbqnevfe7uwf"]
+[gd_scene load_steps=6 format=3 uid="uid://cjbqnevfe7uwf"]
 
-[ext_resource type="PackedScene" uid="uid://yo0hr5l8yrdj" path="res://componens/turn_order_item.tscn" id="1_58qw5"]
 [ext_resource type="Texture2D" uid="uid://bxvo2i18km0al" path="res://icons/Back.svg" id="1_83hpv"]
 [ext_resource type="Script" path="res://scripts/turn_order.gd" id="1_u7nqp"]
 [ext_resource type="Texture2D" uid="uid://2sbeb2nihtia" path="res://icons/Forward.svg" id="2_2vgin"]
@@ -11,6 +10,7 @@
 title = "Turn Order"
 position = Vector2i(0, 36)
 size = Vector2i(200, 500)
+unfocusable = true
 script = ExtResource("1_u7nqp")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -49,21 +49,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TurnOrderItem" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
-layout_mode = 2
-
-[node name="TurnOrderItem2" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
-layout_mode = 2
-
-[node name="TurnOrderItem3" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
-layout_mode = 2
-
-[node name="TurnOrderItem4" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
-layout_mode = 2
-
-[node name="TurnOrderItem5" parent="VBoxContainer/ScrollContainer/VBoxContainer" instance=ExtResource("1_58qw5")]
-layout_mode = 2
-
 [node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer"]
 layout_mode = 2
 
@@ -84,6 +69,7 @@ icon = ExtResource("2_2vgin")
 icon_alignment = 2
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="window_input" from="." to="." method="_on_window_input"]
 [connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/ClearButton" to="." method="_on_clear_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/SortButton" to="." method="_on_sort_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/PanelContainer2/HBoxContainer/PrevButton" to="." method="_on_prev_button_pressed"]

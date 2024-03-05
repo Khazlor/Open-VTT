@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://0gfii8buhxxb"]
 
-[ext_resource type="Script" path="res://scripts/token.gd" id="1_8ye4b"]
-[ext_resource type="Script" path="res://componens/CustomPolygon.gd" id="2_pj8py"]
+[ext_resource type="Script" path="res://scripts/token.gd" id="1_820ps"]
+[ext_resource type="Script" path="res://components/CustomPolygon.gd" id="2_23wpd"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_avtol"]
 light_mode = 1
@@ -21,14 +21,14 @@ fill_from = Vector2(0.5, 0.5)
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 1
-script = ExtResource("1_8ye4b")
+script = ExtResource("1_820ps")
 
 [node name="TokenPolygon" type="Control" parent="."]
 texture_repeat = 1
 layout_mode = 1
 anchors_preset = 0
 mouse_filter = 1
-script = ExtResource("2_pj8py")
+script = ExtResource("2_23wpd")
 
 [node name="RemoteTransform2D" type="RemoteTransform2D" parent="TokenPolygon"]
 remote_path = NodePath("../../UI")

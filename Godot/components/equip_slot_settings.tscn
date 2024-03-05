@@ -1,0 +1,78 @@
+[gd_scene load_steps=3 format=3 uid="uid://c37cg5ywn3qfe"]
+
+[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="1_2gkwa"]
+[ext_resource type="Script" path="res://scripts/equip_slot_settings.gd" id="1_pl4im"]
+
+[node name="EquipSlotSettings" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pl4im")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LeftVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Left Equipment Slots:"
+
+[node name="LeftAddButton" type="Button" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("1_2gkwa")
+
+[node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer"]
+layout_mode = 2
+
+[node name="MiddleVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Middle Equipment Slots:"
+
+[node name="MiddleAddButton" type="Button" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("1_2gkwa")
+
+[node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer"]
+layout_mode = 2
+
+[node name="RightVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/RightVBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/RightVBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Right Equipment Slots:"
+
+[node name="RightAddButton" type="Button" parent="ScrollContainer/VBoxContainer/RightVBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("1_2gkwa")
+
+[node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/RightVBoxContainer"]
+layout_mode = 2
+
+[connection signal="pressed" from="ScrollContainer/VBoxContainer/LeftVBoxContainer/HBoxContainer/LeftAddButton" to="." method="_on_left_add_button_pressed"]
+[connection signal="pressed" from="ScrollContainer/VBoxContainer/MiddleVBoxContainer/HBoxContainer/MiddleAddButton" to="." method="_on_middle_add_button_pressed"]
+[connection signal="pressed" from="ScrollContainer/VBoxContainer/RightVBoxContainer/HBoxContainer/RightAddButton" to="." method="_on_right_add_button_pressed"]

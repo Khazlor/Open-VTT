@@ -1,14 +1,14 @@
 [gd_scene load_steps=4 format=3 uid="uid://yo0hr5l8yrdj"]
 
-[ext_resource type="Texture2D" uid="uid://cl14stbvjfjch" path="res://images/SPELLFORCE 3 - Armor Concepts by Moritz Lacusteanu.jpg" id="1_fenbp"]
-[ext_resource type="Script" path="res://scripts/turn_order_item.gd" id="1_uk4ug"]
+[ext_resource type="Script" path="res://scripts/turn_order_item.gd" id="1_ncoe2"]
+[ext_resource type="Texture2D" uid="uid://cl14stbvjfjch" path="res://images/SPELLFORCE 3 - Armor Concepts by Moritz Lacusteanu.jpg" id="2_x1qvh"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qhkdm"]
 content_margin_left = 2.0
 content_margin_right = 2.0
 
 [node name="TurnOrderItem" type="PanelContainer"]
-script = ExtResource("1_uk4ug")
+script = ExtResource("1_ncoe2")
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 2
@@ -21,7 +21,7 @@ mouse_filter = 2
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("1_fenbp")
+texture = ExtResource("2_x1qvh")
 expand_mode = 3
 stretch_mode = 5
 

@@ -115,12 +115,10 @@ func _can_drop_data(_item_position, data):
 
 
 func _drop_data(item_position, item):
-	#place drag and drop layer back to bottom - in case of dragging to map
-	Globals.drag_drop_canvas_layer.layer = -1
-	
 	var to_item = get_item_at_position(item_position)
 	var shift = get_drop_section_at_position(item_position)
 	
+	Globals.drag_drop_canvas_layer.layer = -1
 	emit_signal('moved', item, to_item, shift)
 
 

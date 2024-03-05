@@ -1,13 +1,13 @@
 [gd_scene load_steps=10 format=3 uid="uid://cpg6e2yfnrqhd"]
 
-[ext_resource type="Script" path="res://scripts/macro_settings.gd" id="1_3uj7i"]
-[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_6uvel"]
-[ext_resource type="Texture2D" uid="uid://oti8uykmvghf" path="res://icons/TextureRect.svg" id="2_dut1p"]
-[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="3_uk8k1"]
-[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="4_rirko"]
-[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="5_1h6ch"]
-[ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="6_0j6fc"]
-[ext_resource type="Texture2D" uid="uid://cht0csesjox1o" path="res://icons/RandomNumberGenerator.svg" id="7_qxque"]
+[ext_resource type="Script" path="res://scripts/macro_settings.gd" id="1_wu2ja"]
+[ext_resource type="Texture2D" uid="uid://oti8uykmvghf" path="res://icons/TextureRect.svg" id="2_se8qu"]
+[ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="3_pwilp"]
+[ext_resource type="Texture2D" uid="uid://cnugbxt2isuwr" path="res://icons/ArrowUp.svg" id="4_u5172"]
+[ext_resource type="Texture2D" uid="uid://lxjbwqi3shqm" path="res://icons/ArrowDown.svg" id="5_jxmnl"]
+[ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="6_oy7ve"]
+[ext_resource type="Texture2D" uid="uid://cht0csesjox1o" path="res://icons/RandomNumberGenerator.svg" id="7_y3s5x"]
+[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="8_bbvva"]
 
 [sub_resource type="Theme" id="Theme_t3ywq"]
 
@@ -18,7 +18,7 @@ offset_bottom = 31.0
 grow_horizontal = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
-script = ExtResource("1_3uj7i")
+script = ExtResource("1_wu2ja")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -35,7 +35,7 @@ placeholder_text = "Macro name"
 [node name="IconTextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(35, 0)
 layout_mode = 2
-texture_normal = ExtResource("2_dut1p")
+texture_normal = ExtResource("2_se8qu")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -48,25 +48,25 @@ layout_mode = 2
 
 [node name="AddButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("2_6uvel")
+icon = ExtResource("3_pwilp")
 
 [node name="MoveUpButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("3_uk8k1")
+icon = ExtResource("4_u5172")
 
 [node name="MoveDownButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("4_rirko")
+icon = ExtResource("5_jxmnl")
 
 [node name="EditButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
-icon = ExtResource("6_0j6fc")
+icon = ExtResource("6_oy7ve")
 
 [node name="RollButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
-icon = ExtResource("7_qxque")
+icon = ExtResource("7_y3s5x")
 icon_alignment = 1
 expand_icon = true
 
@@ -76,7 +76,7 @@ layout_mode = 2
 
 [node name="RemoveButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("5_1h6ch")
+icon = ExtResource("8_bbvva")
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
 layout_mode = 2

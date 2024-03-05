@@ -4,7 +4,7 @@
 
 extends Control
 
-const roll_panel_item_template = preload("res://componens/roll_panel_item.tscn")
+const roll_panel_item_template = preload("res://components/roll_panel_item.tscn")
 var roll_panel_item: Control
 #bools for determining roll parameters
 var number_of_dice = 0	#/r Xdy - number of dice to be rolled
@@ -376,13 +376,13 @@ func replace_attributes(text_in: String, character: Character, target: Character
 				print("attr: ", attr)
 				if character.attributes.has(attr):
 					text_in = text_in.erase(i, attr.length() + 1)
-					text_in += character.attributes[attr]
+					text_in += character.attributes[attr][1]
 				break
 			else:
 				attr = text_in.substr(i + 1, len - (i + 1))
 			if character.attributes.has(attr):
 				text_in = text_in.erase(i, attr.length() + 1)
-				text_in.insert(i, character.attributes[attr])
+				text_in.insert(i, character.attributes[attr][1])
 				i = text_in.find("$", i)
 			else:
 				i = text_in.find("$", i + 1)
@@ -428,7 +428,7 @@ func assign_attributes(text_in: String, character: Character, target: Character)
 				continue
 			var attr = attr_regex.search(result_str).get_string()
 			if character.attributes.has(attr):
-				character.attributes[attr] = value_regex.search(result_str).get_string()
+				character.attributes[attr][1] = value_regex.search(result_str).get_string()
 				character.emit_signal("attr_updated", attr)
 		else: #target
 			if target == null:
@@ -536,13 +536,13 @@ func replace_attr(text_in, macro: String, i: int, character: Character = null, t
 	if macro[0] == "$": #character
 		if character.attributes.has(macro.substr(1)):
 			print("attr found")
-			replace_text(text_in, character.attributes[macro.substr(1)], i, macro.length())
+			replace_text(text_in, character.attributes[macro.substr(1)][1], i, macro.length())
 		else:
 			print("attr not found")
 			replace_text(text_in, "null", i, macro.length())
 	else: #target
 		if target.attributes.has(macro.substr(1)):
-			replace_text(text_in, character.attributes[macro.substr(1)], i, macro.length())
+			replace_text(text_in, character.attributes[macro.substr(1)][1], i, macro.length())
 		else:
 			replace_text(text_in, "null", i, macro.length())
 
@@ -577,7 +577,7 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 			var n = await resolve_inner(text_in, i, "]", character, target)
 			var sub_str = [text_in[0].substr(i, n-i+1)]
 			n -= remove_marks(sub_str)
-			character.attributes[attr.substr(1)] = sub_str[0]
+			character.attributes[attr.substr(1)][1] = sub_str[0]
 			character.emit_signal("attr_updated", attr.substr(1))
 	else: #target
 		if target.attributes.has(attr.substr(1)):

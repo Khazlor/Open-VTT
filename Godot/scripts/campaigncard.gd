@@ -11,7 +11,7 @@ func _ready():
 	$PanelContainer/Name.text = campaign.campaign_name
 	$PanelContainer/MarginContainer/VBoxContainer/Players.text = "Players:"
 	for player in campaign.players:
-		$PanelContainer/MarginContainer/VBoxContainer/Players.text + "\n" + campaign.players
+		$PanelContainer/MarginContainer/VBoxContainer/Players.text += "\n" + campaign.players
 	$PanelContainer/MarginContainer/VBoxContainer/DM.text = "DM: " + campaign.DM_name
 	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = campaign.campaign_desc
 	$PanelContainer/preview.texture = load(campaign.image)

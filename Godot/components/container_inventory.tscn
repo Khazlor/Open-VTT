@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://g7ffb3kebh7q"]
+
+[ext_resource type="Script" path="res://scripts/container_inventory.gd" id="1_olnpr"]
+[ext_resource type="Script" path="res://scripts/container_inventory_tab_container.gd" id="2_gykha"]
+
+[node name="ContainerInventory" type="Window"]
+title = "Container Inventory"
+initial_position = 1
+size = Vector2i(500, 500)
+script = ExtResource("1_olnpr")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_gykha")
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]

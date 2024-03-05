@@ -13,11 +13,9 @@ func _process(delta):
 
 func fill_action_bar(selected_tokens = []):
 	clear()
-	print("tokens: ", selected_tokens)
 	var macros_in_bar = {}
 	for token in selected_tokens: #create list of all macros in bar of selected tokens
 		macros_in_bar.merge(token.character.macros_in_bar)
-	print("macros: ", macros_in_bar)
 	for macro_key in macros_in_bar: #generate buttons for each macro in bar
 		var macro = macros_in_bar[macro_key]
 		var stylebox = StyleBoxFlat.new()
@@ -70,7 +68,6 @@ func fill_action_bar(selected_tokens = []):
 #		button.connect("pressed", button_pressed)
 		panel.add_child(button)
 		self.add_child(panel)
-		print("added")
 	
 func clear():
 	for child in self.get_children():

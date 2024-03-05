@@ -5,9 +5,11 @@ var token
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if token != null:
-		$HBoxContainer/TextureRect.texture = token.character.token_texture
+		var texture = load(token.character.token_texture)
+		if texture != null:
+			$HBoxContainer/TextureRect.texture = texture
 		$HBoxContainer/NameLabel.text = token.character.name
-		$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"]
+		$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"][1]
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -23,9 +25,10 @@ func _on_button_pressed():
 	$Button.flat = false
 	#select token
 	Globals.turn_order.emit_signal("token_turn_selected", token)
+	Globals.turn_order.lose_focus()
 	
 func unselect():
 	$Button.flat = true
 
 func update():
-	$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"]
+	$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"][1]

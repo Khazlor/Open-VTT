@@ -12,7 +12,7 @@ var shapePointArray: PackedVector2Array
 var ScaledPointArray: PackedVector2Array
 var colorLines: Color
 var lineWidth: float
-
+var texture
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -27,12 +27,14 @@ func _draw(): #draw polygon and polyline
 	var texture_offset = Vector2(0.5, 0.5) + character.token_texture_offset / character.token_size #no need co calculate for every point
 	for i in range(shapePointArray.size()):
 		texture_uvs.append((shapePointArray[i] - Vector2(0.5, 0.5)) / character.token_texture_scale + texture_offset)
-	draw_colored_polygon(ScaledPointArray, Globals.colorBack, texture_uvs, character.token_texture)
+	
+	draw_colored_polygon(ScaledPointArray, Globals.colorBack, texture_uvs, texture)
 	draw_polyline(ScaledPointArray + PackedVector2Array([ScaledPointArray[0]]), character.token_outline_color, character.token_outline_width, false)
 	
 
 #updates sizes of polygon based on token
 func update_token(shape: bool):
+	texture = load(character.token_texture)
 	if shape:
 		if Globals.tokenShapeDict.has(character.token_shape):
 			shapePointArray = Globals.tokenShapeDict[character.token_shape]

@@ -4,7 +4,7 @@
 
 extends Control
 
-const MapCard = preload("res://componens/mapcard.tscn")
+const MapCard = preload("res://components/mapcard.tscn")
 
 #popup path for shorter paths
 @onready var popup = $PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel

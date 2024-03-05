@@ -1,0 +1,49 @@
+[gd_scene load_steps=4 format=3 uid="uid://cb2w5ybormmnv"]
+
+[ext_resource type="Texture2D" uid="uid://cl14stbvjfjch" path="res://images/SPELLFORCE 3 - Armor Concepts by Moritz Lacusteanu.jpg" id="1_f0c13"]
+[ext_resource type="Script" path="res://scripts/equipment.gd" id="1_il8yh"]
+[ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="4_wak76"]
+
+[node name="Equipment" type="PanelContainer"]
+offset_right = 500.0
+offset_bottom = 800.0
+script = ExtResource("1_il8yh")
+
+[node name="BackgroundTextureRect" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("1_f0c13")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="SlotsLeft" type="VFlowContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="SlotsMiddle" type="FlowContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 8
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="SlotsRight" type="HFlowContainer" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EditButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+icon = ExtResource("4_wak76")
+icon_alignment = 1
+
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainer/EditButton" to="." method="_on_edit_button_pressed"]

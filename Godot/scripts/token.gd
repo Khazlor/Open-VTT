@@ -72,16 +72,19 @@ func change_bars():
 		bar.self_modulate = bar_data["color"]
 		bar.custom_minimum_size.y = bar_data["size"]
 		if character.attributes.has(bar_data["attr1"]):
-			bar.value = character.attributes[bar_data["attr1"]].to_float()
+			bar.value = character.attributes[bar_data["attr1"]][1].to_float()
 		if character.attributes.has(bar_data["attr2"]):
-			bar.max_value = character.attributes[bar_data["attr2"]].to_float()
+			bar.max_value = character.attributes[bar_data["attr2"]][1].to_float()
 		bar.show_percentage = false
 		bars.add_child(bar)
 		var text = Label.new()
 		text.use_parent_material = true
 		text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		text.text = str(character.attributes[bar_data["attr1"]].to_float()) + "/" + str(bar.max_value)
+		if character.attributes.has(bar_data["attr1"]):
+			text.text = str(character.attributes[bar_data["attr1"]][1].to_float()) + "/" + str(bar.max_value)
+		else:
+			text.text = "0/" + str(bar.max_value)
 		text.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 		text.add_theme_font_size_override("t", bar.custom_minimum_size.y)
 		bar.add_child(text)
@@ -106,17 +109,17 @@ func update_bars(attr: StringName):
 		var bar_data = character.bars[i]
 		if bar_data["attr2"] == attr:
 			var bar = bars.get_child(i)
-			bar.max_value = character.attributes[attr].to_float()
-			bar.get_child(0).text = str(character.attributes[attr].to_float()) + "/" + str(bar.max_value) #label
+			bar.max_value = character.attributes[attr][1].to_float()
+			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
 		if bar_data["attr1"] == attr:
 			var bar = bars.get_child(i)
-			bar.value = character.attributes[attr].to_float()
-			bar.get_child(0).text = str(character.attributes[attr].to_float()) + "/" + str(bar.max_value) #label
-			bar_bubbles.get_child(i).text = str(character.attributes[attr].to_float())
+			bar.value = character.attributes[attr][1].to_float()
+			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
+			bar_bubbles.get_child(i).text = str(character.attributes[attr][1].to_float())
 	for i in range(character.attr_bubbles.size()):
 		var attr_bubble = character.attr_bubbles[i]
 		if attr_bubble["name"] == attr:
-			attr_bubbles.get_child(i).get_meta("text").text = character.attributes[attr]
+			attr_bubbles.get_child(i).get_meta("text").text = character.attributes[attr][1]
 	#update initiative
 	if attr == "initiative":
 		if in_turn_order == null:
@@ -136,7 +139,7 @@ func change_attr_bubbles():
 				le.add_theme_constant_override("minimum_character_width", -1) #shrinks lineedit
 				le.expand_to_text_length = true
 				le.flat = true
-				le.text = character.attributes[attr_data["name"]]
+				le.text = character.attributes[attr_data["name"]][1]
 				var image = load(attr_data["icon"])
 				if image != null:
 					le.right_icon = load(attr_data["icon"])
@@ -158,7 +161,7 @@ func change_attr_bubbles():
 				hb.use_parent_material = true
 				var label = Label.new()
 				label.use_parent_material = true
-				label.text = character.attributes[attr_data["name"]]
+				label.text = character.attributes[attr_data["name"]][1]
 				hb.add_child(label)
 				var image = load(attr_data["icon"])
 				if image != null:
@@ -187,39 +190,39 @@ func change_attr_bubbles():
 
 func bar_bubble_submit(new_text):
 	if character.attributes.has(edited_attr):
-		var s = character.attributes[edited_attr]
+		var s = character.attributes[edited_attr][1]
 		if new_text[0] == '+': #add to attribute
 			if new_text[1] == '+': #ignore max
-				character.attributes[edited_attr] = str(s.to_float() + new_text.erase(0,1).to_float())
+				character.attributes[edited_attr][1] = str(s.to_float() + new_text.erase(0,1).to_float())
 			else:
 				if max_attr.is_empty() or not character.attributes.has(max_attr): # no max
-					character.attributes[edited_attr] = str(s.to_float() + new_text.to_float())
+					character.attributes[edited_attr][1] = str(s.to_float() + new_text.to_float())
 				else:
-					var max = character.attributes[max_attr].to_float()
+					var max = character.attributes[max_attr][1].to_float()
 					var n = s.to_float() + new_text.to_float()
 					if n > max:
-						character.attributes[edited_attr] = str(max)
+						character.attributes[edited_attr][1] = str(max)
 					else:
-						character.attributes[edited_attr] = str(n)
+						character.attributes[edited_attr][1] = str(n)
 		elif new_text[0] == '-': #subtract from attribute
-			character.attributes[edited_attr] = str(s.to_float() + new_text.to_float())
+			character.attributes[edited_attr][1] = str(s.to_float() + new_text.to_float())
 		elif new_text[0] == '*': #multiply attribute
 			if new_text[1] == '*': #ignore max
-				character.attributes[edited_attr] = str(s.to_float() * new_text.erase(0,2).to_float())
+				character.attributes[edited_attr][1] = str(s.to_float() * new_text.erase(0,2).to_float())
 			else:
 				if max_attr.is_empty() or not character.attributes.has(max_attr): # no max
-					character.attributes[edited_attr] = str(s.to_float() * new_text.erase(0,1).to_float())
+					character.attributes[edited_attr][1] = str(s.to_float() * new_text.erase(0,1).to_float())
 				else:
-					var max = character.attributes[max_attr].to_float()
+					var max = character.attributes[max_attr][1].to_float()
 					var n = s.to_float() * new_text.erase(0,1).to_float()
 					if n > max:
-						character.attributes[edited_attr] = str(max)
+						character.attributes[edited_attr][1] = str(max)
 					else:
-						character.attributes[edited_attr] = str(n)
+						character.attributes[edited_attr][1] = str(n)
 		elif new_text[0] == '/': #divide attribute
-			character.attributes[edited_attr] = str(s.to_float() / new_text.erase(0,1).to_float())
+			character.attributes[edited_attr][1] = str(s.to_float() / new_text.erase(0,1).to_float())
 		else: #set attribute
-			character.attributes[edited_attr] = new_text
+			character.attributes[edited_attr][1] = new_text
 		character.emit_signal("attr_updated", edited_attr)
 			
 			

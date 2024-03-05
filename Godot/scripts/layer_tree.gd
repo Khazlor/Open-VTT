@@ -9,7 +9,7 @@ var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
 var button_add: Texture2D = load("res://icons/Add.svg")
 var button_remove: Texture2D = load("res://icons/Remove.svg")
 var button_light: Texture2D = load("res://icons/LightOccluder2D.svg")
-var layer = preload("res://componens/draw.tscn")
+var layer = preload("res://components/draw.tscn")
 
 @onready var draw_root = $"../../../Draw/Layers"
 
@@ -109,6 +109,7 @@ func _drop_data(item_position, item):
 	var to_item = get_item_at_position(item_position)
 	var shift = get_drop_section_at_position(item_position)
 	
+	Globals.drag_drop_canvas_layer.layer = -1
 	emit_signal('moved', item, to_item, shift)
 
 
