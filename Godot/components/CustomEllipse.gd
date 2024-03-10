@@ -6,7 +6,7 @@ extends Control
 
 class_name CustomEllipse
 
-var pointArray: PackedVector2Array
+var polygon: PackedVector2Array
 
 var angle_shift = 5:
 	set(value):
@@ -28,13 +28,13 @@ func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/
 	var ab = self.size/2
 	var seg = 360/angle_shift
 	var angle = 0
-	pointArray.clear()
-	pointArray.append(Vector2(ab.x + ab.x, ab.y))
+	polygon.clear()
+	polygon.append(Vector2(ab.x + ab.x, ab.y))
 	for i in range(int(seg)):
 		angle += angle_shift_rad
-		pointArray.append(Vector2(ab.x + ab.x * cos(angle), ab.y + ab.y * sin(angle)))
-	draw_colored_polygon(pointArray, Globals.colorBack)
-	draw_polyline(pointArray, Globals.colorLines, Globals.lineWidth, false)
+		polygon.append(Vector2(ab.x + ab.x * cos(angle), ab.y + ab.y * sin(angle)))
+	draw_colored_polygon(polygon, Globals.colorBack)
+	draw_polyline(polygon, Globals.colorLines, Globals.lineWidth, false)
 		
 		
 	

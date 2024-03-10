@@ -5,6 +5,7 @@
 extends Control
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	Globals.tool_bar = $MarginContainer/VBoxContainer/Select
 	$MarginContainer/VBoxContainer/Select.grab_focus()
 
 

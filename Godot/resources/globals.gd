@@ -9,12 +9,14 @@ var campaign: Campaign_res
 var map: Map_res
 var new_map: Map_res
 
+var draw_comp = Node2D
 var draw_layer: Node2D
 var drag_drop_canvas_layer: CanvasLayer #for dragging characters to map
 
 var roll_panel: Control
 var action_bar: FlowContainer
 var turn_order: Window
+var tool_bar
 var windows: Control
 
 var snapping = false

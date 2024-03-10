@@ -33,6 +33,7 @@ var query_or_cond_regex
 var assign_start_regex
 var inner_regex
 
+@onready var scroll_bar = $MarginContainer/VBoxContainer/ScrollContainer.get_v_scroll_bar()
 @onready var textEdit = $MarginContainer/VBoxContainer/TextEdit
 @onready var query_diag = $QueryDialog
 @onready var query_diag_opt = $QueryDialog/VBoxContainer/OptionButton
@@ -41,8 +42,7 @@ var inner_regex
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Globals.roll_panel = self
-	print("start + " + str(null))
-	print("start + " + str("null"))
+	
 	assignment_regex = RegEx.new()
 	assignment_regex.compile("[\\$@]\\S+\\s*=\\s*\\[.*]") # regex to detect $attr = [attr value] or @attr = [attr value]
 	attr_regex = RegEx.new()
@@ -59,20 +59,26 @@ func _ready():
 	
 	inner_regex = RegEx.new()
 	inner_regex.compile("(\\/r|@|\\$|\\?{)") # regex to see if inner resolve is needed
+	
+	scroll_bar.connect("changed", on_scroll_bar_changed)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+	
+#handles scroll to bottom on expand
+func on_scroll_bar_changed():
+	scroll_bar.value = scroll_bar.max_value
 
-func _input(event):
-	if textEdit.has_focus():
-		if Input.is_action_just_pressed("enter"):
-			if Input.is_action_pressed("shift"):
-				textEdit.insert_text_at_caret("\n") #insert linebreak - one will be deleted by signal
-				return
-			textEdit.connect("text_changed", remove_break) #deletes linebreak added by submitting - will occur after this function
-			#execute command
-			await execute_roll(textEdit.text, null, null)
+
+func _on_text_edit_gui_input(event):
+	if Input.is_action_just_pressed("enter"):
+		if Input.is_action_pressed("shift"):
+			textEdit.insert_text_at_caret("\n") #insert linebreak - one will be deleted by signal
+			return
+		textEdit.connect("text_changed", remove_break) #deletes linebreak added by submitting - will occur after this function
+		#execute command
+		await execute_macro(textEdit.text)
 	
 		
 func create_roll_panel():
@@ -82,7 +88,7 @@ func create_roll_panel():
 
 
 func evaluate_roll(roll_section: String):
-	print("roll: ", roll_section)
+	#print("roll: ", roll_section)
 	roll_section += " "#adding char to end of expression - to trigger roll if untriggered at end
 	for character in roll_section:
 		final_expression_part += character
@@ -96,7 +102,7 @@ func evaluate_roll(roll_section: String):
 					if expression.is_valid_int():
 						number_of_dice = expression.to_int()
 						expression = ""
-						print(number_of_dice)
+						#print(number_of_dice)
 					else:
 						print("number of dice is not a number")
 						final_expression += final_expression_part
@@ -121,7 +127,7 @@ func evaluate_roll(roll_section: String):
 						sides_of_dice = expression.to_int()
 						expression = ""
 						drop = true
-						print(sides_of_dice)
+						#print(sides_of_dice)
 					else:
 						print("sides of dice is not a number")
 						final_expression += final_expression_part
@@ -146,7 +152,7 @@ func evaluate_roll(roll_section: String):
 					sides_of_dice = expression.to_int()
 					expression = ""
 					keep = true
-					print(sides_of_dice)
+					#print(sides_of_dice)
 				else:
 					print("sides of dice is not a number")
 					final_expression += final_expression_part
@@ -185,18 +191,18 @@ func evaluate_roll(roll_section: String):
 				continue
 			if keep: #keeping dice - preceding number is number of dice to be kept
 				keep_drop_dice = expression.to_int()
-				print(keep_drop_dice)
+				#print(keep_drop_dice)
 				expression = ""
 			elif drop: #dropping dice - preceding number is number of dice to be dropped
 				keep_drop_dice = expression.to_int()
-				print(keep_drop_dice)
+				#print(keep_drop_dice)
 				expression = ""
 			else: #not keeping or dropping -> xdY - preceding number is sides of dice to be rolled
 				if number_of_dice > 0 and sides_of_dice == 0:
 					if expression.is_valid_int():
 						sides_of_dice = expression.to_int()
 						expression = ""
-						print(sides_of_dice)
+						#print(sides_of_dice)
 					else:
 						print("sides of dice is not a number")
 						final_expression += final_expression_part
@@ -233,11 +239,11 @@ func generate_dice():
 	var dice_array = []
 	for number in number_of_dice:
 		dice_array.append(randi_range(1, sides_of_dice))
-		print("dice: ", number, " is ", dice_array[number])
+		#print("dice: ", number, " is ", dice_array[number])
 	var dice_array_sorted = dice_array.duplicate()
 	dice_array_sorted.sort()
-	for number in number_of_dice:
-		print("sortdice: ", number, " is ", dice_array_sorted[number])
+	#for number in number_of_dice:
+		#print("sortdice: ", number, " is ", dice_array_sorted[number])
 	var dice_keep_drop_array = []
 	if keep or drop:
 		if keep:
@@ -270,7 +276,7 @@ func generate_dice():
 		else: 
 			roll_hint += str(item) + "+"
 	final_expression += str(sum)
-	print("sum: ", sum, "fe: ", final_expression)
+	#print("sum: ", sum, "fe: ", final_expression)
 	roll_hint = roll_hint.left(-1) + ")"
 		
 # evaluating final expression
@@ -279,9 +285,9 @@ func calculate_expression():
 	print(final_expression + " <- calculating")
 	var error = calc_expression.parse(final_expression)
 	if error != OK:
-		result_node.append_text("(expression error)")
+		result_node.append_text("<expression error>")
 		print("calculate error: " + calc_expression.get_error_text())
-		return "(expression error)"
+		return "<expression error>"
 	var result = calc_expression.execute()
 	if not calc_expression.has_execute_failed():
 		results.append(str(result))
@@ -292,8 +298,8 @@ func calculate_expression():
 #		result_node.pop()
 	else:
 		print("calculate error: " + calc_expression.get_error_text())
-		result_node.append_text("(expression error)")
-		result = "(expression error)"
+		result_node.append_text("<expression error>")
+		result = "<expression error>"
 	roll_hint = ""
 	return str(result)
 	
@@ -302,62 +308,28 @@ func remove_break():
 	textEdit.backspace()
 	textEdit.disconnect("text_changed", remove_break)
 	
-
-#returs array of alternating sections and roll_sections - starts with non-roll section
-#func get_roll_sections(text_in: String, character: Character = null, targets = []):
-#	var i = text_in.find("/r")
-#	var sections = []
-#	var len = 0
-#	while i != -1:
-#		print(len, " ", i)
-#		var section = text_in.substr(len, i - len) #section between roll_sections
-#		print("section: ", section)
-#		sections.append(section)
-#
-#		len = text_in.find("//", i)
-#		if len == -1: #to the end of string
-#			section = text_in.substr(i + 2, -1)
-#			sections.append(section)
-#			break
-#		else:
-#			section = text_in.substr(i + 2, len - (i + 2))
-#			len += 2
-#			i = text_in.find("/r", len)
-#			print(section, i)
-#			sections.append(section)
-#
-#	if len != -1: #non roll section at end
-#		var section = text_in.substr(len, -1)
-#		sections.append(section)
-#	print("sections: ", sections)
-#	return sections
-	
 #executes macro by character to all targets
 # basic syntax:
 # $hp = token.hp
 # @hp = target.hp
 func execute_macro(text_in: String, character: Character = null, targets = []):
+	var split_text = split_command(text_in)
+	if split_text.size() > 1: #has targeting
+		var targeting_data = targeting(split_text[1])
+		if targeting_data != null:
+			targets = Globals.draw_comp.create_targeting(targeting_data)
+			if targets == null: #nothing selected yet - wait for selection
+				targets = await Globals.draw_comp.targeting_end
+			print("targets targeted: ", targets)
 	if targets.is_empty(): #roll once
-		await execute_roll(text_in, character, null)
+		await execute_roll(split_text[0], character, null)
 	else: #roll for each target - TODO probably do not create roll panel for each
 		for target in targets:
-			await execute_roll(text_in, character, target)
+			await execute_roll(split_text[0], character, target)
 					
 					
 func execute_roll(text_in: String, character: Character = null, target: Character = null):
-#	create_roll_panel()
-#	var is_roll_section = false #start with non-roll section -> get_roll_sections()
-#	var roll_sections = get_roll_sections(text_in)
-#	for roll_section in roll_sections:
-#		if is_roll_section:
-#			roll_section = replace_attributes(roll_section, character, target)
-#			resolve_queries_and_conditions(roll_section)
-#			evaluate_roll(roll_section)
-#			is_roll_section = false
-#		else: #not roll section - append text to result
-#			result_node.append_text(roll_section)
-#			is_roll_section = true
-#	assign_attributes(result_node.get_parsed_text(), character, target)
+	print("target = ", target)
 	
 	create_roll_panel()
 	var text_in_arr = [text_in + "  "] #array passed by reference
@@ -441,8 +413,8 @@ func assign_attributes(text_in: String, character: Character, target: Character)
 #text_in = array with single string - pass by reference
 func resolve_inner(text_in, i: int, closing_str: String, character: Character, target: Character, ignore: int = 0):
 	print("inner")
-	print(text_in)
-	print(text_in[0][i])
+	#print(text_in)
+	#print(text_in[0][i])
 	var attr = ""
 	var attr_i = 0
 	var is_attr = false
@@ -454,12 +426,15 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 		closing_len = 1
 	else:
 		closing_len = closing_str.length()
-		
-	while text_in[0].substr(i, closing_len) != closing_str:
+	
+	var last = text_in[0].substr(i, closing_len) == closing_str #for one last loop at the end
+	while not last:
 		if i >= text_in[0].length()-1:
 			break
+		if text_in[0].substr(i, closing_len) == closing_str:
+			last = true #will do one more - then break
 		var char = text_in[0][i]
-		print(char)
+		#print(char)
 #		print(i)
 		if ignore != 0: #resolving either "" or ''
 			if ignore == 1: # inside ""
@@ -488,7 +463,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 			i = n - 1
 			print(i, " ", text_in[0][i], " ", text_in[0][i + 1])
 		elif is_attr:
-			if char != " " and char != "=" and char != ";" and char != "|" and char != "/":
+			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?":
 				attr += char
 			else:
 				print("attr end : ", attr)
@@ -501,7 +476,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 					replace_attr(text_in, attr, attr_i, character, target)
 					i = attr_i-1
 		elif is_macro:
-			if char != " " and char != "=" and char != ";" and char != "|" and char != "/": #add char
+			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?": #add char
 				attr += char
 			else: #replace macro with macro value + return to start
 				print("macro end : ", attr)
@@ -527,40 +502,40 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 			print("cond or query")
 			i -= 1
 			await condition_or_query(text_in, i + 3, character, target)
-		i += 1
-	print("return")
+		if not last:
+			i += 1
+	print("inner return")
 	return i - 1
 
 #text_in = array with single string - pass by reference
-func replace_attr(text_in, macro: String, i: int, character: Character = null, target: Character = null):
-	if macro[0] == "$": #character
-		if character.attributes.has(macro.substr(1)):
+func replace_attr(text_in, attr: String, i: int, character: Character = null, target: Character = null):
+	if attr[0] == "$" and character != null: #character
+		if character.attributes.has(attr.substr(1)):
 			print("attr found")
-			replace_text(text_in, character.attributes[macro.substr(1)][1], i, macro.length())
-		else:
-			print("attr not found")
-			replace_text(text_in, "null", i, macro.length())
-	else: #target
-		if target.attributes.has(macro.substr(1)):
-			replace_text(text_in, character.attributes[macro.substr(1)][1], i, macro.length())
-		else:
-			replace_text(text_in, "null", i, macro.length())
+			replace_text(text_in, character.attributes[attr.substr(1)][1], i, attr.length())
+			return
+	elif attr[0] == "@" and target != null: #target
+		if target.attributes.has(attr.substr(1)):
+			replace_text(text_in, target.attributes[attr.substr(1)][1], i, attr.length())
+			return
+	#error
+	print("attr not found")
+	replace_text(text_in, "<null>", i, attr.length())
 
 
-func replace_macro(text_in, attr: String, i: int, character: Character = null, target: Character = null):
-	if attr[0] == "#" and character != null: #character macro
-		if character.macros.has(attr.substr(1)):
+func replace_macro(text_in, macro: String, i: int, character: Character = null, target: Character = null):
+	if macro[0] == "#" and character != null: #character macro
+		if character.macros.has(macro.substr(1)):
 			print("macro found")
-			replace_text(text_in, character.macros[attr.substr(1)]["text"], i, attr.length())
-		else:
-			print("macro not found")
-			replace_text(text_in, "null", i, attr.length())
-	else: #target macro
-		if target.macros.has(attr.substr(1)):
-			replace_text(text_in, character.macros[attr.substr(1)]["text"], i, attr.length())
-		else:
-			replace_text(text_in, "null", i, attr.length())
-
+			replace_text(text_in, character.macros[macro.substr(1)]["text"], i, macro.length())
+			return
+	elif macro[0] == "%" and target != null: #target macro
+		if target.macros.has(macro.substr(1)):
+			replace_text(text_in, target.macros[macro.substr(1)]["text"], i, macro.length())
+			return
+	#error
+	print("macro not found")
+	replace_text(text_in, "<null>", i, macro.length())
 
 #text_in = array with single string - pass by reference
 func replace_text(text_in, text: String, i: int, len: int):
@@ -570,22 +545,39 @@ func replace_text(text_in, text: String, i: int, len: int):
 	print("replaced: ", text_in[0])
 
 #text_in = array with single string - pass by reference
+#assigns value between [] to attribute, returns skip bool - if 
 func assignment(text_in, i: int, attr: String, character: Character = null, target: Character = null):
 	print("assign")
-	if attr[0] == "$": #character
+	if attr[0] == "$" and character != null: #character
 		if character.attributes.has(attr.substr(1)):
 			var n = await resolve_inner(text_in, i, "]", character, target)
-			var sub_str = [text_in[0].substr(i, n-i+1)]
+			var sub_str = [text_in[0].substr(i, n-i+2)]
 			n -= remove_marks(sub_str)
+			print("assignment value: ", sub_str, " | or | ", sub_str[0])
+			if sub_str[0].find("<null>") != -1 or sub_str[0].find("<expression error>") != -1: #error in assignment value - do nothing
+				print("error in assignment value")
+				return
 			character.attributes[attr.substr(1)][1] = sub_str[0]
 			character.emit_signal("attr_updated", attr.substr(1))
-	else: #target
+			return
+	elif attr[0] == "@" and target != null: #target
 		if target.attributes.has(attr.substr(1)):
 			var n = await resolve_inner(text_in, i, "]", character, target)
-			var sub_str = [text_in[0].substr(i, n-i+1)]
+			print(text_in[0])
+			var sub_str = [text_in[0].substr(i, n-i+2)]
 			n -= remove_marks(sub_str)
-			target.attributes[attr.substr(1)] = sub_str[0]
+			print("assignment value: ", sub_str, " | or | ", sub_str[0])
+			if sub_str[0].find("<null>") != -1 or sub_str[0].find("<expression error>") != -1: #error in assignment value - do nothing
+				print("error in assignment value")
+				return
+			target.attributes[attr.substr(1)][1] = sub_str[0]
 			target.emit_signal("attr_updated", attr.substr(1))
+			return
+	#error cannot access attribute - resolve and skip
+	var n = await resolve_inner(text_in, i, "]", character, target)
+	text_in[0].substr(i, n-i+1)
+	
+	
 	
 #text_in = array with single string - pass by reference
 func roll(text_in, i: int, character: Character = null, target: Character = null):
@@ -624,7 +616,7 @@ func condition(text_in, i: int, character: Character = null, target: Character =
 		else:
 			var part_parts = part.split(":")
 			if part_parts.size() == 1: # no : -> default -> execute
-				print("found")
+				print("found - default")
 				replace_text(text_in, part, i-2, n-i+4)
 				return
 			elif part_parts[0].begins_with("<="):
@@ -736,3 +728,87 @@ func remove_marks(sub_str = []):
 		shorter += mark_end-mark_begin+1
 		mark_begin = sub_str[0].find("\u001A")
 	return shorter
+
+
+#splits command into sections - command, targeting
+func split_command(text_in: String):
+	var sub_str_arr = text_in.split("||")
+	return sub_str_arr
+	
+#parses targeting string - calls proper functions in draw()
+func targeting(text_in: String):
+	var sub_str_arr = text_in.split(" ", false) #split into words
+	var shape_arr = [] #array for shape and its dimentions
+	var point_arr = [] #array for target point options
+	#basic argument size check
+	if sub_str_arr.size() < 3: #at least 3 arguments needed for shape
+		if sub_str_arr.size() < 1 or not (sub_str_arr[0] == "self" or sub_str_arr[0] == "point"): #and not just point
+			print("targeting syntax error - too short")
+			return null
+	#see if valid area shape
+	if sub_str_arr[0] == "circle": #circle area - one argument - diameter
+		shape_arr.append("circle")
+		if sub_str_arr[1].is_valid_float():
+			shape_arr.append(sub_str_arr[1].to_float())
+			sub_str_arr = sub_str_arr.slice(2) #trim array
+		else:
+			print("targeting syntax error - not a number")
+			return null
+	elif sub_str_arr[0] == "rect": #rectangular area
+		shape_arr.append("rect")
+		#get rect dimentions - need one or two numbers - (x,x) or (x,y)
+		if sub_str_arr[1].is_valid_float():
+			shape_arr.append(sub_str_arr[1].to_float())
+		else:
+			print("targeting syntax error - not a number")
+			return null
+		if sub_str_arr[2].is_valid_float():
+			shape_arr.append(sub_str_arr[2].to_float())
+			sub_str_arr = sub_str_arr.slice(3) #trim array
+		else: #no second number - (x,x)
+			shape_arr.append(sub_str_arr[1].to_float())
+			sub_str_arr = sub_str_arr.slice(2) #trim array
+	elif sub_str_arr[0] == "cone": #cone area - with begin and end width
+		shape_arr.append("cone")
+		#get cone dimentions - need three numbers - begin-width, end-width, length
+		if sub_str_arr.size() < 5: #at least 5 arguments needed for cone
+			print("targeting syntax error - too short")
+			return null
+		if sub_str_arr[1].is_valid_float() and sub_str_arr[2].is_valid_float() and sub_str_arr[3].is_valid_float():
+			shape_arr.append(sub_str_arr[1].to_float())
+			shape_arr.append(sub_str_arr[2].to_float())
+			shape_arr.append(sub_str_arr[3].to_float())
+			sub_str_arr = sub_str_arr.slice(4) #trim array
+		else:
+			print("targeting syntax error - not a number")
+			return null
+	elif sub_str_arr[0] == "cone_angle": #cone area - with angle
+		shape_arr.append("cone_angle")
+		#get cone_angle dimentions - need two numbers - angle, length
+		if sub_str_arr[1].is_valid_float() and sub_str_arr[2].is_valid_float():
+			shape_arr.append(sub_str_arr[1].to_float())
+			shape_arr.append(sub_str_arr[2].to_float())
+			sub_str_arr = sub_str_arr.slice(3) #trim array
+		else:
+			print("targeting syntax error - not a number")
+			return null
+		
+	#target point
+	if sub_str_arr.size() < 1: #no target arguments
+		print("targeting syntax error - no target arguments")
+		return null
+	if sub_str_arr[0] == "self": #begin from self - character token
+		point_arr.append("self")
+	elif sub_str_arr[0] == "point": #begin from point - might contain radius
+		point_arr.append("point")
+		if sub_str_arr.size() > 1:
+			if sub_str_arr[1].is_valid_float():
+				point_arr.append(sub_str_arr[1].to_float())
+			else:
+				print("targeting syntax error - invalid target radius")
+				return null
+	else: #not self or point
+		print("targeting syntax error - invalid target argument: ", sub_str_arr[0])
+		return null
+	return [shape_arr, point_arr]
+

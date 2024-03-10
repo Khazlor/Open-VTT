@@ -51,6 +51,13 @@ var flip_x = false
 var flip_y = false
 var oposite_corner_pos_in_world = null
 
+var targeting = false #targeting bool
+var targeting_shape = null
+var targeting_origin = null #vector2 or null
+var targeting_point_radius = -1
+var targeting_range_circle = null #circle showing range
+var targeting_self = false
+
 var mouse_pos = Vector2(0,0)
 
 var last_event_pos = Vector2(-1,-1)
@@ -63,7 +70,11 @@ var unshaded_material: CanvasItemMaterial
 @onready var tool_panel_object_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Object"
 @onready var tool_panel_map_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Map"
 
+signal targeting_end(selected_targets)
+
 func _ready():
+	Globals.draw_comp = self
+	
 	get_viewport().files_dropped.connect(on_files_dropped) #drag and drop images
 	#editing selected transforms
 	tool_panel_object_menu.connect("object_change", _on_object_change_signal)
@@ -74,13 +85,14 @@ func _ready():
 	
 	#selected token in turn order:
 	Globals.turn_order.connect("token_turn_selected", select_token)
+	
 
 func _unhandled_input(event):
 #	print_tree_pretty() #DEBUG TODO remove
 	if event is InputEventMouse:
 		if Globals.draw_layer == null: #check if layer is selected
 			return
-		var mouse_pos = get_global_mouse_position()
+		mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
 	#		var snapping_camera_adjusted = get_node("../Camera2D").zoom
 	#		var snapping_camera_offset = Vector2(fmod(get_node("../Camera2D").position.x, 70), fmod(get_node("../Camera2D").position.y, 70))
@@ -115,7 +127,12 @@ func _unhandled_input(event):
 	#		return
 	#	else:
 	#		last_event_pos = event.position
-	
+		if targeting and Input.is_action_just_pressed("mouseleft"): #targeting end
+			end_targeting()
+			return
+		if targeting and event is InputEventMouseMotion: #targeting moved mouse
+			update_targeting()
+			return
 		#double click - open character sheet if selected
 		if Globals.tool == "select" and event is InputEventMouseButton and event.double_click:
 			if selected.size() == 1:
@@ -131,6 +148,7 @@ func _unhandled_input(event):
 		#pressed (not button)
 		if Input.is_action_just_pressed("mouseleft"):
 			print("mouse pressed")
+			Globals.tool_bar.grab_focus()
 			draw_enable = true
 		#end any dragging
 		if Input.is_action_just_released("mouseleft"):
@@ -884,10 +902,10 @@ func _unhandled_input(event):
 			mouse_over_br = false
 			mouse_over_rotate = false
 			
-		elif Input.is_action_just_released("Escape"): #go back to map selection
+		elif Input.is_action_just_pressed("Escape"): #go back to map selection
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 			
-		elif Input.is_action_just_released("I-pressed"): #open inventory TODO - get character from token
+		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
 			print("released I")
 			if not selected.is_empty():
 				print("released I - selected not empty")
@@ -1585,3 +1603,155 @@ func create_select_box(position):
 	select_box.connect("mouse_entered", _on_select_mouse_entered)
 	select_box.connect("mouse_exited", _on_select_mouse_exited)
 	$Select.add_child(select_box)
+
+func create_targeting(targeting_data):
+	print("targeting data: ", targeting_data)
+	targeting = true
+	
+	if selected.size() > 0: #get macro start position
+		targeting_origin = get_object_center(selected[0])
+	
+	# parse targeting_data
+	if targeting_data[0].size() != 0: #has shape
+		if targeting_data[0][0] == "circle": #circle shape
+			var radius = targeting_data[0][1]
+			targeting_shape = CustomCircle.new()
+			targeting_shape.radius = radius
+		elif targeting_data[0][0] == "rect": #rectangle shape
+			var x = targeting_data[0][1]/2 #offsets from center
+			var y = targeting_data[0][2]/2
+			targeting_shape = Polygon2D.new()
+			targeting_shape.polygon = [Vector2(x,y), Vector2(-x,y), Vector2(-x,-y), Vector2(x,-y)] #set polygon points
+		elif targeting_data[0][0] == "cone": #cone shape
+			var start_width = targeting_data[0][1]
+			var end_width = targeting_data[0][2]
+			var len = targeting_data[0][3]
+			targeting_shape = Polygon2D.new()
+			targeting_shape.polygon = [Vector2(0,-start_width/2), Vector2(len, -end_width/2), Vector2(len, end_width/2), Vector2(0, start_width/2)] #set polygon points
+		elif targeting_data[0][0] == "cone_angle": #cone_angle shape
+			var angle = targeting_data[0][1]
+			var len = targeting_data[0][2]
+			targeting_shape = CustomArc.new()
+			targeting_shape.angle_size = angle
+			targeting_shape.radius = len
+			
+		if targeting_shape != null: #was created
+			if "mouse_filter" in targeting_shape: #rect does not have
+				targeting_shape.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			if targeting_origin != null:
+				#set initial position
+				if targeting_shape is CustomCircle:
+					targeting_shape.center = targeting_origin
+				else:
+					targeting_shape.position = targeting_origin
+			Globals.draw_comp.add_child(targeting_shape)
+			
+		#point
+		if targeting_data[1][0] == "self": #position on selected
+			if targeting_origin != null:
+				if targeting_shape == null:
+					var selected = get_clicked(targeting_origin)
+					if "character" in selected:
+						reset_targeting_variables()
+						return [selected.character]
+					reset_targeting_variables()
+					return []
+				else:
+					targeting_self = true
+			else:
+				print("targeting self - nothing selected") #change to point
+				targeting_self = true
+
+		elif targeting_data[1][0] == "point": #position on selected
+			if targeting_data[1].size() > 1:
+				targeting_point_radius = targeting_data[1][1]
+				if targeting_origin != null:
+					targeting_range_circle = CustomCircle.new()
+					targeting_range_circle.center = targeting_origin
+					targeting_range_circle.radius = targeting_point_radius
+					targeting_range_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					Globals.draw_comp.add_child(targeting_range_circle)
+				else: #no origin ignore range
+					targeting_point_radius = -1
+					
+	return null
+		
+
+func update_targeting():
+	if targeting_shape != null: #has shape set shape transforms
+		if not targeting_self: # point - update position
+			if targeting_point_radius != -1:
+				if targeting_point_radius > targeting_origin.distance_to(mouse_pos):
+					if targeting_shape is CustomCircle:
+						targeting_shape.center = mouse_pos
+					else:
+						targeting_shape.position = mouse_pos
+				else:
+					return
+			else: #unlimited range
+				if targeting_shape is CustomCircle:
+					targeting_shape.center = mouse_pos
+				else:
+					targeting_shape.position = mouse_pos
+		#both self and point - set rotation based on mouse
+		if targeting_origin != null:
+			var angle = targeting_origin.angle_to_point(mouse_pos)
+			targeting_shape.rotation = angle
+			
+
+func end_targeting():
+	var selected_targets = []
+	if targeting_shape == null: #point no shape - get clicked
+		var selected_target = get_clicked(get_global_mouse_position())
+		if "character" in selected_target:
+			selected_targets.append(selected_target.character)
+		emit_signal("targeting_end", selected_targets)
+		reset_targeting_variables()
+		return
+	if targeting_origin == null: #set origin 
+		targeting_origin = get_global_mouse_position()
+		if targeting_self: #set initial position
+			if targeting_shape is CustomCircle:
+				targeting_shape.center = targeting_origin
+			else:
+				targeting_shape.position = targeting_origin
+		return
+	#has shape - get characters inside shape
+	var rotated_polygon = [] #rotated polygon of shape object
+	for point in targeting_shape.polygon:
+		rotated_polygon.append(point.rotated(targeting_shape.rotation))
+	
+	var lines_children = Globals.draw_layer.get_children()
+	for child in lines_children:
+		if child.is_class("Node2D"): #inherits from Node2D
+			if Globals.select_recursive:
+				if child.get_class() == "Node2D": #is Node2D -> Layer
+					lines_children.append_array(child.get_children())
+			continue
+		if "character" in child: #if character token
+			child = child.get_child(0)
+			var center = get_object_center(child) - targeting_shape.position
+			if Geometry2D.is_point_in_polygon(center, rotated_polygon):
+				selected_targets.append(child.character)
+	#reset variables
+	reset_targeting_variables()
+	
+	emit_signal("targeting_end", selected_targets)
+	return
+	
+func reset_targeting_variables():
+	targeting = false
+	if targeting_shape != null:
+		targeting_shape.queue_free()
+	if targeting_range_circle != null:
+		targeting_range_circle.queue_free()
+	targeting_origin = null
+	targeting_point_radius = -1
+	targeting_self = false
+	
+
+func get_object_center(object):
+	var distance = Vector2(0,0).distance_to((object.size * object.scale)/2)
+	var angle = Vector2(0,0).angle_to_point((object.size * object.scale)/2) + object.rotation
+	var center = object.position + Vector2(distance * cos(angle), distance * sin(angle))
+	return center

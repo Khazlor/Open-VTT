@@ -54,11 +54,13 @@ func UI_set_position():
 	#bar_bubbles (left side)
 	bar_bubbles.position = center + Vector2(token_polygon.size.x * abs(token_polygon.scale.x)/2 + 10, - token_polygon.size.y/2)
 	
+	
 func get_center_offset():
 	var distance = Vector2(0,0).distance_to((token_polygon.size * token_polygon.scale)/2)
 	var angle = Vector2(0,0).angle_to_point((token_polygon.size * token_polygon.scale)/2) + token_polygon.rotation
 	var center = Vector2(distance * cos(angle), distance * sin(angle))
 	return center
+	
 	
 func change_bars():
 	var flatstyle = StyleBoxFlat.new()
@@ -68,6 +70,7 @@ func change_bars():
 		child.queue_free()
 	for bar_data in character.bars:
 		var bar = ProgressBar.new()
+		bar.mouse_filter = Control.MOUSE_FILTER_PASS
 		bar.use_parent_material = true
 		bar.self_modulate = bar_data["color"]
 		bar.custom_minimum_size.y = bar_data["size"]
