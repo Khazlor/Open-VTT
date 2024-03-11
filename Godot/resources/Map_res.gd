@@ -120,6 +120,13 @@ func load_token(save_file: FileAccess):
 	#set character in token
 	token.character = character
 	token_polygon.character = character
+	
+	character.connect("attr_updated", character.apply_modifiers_to_attr)
+	character.connect("item_equipped", character.equip_item)
+	character.connect("item_unequipped", character.unequip_item)
+	
+	character.load_equipped_items_from_equipment()
+	character.load_attr_modifiers_from_equipment()
 
 func add_token(token):
 	tokens.append(token)

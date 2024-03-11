@@ -514,13 +514,49 @@ func replace_attr(text_in, attr: String, i: int, character: Character = null, ta
 			print("attr found")
 			replace_text(text_in, character.attributes[attr.substr(1)][1], i, attr.length())
 			return
+		else: #might be equipped item attribute
+			var split = attr.substr(1).split(".", false)
+			if split.size() > 2: #equip.slot_name.attr
+				if split[0] == "equip":
+					print("equip")
+					print(character.equip_slots)
+					var slot = find_slot(character, split[1])
+					if slot != null:
+						print("slot")
+						if slot["item"] != null: #slot has item
+							print("item")
+							print(slot["item"]["attributes"], " || ", split[2])
+							if slot["item"]["attributes"].has(split[2]): #item has attribute
+								print("attr")
+								var item_attr = slot["item"]["attributes"][split[2]]
+								replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
+								return
+						
 	elif attr[0] == "@" and target != null: #target
 		if target.attributes.has(attr.substr(1)):
 			replace_text(text_in, target.attributes[attr.substr(1)][1], i, attr.length())
 			return
+		else: #might be equipped item attribute
+			var split = attr.substr(1).split(".", false)
+			if split.size() > 2: #equip.slot_name.attr
+				if split[0] == "equip":
+					var slot = find_slot(target, split[1])
+					if slot != null:
+						if slot["item"] != null: #slot has item
+							if slot["item"]["attributes"].has(split[2]): #item has attribute
+								var item_attr = slot["item"]["attributes"][split[2]]
+								replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
+								return
 	#error
 	print("attr not found")
 	replace_text(text_in, "<null>", i, attr.length())
+
+func find_slot(character, slot_name):
+	for slot_side_arr in character.equip_slots:
+		for slot in slot_side_arr:
+			if slot["name"] == slot_name:
+				return slot
+	return null
 
 
 func replace_macro(text_in, macro: String, i: int, character: Character = null, target: Character = null):
