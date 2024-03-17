@@ -1509,9 +1509,8 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="SubViewport" type="SubViewport" parent="CanvasLayer/Windows"]
-
-[node name="TurnOrder" parent="CanvasLayer/Windows/SubViewport" instance=ExtResource("16_8sr77")]
+[node name="TurnOrder" parent="CanvasLayer/Windows" instance=ExtResource("16_8sr77")]
+position = Vector2i(1450, 80)
 
 [connection signal="child_exiting_tree" from="." to="." method="_on_child_exiting_tree"]
 [connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]

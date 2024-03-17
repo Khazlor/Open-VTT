@@ -14,6 +14,8 @@ var mapcard
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():  #multiplayer - client
+		return
 	popup.transient = true
 	popup.exclusive = true
 	var map_dir = DirAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps")
@@ -23,7 +25,7 @@ func _ready():
 	var files = map_dir.get_files()
 	for file in files:
 		map = Map_res.new()
-		map.load_map(file)
+		map.load_map(file, false)
 		
 		_add_mapcard(map)
 	
@@ -58,7 +60,7 @@ func _on_new_map_pressed():
 	while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
 		i += 1
 		map.map_name = oldname + "_" + str(i)
-	map.save_map()
+	map.save_map(null)
 	
 	_add_mapcard(map)
 	

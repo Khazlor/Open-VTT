@@ -11,41 +11,32 @@ var button_remove: Texture2D = load("res://icons/Remove.svg")
 var button_light: Texture2D = load("res://icons/LightOccluder2D.svg")
 var layer = preload("res://components/draw.tscn")
 
-@onready var draw_root = $"../../../Draw/Layers"
+var draw_root
 
 enum {BEFORE = -1, ON = 0, AFTER = 1}
 
 signal moved(item, to_item, shift)
 
+func _enter_tree():
+	create_root()
+
 
 func _ready():
-	hide_root = true
-	connect("moved", _move_item)
-	if Globals.new_map.saved_layers == null:
-		var item = create_item() #root
-		item.set_selectable(0, false)
-		#set root of draw_layers - might no longer be needed
-		item.set_meta("draw_layer", draw_root) 
-		item.add_button(0, button_add, 1)
+	pass
 	
-		print("tree not loaded")
-		item = add_new_item("layer_group_1")
-		item = add_new_item("layer_1", item)
-		item = add_new_item("layer_2", item)
-		item = add_new_item("layer_3", item)
-		item = add_new_item("layer_4", item)
-		item = add_new_item("layer_5", item)
-		item = add_new_item("layer_group_2")
-		add_new_item("layer_6", item)
-		add_new_item("layer_7", item)
-		add_new_item("layer_8", item)
-		add_new_item("layer_9", item)
-		add_new_item("layer_10", item)
-		
-	else:
-		print("tree loaded")
+func create_root():
+	hide_root = false
+	connect("moved", _move_item)
+	
+	var item = create_item() #root
+	item.set_selectable(0, false)
+	#set root of draw_layers - might no longer be needed
+	draw_root = $"../../../Draw/Layers"
+	item.set_meta("draw_layer", draw_root) 
+	item.add_button(0, button_add, 1)
+	
 
-func add_new_item(item_name: String, parent: TreeItem = null):
+func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Node2D = null):
 	#if tree was empty, hide root
 	if hide_root == false:
 		hide_root = true
@@ -60,24 +51,33 @@ func add_new_item(item_name: String, parent: TreeItem = null):
 	item.add_button(0, button_remove)
 	item.add_button(0, button_light)
 	
-	var draw_layer = Node2D.new()
-	#set meta for recreation after loading
-	draw_layer.set_meta("item_name", item_name)
-	draw_layer.set_meta("visibility", 0)
+	if existing_node == null:
+		var draw_layer = Node2D.new()
+		#set meta for recreation after loading
+		draw_layer.set_meta("item_name", item_name)
+		draw_layer.set_meta("type", "layer")
+		draw_layer.set_meta("visibility", 0)
+		draw_layer.set_meta("DM", false)
+
+		draw_layer.set_meta("tree_item", item)
+		
+		draw_layer.z_as_relative = false
+		item.set_meta("draw_layer", draw_layer)
+		if parent == null:
+			draw_root.add_child(draw_layer)
+			draw_root.move_child(draw_layer, 0)
+		else:
+			parent.get_meta("draw_layer").add_child(draw_layer)
+			parent.get_meta("draw_layer").move_child(draw_layer, 0)
+		
+		draw_layer.set_owner(draw_root)
+		
+		change_z_indexes()
 	
-	draw_layer.z_as_relative = false
-	item.set_meta("draw_layer", draw_layer)
-	if parent == null:
-		draw_root.add_child(draw_layer)
-		draw_root.move_child(draw_layer, 0)
 	else:
-		parent.get_meta("draw_layer").add_child(draw_layer)
-		parent.get_meta("draw_layer").move_child(draw_layer, 0)
-	
-	draw_layer.set_owner(draw_root)
-	
-	change_z_indexes()
-	
+		existing_node.z_as_relative = false
+		item.set_meta("draw_layer", existing_node)
+		
 #	var draw_layer = Node2D.new()
 #	draw_layer.z_as_relative = false
 #	item.set_meta("draw_layer", draw_layer)
@@ -246,22 +246,7 @@ func change_z_indexes():
 		
 #add child based on existing layer
 func load_self_and_children(node: Node2D, parent: TreeItem):
-	var item = create_item(parent)
-	item.set_meta("draw_layer", node)
-	var meta = node.get_meta("item_name")
-	if meta != null:
-		item.set_text(0, node.get_meta("item_name"))
-	if parent != null: #non root have multiple buttons
-		item.add_button(0, button_visible)
-		if not node.visible:
-			item.set_button(0, 0, button_hidden)
-		item.add_button(0, button_add)
-		item.add_button(0, button_remove)
-		item.add_button(0, button_light)
-	else: #root has only one button
-		item.add_button(0, button_add, 1)
-		item.set_selectable(0, false)
-	
+	var item = add_new_item(node.get_meta("item_name"), parent, node)
 	for child in node.get_children(true):
 		if child.has_meta("item_name"):
 			load_self_and_children(child, item)

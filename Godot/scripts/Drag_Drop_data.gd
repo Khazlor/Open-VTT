@@ -34,6 +34,7 @@ func _drop_data(position, data):
 			token.character.save_as_token = true
 			token.character.load_equipped_items_from_equipment()
 			token.character.load_attr_modifiers_from_equipment()
+		token.set_meta("type", "token")
 		Globals.draw_layer.add_child(token)
 		Globals.map.add_token(token)
 		token.light_mask = Globals.draw_layer.light_mask
@@ -74,6 +75,7 @@ func _drop_data(position, data):
 		else:
 			container.position = mouse_pos
 		container.set_meta("inventory", [new_item_dict])
+		container.set_meta("type", "container")
 		Globals.draw_layer.add_child(container)
 
 #set drag_drop_layer to back on drag end - does not trigger when dragging from other windows

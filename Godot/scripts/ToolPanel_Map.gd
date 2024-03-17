@@ -15,6 +15,8 @@ signal fov_opacity_changed(value)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#load map settings
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():  #multiplayer - client
+		return
 	$ScrollContainer/VBoxContainer/BackgroundColor/BackgroundColorPickerButton.color = Globals.new_map.background_color
 	RenderingServer.set_default_clear_color(Globals.new_map.background_color)
 	$ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/GridEnable.button_pressed = grid.visible

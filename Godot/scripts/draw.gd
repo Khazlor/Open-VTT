@@ -6,6 +6,7 @@ extends Node2D
 
 var char_sheet = preload("res://UI/character_sheet.tscn")
 var inventory_sheet = preload("res://components/container_inventory.tscn")
+var token_comp = preload("res://components/token.tscn")
 
 #drawing
 var pressed = false
@@ -140,6 +141,7 @@ func _unhandled_input(event):
 					var ch_sh = char_sheet.instantiate()
 					ch_sh.character = selected[0].character
 					Globals.windows.add_child(ch_sh)
+					mouse_over_clear()
 
 		#button pressed or mouse moved
 		if Input.is_action_just_pressed("mouseleft") and Globals.mouseOverButton:
@@ -180,6 +182,8 @@ func _unhandled_input(event):
 			#drag finished
 			if selected_dragging:
 				selected_dragging = false
+				for object in selected:
+					synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
 				return
 			#rotating selection finished
 			if selected_rotating:
@@ -330,8 +334,6 @@ func _unhandled_input(event):
 		if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
 			if current_panel == null:
 				return
-			print_tree_pretty()
-			#current_panel.rotation_degrees = 30
 			print("rect finished")
 			print(current_panel.size)
 			print(current_panel.position)
@@ -340,6 +342,9 @@ func _unhandled_input(event):
 				#lines.remove_child(current_panel)
 				current_panel.queue_free()
 				print("free")
+			else:
+				current_panel.name = current_panel.name
+				create_object.rpc(get_path_to(current_panel.get_parent()), current_panel.name, serialize_object_for_rpc(current_panel))
 		#else button held -> drawing
 		if draw_enable:
 			if Globals.tool == "rect":
@@ -357,6 +362,7 @@ func _unhandled_input(event):
 						style.border_color = Globals.colorLines
 						style.set_border_width_all(Globals.lineWidth)
 						current_panel.add_theme_stylebox_override("panel", style)
+						current_panel.set_meta("type", "rect")
 						Globals.draw_layer.add_child(current_panel)
 						current_panel.set_owner(layers_root)
 						
@@ -393,6 +399,7 @@ func _unhandled_input(event):
 						current_line = Line2D.new()
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
+						current_rect.set_meta("type", "line")
 						Globals.draw_layer.add_child(current_rect)
 						current_rect.set_owner(layers_root)
 						current_rect.add_child(current_line)
@@ -424,6 +431,7 @@ func _unhandled_input(event):
 						begin = mouse_pos
 						current_ellipse.set_begin(begin)
 						current_ellipse.set_end(begin)
+						current_ellipse.set_meta("type", "circle")
 						Globals.draw_layer.add_child(current_ellipse)
 						current_ellipse.set_owner(layers_root)
 				#moved - modify objects
@@ -477,6 +485,7 @@ func _unhandled_input(event):
 							current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
 							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
 							current_label.text = "text"
+							current_panel.set_meta("type", "text")
 							Globals.draw_layer.add_child(current_label)
 							current_label.set_owner(layers_root)
 						#didn't click on existing textedit
@@ -892,15 +901,7 @@ func _unhandled_input(event):
 			#resetting select box state variables
 			selected_tokens.clear()
 			selected.clear()
-			mouse_over_selected = false
-			selected_creating = false
-			selected_scaling = false
-			selected_rotating = false
-			mouse_over_tl = false
-			mouse_over_bl = false
-			mouse_over_tr = false
-			mouse_over_br = false
-			mouse_over_rotate = false
+			mouse_over_clear()
 			
 		elif Input.is_action_just_pressed("Escape"): #go back to map selection
 			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
@@ -933,6 +934,17 @@ func _unhandled_input(event):
 					new_object.add_sibling(light)
 					var remote = get_object_light_remote(new_object)
 					remote.remote_path = remote.get_path_to(light)
+
+func mouse_over_clear():
+	mouse_over_selected = false
+	mouse_over_tl = false
+	mouse_over_bl = false
+	mouse_over_tr = false
+	mouse_over_br = false
+	mouse_over_rotate = false
+	selected_creating = false
+	selected_scaling = false
+	selected_rotating = false
 
 func copy_to_clipboard():
 	for object in Globals.clipboard_objects: # free old clipboard
@@ -1281,6 +1293,7 @@ func on_files_dropped(files):
 		var style = StyleBoxTexture.new()
 		style.texture = tex
 		current_panel.add_theme_stylebox_override("panel", style)
+		current_panel.set_meta("type", "rect")
 		Globals.draw_layer.add_child(current_panel)
 		current_panel.set_owner(layers_root)
 		
@@ -1515,12 +1528,14 @@ func create_or_enable_light(object):
 		light.range_layer_max = 0
 		light.range_layer_min = -512
 		light.shadow_enabled = true
+		light.set_meta("type", "light")
 		object.add_sibling(light)
 		object.set_meta("light", true)
 		var remote = RemoteTransform2D.new()
 		remote.update_scale = false
 		remote.position = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y())
 		remote.set_meta("light", true)
+		remote.set_meta("type", "remote")
 		object.add_child(remote)
 		remote.set_remote_node(remote.get_path_to(light))
 		
@@ -1755,3 +1770,210 @@ func get_object_center(object):
 	var angle = Vector2(0,0).angle_to_point((object.size * object.scale)/2) + object.rotation
 	var center = object.position + Vector2(distance * cos(angle), distance * sin(angle))
 	return center
+
+
+# ============== multiplayer synch of objects on map =================
+
+#creates object on other peers
+@rpc("any_peer", "call_remote", "reliable", 0)
+func create_object(parent_path: NodePath, node_name: String, object_data_arr):
+	print("creating object")
+	print(parent_path)
+	var parent = get_node(parent_path)
+	if parent == null:
+		print("parent path not correct")
+		return
+	
+	var node = null
+	if object_data_arr[0][0] == "rect": #object is rectangle - panel
+		print("rect object")
+		var style
+		if object_data_arr[0][5].size() == 1: #texture:
+			style = StyleBoxTexture.new()
+			var texture = load(object_data_arr[0][5][0])
+			if texture != null:
+				style.texture == texture
+		elif object_data_arr[0][5].size() == 3: #flat
+			style = StyleBoxFlat.new()
+			style.bg_color = object_data_arr[0][5][0]
+			style.border_color = object_data_arr[0][5][1]
+			style.set_border_width_all(object_data_arr[0][5][2])
+		node = Panel.new()
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "rect")
+		node.add_theme_stylebox_override("panel", style)
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	elif object_data_arr[0][0] == "line":
+		node = ColorRect.new()
+		node.color = Color(0,0,0,0)
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "line")
+		node.set_meta("polygon", true)
+		var line = Line2D.new()
+		line.points = object_data_arr[0][5][0]
+		line.default_color = object_data_arr[0][5][1]
+		line.width = object_data_arr[0][5][2]
+		line.position = -node.position
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.add_child(line)
+	elif object_data_arr[0][0] == "circle":
+		node = CustomEllipse.new()
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.line_color = object_data_arr[0][5][0]
+		node.back_color = object_data_arr[0][5][1]
+		node.line_width = object_data_arr[0][5][2]
+		node.set_meta("type", "circle")
+		node.set_meta("polygon", true)
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	elif object_data_arr[0][0] == "text":
+		node = Label.new()
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.text = object_data_arr[0][5]
+		node.set_meta("type", "text")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	elif object_data_arr[0][0] == "token":
+		var token = token_comp.instantiate()
+		#node = load_token(file) TODO token create
+	
+	elif object_data_arr[0][0] == "layer": #name, visibility, GM, light layers
+		node = Node2D.new()
+		node.set_meta("type", "layer")
+		node.set_meta("item_name", object_data_arr[0][1])
+		print(node.get_meta("item_name"))
+		node.set_meta("visibility", object_data_arr[0][2])
+		node.set_meta("GM", object_data_arr[0][3])
+		node.light_mask = object_data_arr[0][4]
+		#TODO add layer to tree
+		layer_tree.add_new_item(object_data_arr[0][1], parent.get_meta("tree_item"), node)
+		
+	if node != null:
+		node.name = node_name
+		parent.add_child(node, true)
+	else:
+		print("no type uknown: ", object_data_arr[0][0])
+		return
+	#load light and shadow for object:
+	if node != null and object_data_arr.size() > 1:
+		if object_data_arr[1][0] == "light":
+			var light = PointLight2D.new()
+			light.position = node.position
+			var texture = GradientTexture2D.new()
+			texture.gradient = Gradient.new()
+			texture.gradient.set_offset(0, 0.7)
+			texture.gradient.set_offset(1, 0)
+			texture.height = object_data_arr[1][3]
+			texture.width = texture.height
+			texture.fill = GradientTexture2D.FILL_RADIAL
+			texture.fill_from = Vector2(0.5, 0.5)
+			texture.fill_to = Vector2(1, 0)
+			texture.repeat = GradientTexture2D.REPEAT_NONE
+			light.texture = texture
+			light.texture_scale = object_data_arr[1][4]
+			light.color = object_data_arr[1][1]
+			light.energy = object_data_arr[1][2]
+			light.range_z_max = 4095
+			light.range_z_min = -4096
+			light.range_layer_max = 0
+			light.range_layer_min = -512
+			light.shadow_enabled = true
+			light.set_meta("type", "light")
+			node.add_sibling(light)
+			node.set_meta("light", true)
+			var remote = RemoteTransform2D.new()
+			remote.update_scale = false
+			remote.position = object_data_arr[1][5]
+			remote.set_meta("light", true)
+			remote.set_meta("type", "remote")
+			node.add_child(remote)
+			remote.set_remote_node(remote.get_path_to(light))
+
+		elif object_data_arr[1][0] == "shadow":
+			var occluder = LightOccluder2D.new()
+			occluder.occluder = OccluderPolygon2D.new()
+			occluder.occluder.polygon = object_data_arr[1][1]
+			occluder.occluder.cull_mode = object_data_arr[1][2]
+			node.add_child(occluder)
+			node.set_meta("shadow", true)
+		if object_data_arr.size() > 2:
+			if object_data_arr[2][0] == "shadow":
+				var occluder = LightOccluder2D.new()
+				occluder.occluder.polygon = object_data_arr[2][1]
+				occluder.occluder.cull_mode = object_data_arr[2][2]
+				node.add_child(occluder)
+				node.set_meta("shadow", true)
+
+func serialize_object_for_rpc(node):
+	if not node.has_meta("type"):
+		return
+	var object_data_arr = []
+	var is_token = false
+	var type = node.get_meta("type")
+	print("save object - ", type)
+	if type == "rect": #object is rectangle - panel
+		var style_arr = []
+		var style = node.get_theme_stylebox("panel")
+		print(style)
+		if style is StyleBoxFlat:
+			style_arr = [style.bg_color, style.border_color, style.border_width_left]
+		elif style is StyleBoxTexture:
+			style_arr = [style.texture.resource_path]
+		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
+	elif type == "line":
+		var line = node.get_child(0)
+		if not line is Light2D:
+			print("saving line - not line - need fix") 
+			return
+		var style_arr = [line.points, line.default_color, line.width]
+		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr])
+	elif type == "circle":
+		var style_arr = [node.line_color, node.back_color, node.line_width]
+		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr])
+	elif type == "text":
+		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text])
+	elif type == "token":
+		var token = node.token_polygon
+		object_data_arr.append(["token"])
+		is_token = true
+		#save after light and shadow
+	elif type == "layer": #name, visibility, GM, light layers
+		var name = node.get_meta("item_name")
+		var visibility = node.get_meta("visibility")
+		var GM = node.get_meta("GM")
+		object_data_arr.append(["layer", name, visibility, GM, node.light_mask])
+
+	#light and shadow can be be on any object
+	if node.has_meta("light"):
+		var light: PointLight2D = Globals.draw_comp.get_object_light(node)
+		var remote: RemoteTransform2D = Globals.draw_comp.get_object_light_remote(node)
+		var light_arr = ["light", light.color, light.energy, light.texture.get_height(), light.texture_scale, remote.position]
+		object_data_arr.append(light_arr)
+	if node.has_meta("shadow"):
+		var occluder: LightOccluder2D = Globals.draw_comp.get_object_shadow(node)
+		var occluder_arr = ["shadow", occluder.occluder.polygon, occluder.occluder.cull_mode]
+		object_data_arr.append(occluder_arr)
+		
+		
+	return object_data_arr
+		
+		
+@rpc("any_peer", "call_remote", "reliable")
+func synch_object_properties(path_to_object, property_arr):
+	print("synch")
+	var node = get_node(path_to_object)
+	if node == null:
+		print("synch path not found - ", path_to_object)
+		return
+	for property in property_arr:
+		node.set(property[0], property[1])

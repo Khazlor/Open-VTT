@@ -19,6 +19,8 @@ var global_item: TreeItem
 func _ready():
 	hide_root = true
 	connect("moved", _move_item)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():  #multiplayer - client
+		return
 	var item = create_item() #root
 	item.set_selectable(0, false)
 	item.add_button(0, button_add, 0)

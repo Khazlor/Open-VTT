@@ -5,6 +5,9 @@
 class_name Tool
 extends Node
 
+var enet_peer = null #for multiplayer
+var spawner: MultiplayerSpawner = null
+
 var campaign: Campaign_res
 var map: Map_res
 var new_map: Map_res

@@ -22,7 +22,7 @@ func _process(delta):
 func _on_gui_input(event):
 	if event.is_action_pressed("mouseleft"):
 		Globals.new_map = map
-		get_tree().change_scene_to_file("res://scenes/map.tscn")
+		get_tree().change_scene_to_file("res://scenes/player_lobby.tscn")
 	elif event.is_action_pressed("mouseright"):
 		Globals.new_map = map
 		emit_signal("mapcard_right_click", map, self)

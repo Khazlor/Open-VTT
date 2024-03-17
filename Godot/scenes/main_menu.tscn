@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cwe83xmexp2g"]
+[gd_scene load_steps=6 format=3 uid="uid://cwe83xmexp2g"]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_8ica2"]
 [ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="1_8y4y0"]
+[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="3_gj8af"]
 
 [sub_resource type="GDScript" id="GDScript_t0u01"]
 script/source = "extends Button
@@ -20,6 +21,14 @@ func _button_pressed():
 	get_tree().change_scene(\"res://scenes/Maps.tscn\")
 	print(\"hello world\")
 "
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tipra"]
+properties/0/path = NodePath("VBoxContainer/HBoxContainer3/PasswordLineEdit:text")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:position")
+properties/1/spawn = true
+properties/1/replication_mode = 2
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -67,29 +76,30 @@ custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="CampaignBrowserBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+[node name="CampaignEditBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.5
 theme_override_font_sizes/font_size = 40
-text = "  Campaigns  "
+text = "  Campaign Editor  "
 script = SubResource("GDScript_t0u01")
 
-[node name="MapBrowserBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+[node name="HostGameBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.5
 theme_override_font_sizes/font_size = 40
-text = "Maps"
+text = "Host Game"
 
-[node name="CharacterBrowserBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+[node name="JoinGameBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.5
 theme_override_font_sizes/font_size = 40
-text = "Characters"
+text = "Join Game"
 
-[node name="MonsterBrowserBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+[node name="GlobalCharactersBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.5
@@ -107,9 +117,11 @@ offset_top = 8.0
 offset_right = -9.0
 offset_bottom = 56.0
 grow_horizontal = 0
-text = "X"
+icon = ExtResource("3_gj8af")
+icon_alignment = 1
 
 [node name="OptBtn" type="Button" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -121,5 +133,109 @@ offset_bottom = 56.0
 grow_horizontal = 0
 text = "O"
 
-[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/CampaignBrowserBtn" to="." method="_on_campaign_browser_btn_pressed"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/MapBrowserBtn" to="." method="_on_map_browser_btn_pressed"]
+[node name="HostGameDialog" type="ConfirmationDialog" parent="."]
+title = "Host Game"
+position = Vector2i(749, 307)
+size = Vector2i(330, 193)
+ok_button_text = "Host Game"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HostGameDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 322.0
+offset_bottom = 144.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HostGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HostGameDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Port:"
+
+[node name="PortSpinBox" type="SpinBox" parent="HostGameDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+max_value = 65535.0
+value = 7000.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HostGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HostGameDialog/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Max connected players:"
+
+[node name="MaxPlayersSpinBox" type="SpinBox" parent="HostGameDialog/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+max_value = 1024.0
+value = 4.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HostGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HostGameDialog/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Password: "
+
+[node name="PasswordLineEdit" type="LineEdit" parent="HostGameDialog/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="HostGameDialog"]
+replication_config = SubResource("SceneReplicationConfig_tipra")
+
+[node name="JoinGameDialog" type="ConfirmationDialog" parent="."]
+title = "Join Game"
+initial_position = 1
+size = Vector2i(286, 193)
+ok_button_text = "Join Game"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="JoinGameDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 278.0
+offset_bottom = 144.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="JoinGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JoinGameDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Ip Address: "
+
+[node name="IPLineEdit" type="LineEdit" parent="JoinGameDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="JoinGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JoinGameDialog/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Port:"
+
+[node name="PortSpinBox" type="SpinBox" parent="JoinGameDialog/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+max_value = 65535.0
+value = 7000.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="JoinGameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="JoinGameDialog/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Password: "
+
+[node name="PasswordLineEdit" type="LineEdit" parent="JoinGameDialog/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/CampaignEditBtn" to="." method="_on_campaign_browser_btn_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/HostGameBtn" to="." method="_on_host_game_btn_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/JoinGameBtn" to="." method="_on_join_game_btn_pressed"]
+[connection signal="confirmed" from="HostGameDialog" to="." method="_on_host_game_dialog_confirmed"]
+[connection signal="delta_synchronized" from="HostGameDialog/MultiplayerSynchronizer" to="." method="_on_multiplayer_synchronizer_delta_synchronized"]
+[connection signal="synchronized" from="HostGameDialog/MultiplayerSynchronizer" to="." method="_on_multiplayer_synchronizer_synchronized"]
+[connection signal="confirmed" from="JoinGameDialog" to="." method="_on_join_game_dialog_confirmed"]

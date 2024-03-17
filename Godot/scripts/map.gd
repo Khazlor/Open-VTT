@@ -11,37 +11,53 @@ func _ready():
 	#light
 	get_viewport().set_canvas_cull_mask_bit(2, false)
 	Globals.windows = $CanvasLayer/Windows
-	
-	randomize()
 	var layers = $Draw/Layers
 	var tree = $CanvasLayer/Layers/Tree
+	randomize()
+	
 	#load
-	if Globals.new_map.saved_layers != null:
-		layers.replace_by(Globals.new_map.saved_layers.instantiate())
-		layers = $Draw/Layers #get new $Draw/Layers
-		#load tokens
-		for i in Globals.new_map.tokens.size():
-			var parent = get_node(Globals.new_map.token_paths[i])
-			if Globals.new_map.token_paths[i].is_empty():
-				print("path is empty")
-			parent.add_child(Globals.new_map.tokens[i])
-			parent.move_child(Globals.new_map.tokens[i], Globals.new_map.token_indexes[i])
-			Globals.new_map.tokens[i].light_mask = parent.light_mask
-			Globals.new_map.tokens[i].fov.shadow_item_cull_mask = parent.light_mask
-		#recursively create treeitem for each layer
-		tree.load_self_and_children(layers, null)
+	
+	Globals.draw_layer = layers
+	if multiplayer.is_server():
+		Globals.new_map.load_map(Globals.new_map.map_name)
+		#else load in player_lobby
 		
-		$Draw.layers_root = layers
-#		var item = $CanvasLayer/Layers/Tree.create_item()
-#		item.add_child(Globals.new_map.saved_layer_tree)
-#		print_tree_pretty()
-		
-#		for child in draw.get_children():
-#			if child.name == "Lines":
-#				draw.remove_child(child)
-#		draw.add_child(Globals.map.saved_scene.instantiate())
-	else:
-		print("new map")
+	#recursively create treeitem for each layer
+	for child in layers.get_children():
+		if child.has_meta("item_name"):
+			tree.load_self_and_children(child, null)
+	
+	#if Globals.new_map.saved_layers != null:
+		#layers.replace_by(Globals.new_map.saved_layers.instantiate())
+		#layers = $Draw/Layers #get new $Draw/Layers
+		##load tokens
+		#for i in Globals.new_map.tokens.size():
+			#print(Globals.new_map.tokens[i])
+			#print(Globals.new_map.token_indexes[i])
+			#print(Globals.new_map.token_paths[i])
+			##Globals.new_map.token_paths[i] = NodePath(String(Globals.new_map.token_paths[i]).insert(5, "/PlayerLobby"))
+			#var parent = get_node(Globals.new_map.token_paths[i])
+			#print(parent)
+			#if Globals.new_map.token_paths[i].is_empty():
+				#print("path is empty")
+			#parent.add_child(Globals.new_map.tokens[i])
+			#parent.move_child(Globals.new_map.tokens[i], Globals.new_map.token_indexes[i])
+			#Globals.new_map.tokens[i].light_mask = parent.light_mask
+			#Globals.new_map.tokens[i].fov.shadow_item_cull_mask = parent.light_mask
+		##recursively create treeitem for each layer
+		#tree.load_self_and_children(layers, null)
+		#
+		#$Draw.layers_root = layers
+##		var item = $CanvasLayer/Layers/Tree.create_item()
+##		item.add_child(Globals.new_map.saved_layer_tree)
+##		print_tree_pretty()
+		#
+##		for child in draw.get_children():
+##			if child.name == "Lines":
+##				draw.remove_child(child)
+##		draw.add_child(Globals.map.saved_scene.instantiate())
+	#else:
+		#print("new map")
 	#changing map to new_map - after map was saved
 	Globals.map = Globals.new_map
 	if tree.get_root().get_first_child() != null:
@@ -69,15 +85,15 @@ func _on_child_exiting_tree(node):
 		#clear tokens list in map
 		#Globals.map.tokens.clear() - no lomger filled in set_owner_on_self_and_children
 		#set ownership of all nodes (might have been deleted when moving layers around)
-		set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
-		var saved_layers = PackedScene.new()
-		saved_layers.pack($Draw/Layers);
-		Globals.map.save(saved_layers)
-	
-	
+		#set_owner_on_self_and_children($Draw/Layers, $Draw/Layers)
+		
+		#var saved_layers = PackedScene.new()
+		#saved_layers.pack($Draw/Layers);
+		#Globals.map.save($Draw/Layers)
+		Globals.map.save_map($Draw/Layers)
+
 func _on_tree_exiting():
 	pass
-
 
 func _on_maps_button_pressed():
 	$CanvasLayer/VSplitContainer.visible = true
