@@ -18,10 +18,10 @@ var dialog_target
 func _ready():
 	$VBoxContainer/HBoxContainer/AttrName.text = attr_dict["name"]
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer/CheckBox.button_pressed = attr_dict["edit"]
-	var image = load(attr_dict["icon"])
+	var image = Globals.load_texture(attr_dict["icon"])
 	if image != null:
 		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = image
-	image = load(attr_dict["image"])
+	image = Globals.load_texture(attr_dict["image"])
 	if image != null:
 		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = image
 
@@ -92,11 +92,12 @@ func _on_image_texture_button_pressed():
 
 
 func _on_token_image_file_dialog_file_selected(path):
+	path = await Globals.lobby.handle_file_transfer(path)
 	if dialog_target == 1: #icon
 		attr_dict["icon"] = path
-		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = load(path)
+		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/PanelContainer/IconTextureButton.texture_normal = Globals.load_texture(path)
 	else: #background image
 		attr_dict["image"] = path
-		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = load(path)
+		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = Globals.load_texture(path)
 	character_sheet.character.emit_signal("attr_bubbles_changed")
 

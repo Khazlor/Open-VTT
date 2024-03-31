@@ -4,6 +4,8 @@
 
 extends Control
 
+var preview = false
+
 var character: Character
 var token_polygon: Control
 var bars: VBoxContainer
@@ -28,18 +30,38 @@ func _ready():
 	attr_bubbles = $UI/AttrBubbles
 	bar_bubbles = $UI/BarBubbles
 	fov = $UI/FovLight
+	if not character.player_character:
+		fov.visible = false
 	timer = $UI/Timer
 	timer.connect("timeout", timer_update)
-	change_bars()
-	change_attr_bubbles()
+	change_bars(true)
+	change_attr_bubbles(true)
 	character.connect("bars_changed", change_bars)
 	character.connect("attr_updated", update_bars)
 	character.connect("attr_bubbles_changed", change_attr_bubbles)
-
+	if not preview:
+		character.connect("get_token_request", on_get_token_request)
+		#synch through signals triggers multiple times when multiple tokens have the same character - use character.token instead
+		#character.connect("synch_macro", on_synch_macro)
+		#character.connect("attr_created", on_attr_created)
+		#character.connect("synch_equip_slot", on_synch_equip_slot)
+		character.token = self
+		character.connect("attr_updated", character.apply_modifiers_to_attr)
+		character.connect("item_equipped", character.equip_item)
+		character.connect("item_unequipped", character.unequip_item)
+		character.load_equipped_items_from_equipment()
+		character.load_attr_modifiers_from_equipment()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+
+func on_get_token_request():
+	character.emit_signal("get_token_response", self)
+
+func _exit_tree():
+	if character.token == self:
+		character.get_token()
 
 #sets correct positions of UI elements around token
 func UI_set_position():
@@ -61,8 +83,15 @@ func get_center_offset():
 	var center = Vector2(distance * cos(angle), distance * sin(angle))
 	return center
 	
+@rpc("any_peer", "call_remote", "reliable")
+func change_bars_on_remote_peers(bars):
+	character.bars = bars
+	character.emit_signal("bars_changed", true)
+	#change_bars(true)
 	
-func change_bars():
+func change_bars(remote = false):
+	if remote == false: #if change was local call change on other peers
+		change_bars_on_remote_peers.rpc(character.bars)
 	var flatstyle = StyleBoxFlat.new()
 	for child in bars.get_children():
 		child.queue_free()
@@ -107,7 +136,15 @@ func change_bars():
 		bar_bubbles.add_child(le)
 	timer.start(0.01) # UI_set_position() after timer
 	
-func update_bars(attr: StringName):
+@rpc("any_peer", "call_remote", "reliable")
+func update_bars_on_remote_peers(attr, value):
+	character.attributes[attr] = value
+	character.emit_signal("attr_updated", attr, true)
+	#update_bars(attr, true)
+	
+func update_bars(attr: StringName, remote = false):
+	if remote == false: #if change was local call change on other peers
+		update_bars_on_remote_peers.rpc(attr, character.attributes[attr])
 	for i in range(character.bars.size()):
 		var bar_data = character.bars[i]
 		if bar_data["attr2"] == attr:
@@ -130,7 +167,14 @@ func update_bars(attr: StringName):
 		else:
 			in_turn_order.update() #TODO
 			
-func change_attr_bubbles():
+@rpc("any_peer", "call_remote", "reliable")
+func change_attr_bubbles_on_remote_peers(attr_bubbles):
+	character.attr_bubbles = attr_bubbles
+	character.emit_signal("attr_bubbles_changed", true)
+			
+func change_attr_bubbles(remote = false):
+	if remote == false: #if change was local call change on other peers
+		change_attr_bubbles_on_remote_peers.rpc(character.attr_bubbles)
 	for child in attr_bubbles.get_children():
 		child.queue_free()
 	for attr_data in character.attr_bubbles:
@@ -143,10 +187,10 @@ func change_attr_bubbles():
 				le.expand_to_text_length = true
 				le.flat = true
 				le.text = character.attributes[attr_data["name"]][1]
-				var image = load(attr_data["icon"])
+				var image = Globals.load_texture(attr_data["icon"])
 				if image != null:
-					le.right_icon = load(attr_data["icon"])
-				image = load(attr_data["image"])
+					le.right_icon = image
+				image = Globals.load_texture(attr_data["image"])
 				if image != null:
 					var c = PanelContainer.new()
 					c.use_parent_material = true
@@ -166,7 +210,7 @@ func change_attr_bubbles():
 				label.use_parent_material = true
 				label.text = character.attributes[attr_data["name"]][1]
 				hb.add_child(label)
-				var image = load(attr_data["icon"])
+				var image = Globals.load_texture(attr_data["icon"])
 				if image != null:
 					var icon = TextureRect.new()
 					icon.use_parent_material = true
@@ -174,7 +218,7 @@ func change_attr_bubbles():
 					icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH
 					icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
 					hb.add_child(icon)
-				image = load(attr_data["image"])
+				image = Globals.load_texture(attr_data["image"])
 				if image != null:
 					var c = PanelContainer.new()
 					c.use_parent_material = true
@@ -254,3 +298,77 @@ func unselect():
 	fov.color.a = Globals.map.fov_opacity
 	attr_bubbles.visible = false
 	bar_bubbles.visible = false
+
+
+# ========================= multiplayer =============================
+
+func on_synch_macro(macro_name, macro_dict, old_macro_name = "", remove = false):
+	synch_macro_to_peers.rpc(macro_name, macro_dict, old_macro_name, remove)
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_macro_to_peers(macro_name, macro_dict, old_macro_name = "", remove = false):
+	
+	var org_dict = character.macros[macro_name]
+	print("macro start - ", character.macros[macro_name])
+	print("synch macro: ", macro_name, macro_dict)
+	if remove:
+		character.macros.erase(macro_name)
+		if character.macros_in_bar.erase(macro_name):
+			character.emit_signal("macro_bar_changed")
+		return
+	if old_macro_name != "": #renamed
+		var old_macro = character.macros[old_macro_name]
+		character.macros.erase(old_macro_name)
+		character.macros[macro_name] = old_macro
+		if macro_dict["in_bar"]:
+			character.macros_in_bar.erase(old_macro_name)
+			character.macros_in_bar[macro_name] = old_macro
+			character.emit_signal("macro_bar_changed")
+		return
+	if character.macros.has(macro_name):
+		var old_macro = character.macros[macro_name]
+		if old_macro["in_bar"] == true and macro_dict["in_bar"] == false: #removed from bar
+			character.macros_in_bar.erase(macro_name)
+		else: #add to bar
+			character.macros_in_bar[macro_name] = macro_dict
+		print("merging dicts")
+		character.macros[macro_name].merge(macro_dict, true)
+	else:
+		character.macros[macro_name] = macro_dict
+	if macro_dict["in_bar"]:
+		character.emit_signal("macro_bar_changed")
+
+
+func on_attr_created(attr_name, remote = false):
+	print("remote - ", remote, character, self)
+	if not remote:
+		create_attr_on_other_peers.rpc(attr_name)
+
+@rpc("any_peer", "call_remote", "reliable")
+func create_attr_on_other_peers(attr_name):
+	if character.attributes.has(attr_name):
+		return
+	character.attributes[attr_name] = ["", ""]
+	character.emit_signal("attr_created", attr_name, true)
+	print("attr_created emited", character)
+	
+func on_synch_equip_slot(side, ind, move_ind, slot_dict, new, remove):
+	synch_equip_slot_on_remote.rpc(side, ind, move_ind, slot_dict, new, remove)
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_equip_slot_on_remote(side, ind, move_ind, slot_dict, new, remove):
+	print("synching slot on remote")
+	if new:
+		character.equip_slots[side].insert(ind, slot_dict)
+		print("inserting slot on remote")
+	elif remove:
+		if character.equip_slots[side][ind] != slot_dict:
+			print("BIG BUG: removed slot does not match slot in remove request !!!")
+		character.equip_slots[side].remove_at(ind)
+	elif move_ind != -1: #moved
+		character.equip_slots[side].remove_at(ind)
+		character.equip_slots[side].insert(move_ind, slot_dict)
+	else: #changed settings
+		character.equip_slots[side][ind] = slot_dict
+	#update any opened char_sheet of character
+	character.emit_signal("equip_slot_synched")

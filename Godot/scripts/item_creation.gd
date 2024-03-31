@@ -26,7 +26,7 @@ func _ready():
 	$ScrollContainer/VBoxContainer/Weight/HBoxContainer/WeightSpinBox.value = item_dict["weight"]
 	$ScrollContainer/VBoxContainer/Count/HBoxContainer/CountSpinBox.value = item_dict["count"]
 	$ScrollContainer/VBoxContainer/Description/HBoxContainer/DescriptionTextEdit.text = item_dict["description"]
-	var image = load(item_dict["icon"])
+	var image = Globals.load_texture(item_dict["icon"])
 	if image != null:
 		$ScrollContainer/VBoxContainer/Icon/HBoxContainer/TextureButton.texture_normal = image
 		
@@ -74,6 +74,7 @@ func _on_texture_button_pressed():
 
 
 func _on_image_file_dialog_file_selected(path):
+	path = await Globals.lobby.handle_file_transfer(path)
 	item_dict["icon"] = path
 	$ScrollContainer/VBoxContainer/Icon/HBoxContainer/TextureButton.texture_normal = load(path)
 

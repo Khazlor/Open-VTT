@@ -9,18 +9,19 @@ var inventory_comp = preload("res://components/inventory.tscn")
 func _ready():
 	print(selected)
 	for object in selected:
+		var new_inventory = inventory_comp.instantiate()
+		var tree = new_inventory.get_node("PanelContainer/Tree")
 		if "character" in object:
 			print("char")
-			var new_inventory = inventory_comp.instantiate()
-			new_inventory.get_node("PanelContainer/Tree").items = object.character.items
-			new_inventory.get_node("PanelContainer/Tree").equipped_items = object.character.equipped_items
-			new_inventory.get_node("PanelContainer/Tree").character = object.character
+			tree.items = object.character.items
+			tree.equipped_items = object.character.equipped_items
+			tree.character = object.character
 			tabs.add_child(new_inventory)
 			new_inventory.name = object.character.name
 		elif object.has_meta("inventory"):
 			print("inv")
-			var new_inventory = inventory_comp.instantiate()
-			new_inventory.get_node("PanelContainer/Tree").items = object.get_meta("inventory")
+			tree.items = object.get_meta("inventory")
+			tree.container = object
 			tabs.add_child(new_inventory)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

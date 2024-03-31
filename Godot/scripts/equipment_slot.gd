@@ -16,6 +16,7 @@ func _ready():
 	load_slot()
 	
 	equipment_sheet.char_sheet.character.connect("unequip_item_from_slot", on_unequip_item_from_slot)
+	equipment_sheet.char_sheet.character.connect("reload_equip_slot", on_reload_equip_slot)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -56,17 +57,24 @@ func _drop_data(at_position, data):
 	var new_item_dict = item_dict.duplicate(true)
 	new_item_dict["equipped"] = true
 	equipment_sheet.char_sheet.character.equip_item(new_item_dict)
-	equipment_sheet.char_sheet.inventory_sheet.tree.add_item_treeitem(new_item_dict, true, equipment_sheet.char_sheet.character)
 	if data.has_meta("inventory"): #dragging from inventory - remove dragged item
 		var inventory = data.get_meta("inventory")
 		if item_dict["equipped"]: #unequip
 			var char = data.get_meta("item_char")
 			char.unequip_item(item_dict)
+		var item_pos
 		for i in inventory.size():
 			if is_same(inventory[i], item_dict): #remove from inventory array
 				inventory.remove_at(i)
+				item_pos = i
 				break
-		data.free() #remove treeitem in old inventory
+		if data.has_meta("item_char"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_char").token), item_dict, item_pos)
+			data.get_meta("item_char").emit_signal("inv_changed")
+		elif data.has_meta("item_container"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_container")), item_dict, item_pos)
+			data.get_meta("item_container").emit_signal("inv_changed")
+	equipment_sheet.char_sheet.inventory_sheet.tree.add_item_treeitem(new_item_dict, true, equipment_sheet.get_slot_params(equip_slot_dict))
 	equip_slot_dict["item"] = new_item_dict
 	
 	load_slot()
@@ -82,19 +90,22 @@ func load_slot():
 			category_str = category
 		else:
 			category_str = category_str + ", " + category
-	tooltip_text = equip_slot_dict["name"] + "\nCategories:\n" + category_str
+	tooltip_text = ""
 	if equip_slot_dict["item"] != null:
-		var texture = load(equip_slot_dict["item"]["icon"])
+		tooltip_text += equip_slot_dict["item"]["name"]
+	tooltip_text += equip_slot_dict["name"] + "\nCategories:\n" + category_str
+	if equip_slot_dict["item"] != null:
+		var texture = Globals.load_texture(equip_slot_dict["item"]["icon"])
 		if texture == null: #no item icon - set to default image and set label text
-			$Label.text = equip_slot_dict["name"]
-			texture = load(equip_slot_dict["image"])
+			$Label.text = equip_slot_dict["item"]["name"]
+			texture = Globals.load_texture(equip_slot_dict["image"])
 		if texture != null:
 			var stylebox = StyleBoxTexture.new()
 			stylebox.texture = texture
 			add_theme_stylebox_override("panel", stylebox)
 	else:
 		#load background image
-		var texture = load(equip_slot_dict["image"])
+		var texture = Globals.load_texture(equip_slot_dict["image"])
 		if texture != null:
 			var stylebox = StyleBoxTexture.new()
 			stylebox.texture = texture
@@ -111,3 +122,8 @@ func on_unequip_item_from_slot(slot):
 	if is_same(slot, equip_slot_dict):
 		load_slot()
 		return
+
+func on_reload_equip_slot(slot_dict):
+	if is_same(slot_dict, equip_slot_dict):
+		print("reload slot")
+		load_slot()

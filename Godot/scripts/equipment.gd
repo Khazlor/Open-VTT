@@ -12,11 +12,32 @@ var equipment_slot_comp = preload("res://components/equipment_slot.tscn")
 func _ready():
 	load_slots()
 	char_sheet.character.connect("equip_slots_changed", update_slot)
+	char_sheet.character.connect("equip_slot_synched", on_equip_slot_synched)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
 
+func get_slot_params(slot):
+	for i in char_sheet.character.equip_slots.size():
+		for j in char_sheet.character.equip_slots[i].size():
+			if is_same(slot, char_sheet.character.equip_slots[i][j]):
+				return [i, j]
+	return null
+
+func on_equip_slot_synched():
+	#clear slots
+	for slot in left_slots.get_children():
+		left_slots.remove_child(slot)
+		slot.queue_free()
+	for slot in middle_slots.get_children():
+		middle_slots.remove_child(slot)
+		slot.queue_free()
+	for slot in right_slots.get_children():
+		right_slots.remove_child(slot)
+		slot.queue_free()
+	#recreate slots
+	load_slots()
 
 func _on_edit_button_pressed():
 	if char_sheet.inventory_sheet.visible: #visible inventory - show settings

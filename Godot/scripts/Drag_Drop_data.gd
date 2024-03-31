@@ -22,6 +22,8 @@ func _can_drop_data(position, data):
 	
 func _drop_data(position, data):
 	Globals.drag_drop_canvas_layer.layer = -1
+	if Globals.draw_layer == null:
+		return
 	print(data)
 	if data.has_meta("character"): #dropping character - create token
 		var token = token_comp.instantiate()
@@ -39,7 +41,8 @@ func _drop_data(position, data):
 		Globals.map.add_token(token)
 		token.light_mask = Globals.draw_layer.light_mask
 		token.fov.shadow_item_cull_mask = Globals.draw_layer.light_mask
-	if data.has_meta("item_dict"): #dropping iem - add to inventory or create container
+		Globals.draw_comp.create_object_on_remote_peers(token)
+	if data.has_meta("item_dict"): #dropping item - add to inventory or create container
 		print("item drop")
 		var item_dict = data.get_meta("item_dict")
 		var new_item_dict = item_dict.duplicate(true)
@@ -49,11 +52,18 @@ func _drop_data(position, data):
 			if item_dict["equipped"]: #unequip
 				var char = data.get_meta("item_char")
 				char.unequip_item(item_dict)
+			var item_pos
 			for i in inventory.size():
 				if is_same(inventory[i], item_dict): #remove from inventory array
 					inventory.remove_at(i)
+					item_pos = i
 					break
-			data.free() #remove treeitem in old inventory
+			if data.has_meta("item_char"):
+				Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_char").token), item_dict, item_pos)
+				data.get_meta("item_char").emit_signal("inv_changed")
+			elif data.has_meta("item_container"):
+				Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_container")), item_dict, item_pos)
+				data.get_meta("item_container").emit_signal("inv_changed")
 		var mouse_pos = dr.get_global_mouse_position()
 		var clicked = dr.get_clicked(mouse_pos)
 		print(clicked)
@@ -61,10 +71,13 @@ func _drop_data(position, data):
 			print("clicked found")
 			if "character" in clicked: #dropped on character
 				clicked.character.items.append(new_item_dict)
+				Globals.draw_comp.synch_object_inventory_add.rpc(Globals.draw_comp.get_path_to(clicked), new_item_dict)
+				clicked.character.emit_signal("inv_changed")
 				return
-			elif clicked.has_meta("inventory"):
+			elif clicked.has_meta("inventory"): #dropped on container
 				clicked.get_meta("inventory").append(new_item_dict)
-				return
+				Globals.draw_comp.synch_object_inventory_add.rpc(Globals.draw_comp.get_path_to(clicked), new_item_dict)
+				clicked.emit_signal("inv_changed")
 		#empty or not character/container - create container
 		print("create container")
 		var container = Panel.new() 
@@ -76,7 +89,9 @@ func _drop_data(position, data):
 			container.position = mouse_pos
 		container.set_meta("inventory", [new_item_dict])
 		container.set_meta("type", "container")
+		container.add_user_signal("inv_changed")
 		Globals.draw_layer.add_child(container)
+		Globals.draw_comp.create_object_on_remote_peers(container)
 
 #set drag_drop_layer to back on drag end - does not trigger when dragging from other windows
 func _notification(what: int) -> void:

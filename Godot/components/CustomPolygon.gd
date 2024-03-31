@@ -32,9 +32,26 @@ func _draw(): #draw polygon and polyline
 	draw_polyline(ScaledPointArray + PackedVector2Array([ScaledPointArray[0]]), character.token_outline_color, character.token_outline_width, false)
 	
 
+func _set(property, value):
+	if property == "size":
+		size = value
+		custom_minimum_size = value
+		scale_shape_to_size()
+		queue_redraw()
+		return true
+	return false
+
 #updates sizes of polygon based on token
 func update_token(shape: bool):
-	texture = load(character.token_texture)
+	if FileAccess.file_exists(character.token_texture):
+		texture = Globals.load_texture(character.token_texture)
+	elif character.token_texture != "": #check file on server
+		texture = Texture2D.new()
+		texture.resource_path = character.token_texture
+		var file_name = character.token_texture.get_file()
+		Globals.lobby.add_to_objects_waiting_for_file(file_name, get_parent())
+		if not multiplayer.is_server():
+			Globals.lobby.tcp_client.send_file_request(file_name)
 	if shape:
 		if Globals.tokenShapeDict.has(character.token_shape):
 			shapePointArray = Globals.tokenShapeDict[character.token_shape]

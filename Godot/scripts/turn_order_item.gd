@@ -5,7 +5,7 @@ var token
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if token != null:
-		var texture = load(token.character.token_texture)
+		var texture = Globals.load_texture(token.character.token_texture)
 		if texture != null:
 			$HBoxContainer/TextureRect.texture = texture
 		$HBoxContainer/NameLabel.text = token.character.name

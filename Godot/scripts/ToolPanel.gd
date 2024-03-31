@@ -5,8 +5,8 @@
 
 extends Control
 
-var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
-var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
+var button_visible: Texture2D = preload("res://icons/GuiVisibilityVisible.svg")
+var button_hidden: Texture2D = preload("res://icons/GuiVisibilityHidden.svg")
 
 var char_sheet = preload("res://UI/character_sheet.tscn")
 
@@ -16,7 +16,8 @@ var dialog_item
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass
+	if not multiplayer.is_server():
+		self.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -35,19 +36,21 @@ func _on_tree_item_selected():
 
 
 func _on_tree_button_clicked(item, column, id, mouse_button_index):
-	if id == 0:#add new
+	if id == 0:#edit
+		tree.set_selected(item, 0)
+		tree.edit_selected(true)
+	if id == 1:#add new
 		if item == tree.get_root(): #first character
 			tree.add_new_item("Character", item)
 		else:
 			tree.add_new_item(item.get_text(0) + "_copy", item)
-	if id == 1:#remove
+	if id == 2:#remove
 		dialog_item = item
 		$ConfirmationDialog.popup()
 
 #change meta data of layer for reload with edited name
 func _on_tree_item_edited():
-	#tree.get_edited().get_meta("draw_layer").set_meta("item_name", tree.get_edited().get_text(0))
-	pass
+	tree.rename_character(tree.get_edited(), tree.get_edited().get_text(0))
 
 func _on_confirmation_dialog_confirmed():
 	custom_remove_item(dialog_item)

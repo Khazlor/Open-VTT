@@ -57,7 +57,25 @@ mouse_force_pass_scroll_events = false
 theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
 
+[node name="Characters" type="MarginContainer" parent="TabContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="Tree" type="Tree" parent="TabContainer/Characters"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_force_pass_scroll_events = false
+script = ExtResource("2_nt2nq")
+
 [node name="Items" type="MarginContainer" parent="TabContainer"]
+visible = false
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -89,24 +107,6 @@ offset_bottom = 61.0
 text = "Are you sure you want to remove item
 and all sub_items?"
 horizontal_alignment = 1
-
-[node name="Characters" type="MarginContainer" parent="TabContainer"]
-visible = false
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/margin_left = 2
-theme_override_constants/margin_top = 2
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_bottom = 2
-
-[node name="Tree" type="Tree" parent="TabContainer/Characters"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-mouse_force_pass_scroll_events = false
-script = ExtResource("2_nt2nq")
 
 [node name="Object" type="MarginContainer" parent="TabContainer"]
 visible = false
@@ -615,14 +615,14 @@ offset_bottom = 61.0
 text = "Are you sure you want to delete character?"
 horizontal_alignment = 1
 
-[connection signal="button_clicked" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_button_clicked"]
-[connection signal="item_activated" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_item_activated"]
-[connection signal="tree_exiting" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_tree_exiting"]
-[connection signal="confirmed" from="TabContainer/Items/ConfirmationDialog" to="TabContainer/Items" method="_on_confirmation_dialog_confirmed"]
 [connection signal="button_clicked" from="TabContainer/Characters/Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="item_activated" from="TabContainer/Characters/Tree" to="." method="_on_tree_item_activated"]
 [connection signal="item_edited" from="TabContainer/Characters/Tree" to="." method="_on_tree_item_edited"]
 [connection signal="item_selected" from="TabContainer/Characters/Tree" to="." method="_on_tree_item_selected"]
+[connection signal="button_clicked" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_button_clicked"]
+[connection signal="item_activated" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_item_activated"]
+[connection signal="tree_exiting" from="TabContainer/Items/Tree" to="TabContainer/Items" method="_on_tree_tree_exiting"]
+[connection signal="confirmed" from="TabContainer/Items/ConfirmationDialog" to="TabContainer/Items" method="_on_confirmation_dialog_confirmed"]
 [connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X/PosXSpinBox" to="TabContainer/Object" method="_on_pos_x_spin_box_value_changed"]
 [connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y/PosYSpinBox" to="TabContainer/Object" method="_on_pos_y_spin_box_value_changed"]
 [connection signal="value_changed" from="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X/SizeXSpinBox" to="TabContainer/Object" method="_on_size_x_spin_box_value_changed"]

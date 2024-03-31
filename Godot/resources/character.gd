@@ -11,6 +11,7 @@ var attribute_modifiers = {} #dictionary of all attribute modifiers (deflection 
 @export var global = false #global characters are shared between campaings
 @export var singleton = false #all tokens have linked attributes
 @export var save_as_token = false #save character only as part of token on map
+@export var player_character = true
 
 @export var token_shape: StringName = &"Square"
 @export var token_size: Vector2 = Vector2(70,70)
@@ -31,18 +32,31 @@ var equipped_items = [] #list of equipped items - does not get saved - saved in 
 @export var macros_in_bar = {} #dict of all macros in action bar
 
 var tree_item: TreeItem
+var token
+
+signal get_token_request()
+signal get_token_response()
 
 signal token_changed()
 signal bars_changed()
 signal attr_bubbles_changed()
+signal attr_created(attr: StringName, remote)
 signal attr_updated(attr: StringName)
-signal macro_bar_changed(macro, macro2)
+signal macro_bar_changed()
 signal equip_slots_changed(equip_slot_dict, side: int, new: bool)
 signal equipped_item_changed(item)
 signal item_equipped(item)
 signal item_unequipped(item)
+signal reload_equip_slot(slot_dict)
 signal unequip_item_from_slot(slot)
 signal attr_modifier_applied(attr: StringName, tooltip: String)
+signal inv_changed()
+
+signal synch_item_added(item)
+signal synch_item_removed(item)
+signal synch_macro(macro_name, macro_dict, old_macro_name, remove)
+signal synch_equip_slot(side, ind, move_ind, slot_dict, new, remove)
+signal equip_slot_synched()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -52,6 +66,14 @@ func _ready():
 func _process(delta):
 	pass
 
+func get_token():
+	emit_get_token_request_after_delay()
+	token = await get_token_response
+	
+func emit_get_token_request_after_delay():
+	token = await Globals.draw_layer.get_tree().create_timer(0.01).timeout
+	emit_signal("get_token_request")
+		
 #save character resource to file
 func save(resolve_conflict: bool = false):
 	#get full path to save
@@ -91,14 +113,23 @@ func store_char_data(save: FileAccess):
 	save.store_var(token_texture)
 	save.store_var(token_texture_offset)
 	save.store_var(token_texture_scale)
-	print("items: ", items)
 	save.store_var(items)
-	print("equip_slots: ", equip_slots)
 	save.store_var(equip_slots)
-	print("bars: ", bars)
 	save.store_var(bars)
 	save.store_var(attr_bubbles)
 	save.store_var(macros)
+	
+func store_char_data_to_buffer():
+	var file_path = "res://temp" #temp file for character - find availible file name
+	var i = 1
+	while FileAccess.file_exists(file_path):
+		file_path = "res://temp_" + str(i)
+	var temp_charater_file = FileAccess.open(file_path, FileAccess.WRITE)
+	store_char_data(temp_charater_file)
+	temp_charater_file.close()
+	var buffer = FileAccess.get_file_as_bytes(file_path)
+	DirAccess.remove_absolute(file_path)
+	return buffer
 	
 func load_char(path: String, char_name: String, global: bool, tree_item: TreeItem):
 	if not FileAccess.file_exists(path + "/" + char_name):
@@ -128,10 +159,6 @@ func load_char(path: String, char_name: String, global: bool, tree_item: TreeIte
 func get_char_data(save: FileAccess):
 	name = save.get_var()
 	attributes = save.get_var()
-	#TODO REMOVE fix attributes
-	for attr in attributes:
-		if attributes[attr] is String:
-			attributes[attr] = [attributes[attr], attributes[attr]]
 	global = save.get_var()
 	singleton = save.get_var()
 	save_as_token = save.get_var()
@@ -153,6 +180,17 @@ func get_char_data(save: FileAccess):
 		if macros[macro]["in_bar"] == true:
 			macros_in_bar[macro] = macros[macro]
 	
+func get_char_data_from_buffer(buffer: PackedByteArray):
+	var file_path = "res://temp" #temp file for character - find availible file name
+	var i = 1
+	while FileAccess.file_exists(file_path):
+		file_path = "res://temp_" + str(i)
+	var temp_charater_file = FileAccess.open(file_path, FileAccess.WRITE_READ)
+	temp_charater_file.store_buffer(buffer)
+	temp_charater_file.seek(0)
+	get_char_data(temp_charater_file)
+	temp_charater_file.close()
+	DirAccess.remove_absolute(file_path)
 	
 func get_path_to_save(include_name: bool = true):
 	var base_path: String #character folder

@@ -4,3 +4,5 @@
 
 [node name="TCP_Server" type="Node"]
 script = ExtResource("1_l1cdn")
+
+[connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]

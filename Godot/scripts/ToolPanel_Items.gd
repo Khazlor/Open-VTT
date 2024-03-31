@@ -1,8 +1,8 @@
 extends MarginContainer
 
 
-var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
-var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
+var button_visible: Texture2D = preload("res://icons/GuiVisibilityVisible.svg")
+var button_hidden: Texture2D = preload("res://icons/GuiVisibilityHidden.svg")
 
 var item_creation_dialog = preload("res://components/item_creation.tscn")
 
@@ -61,4 +61,5 @@ func custom_remove_item(item: TreeItem):
 
 
 func _on_tree_tree_exiting():
-	tree.save_items()
+	if multiplayer.is_server():
+		tree.save_items()

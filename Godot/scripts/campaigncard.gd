@@ -14,7 +14,7 @@ func _ready():
 		$PanelContainer/MarginContainer/VBoxContainer/Players.text += "\n" + campaign.players
 	$PanelContainer/MarginContainer/VBoxContainer/DM.text = "DM: " + campaign.DM_name
 	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = campaign.campaign_desc
-	$PanelContainer/preview.texture = load(campaign.image)
+	$PanelContainer/preview.texture = Globals.load_texture(campaign.image)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

@@ -12,7 +12,7 @@ var token_comp = preload("res://components/token.tscn") #token component
 @export var background_color = Color.DARK_GRAY
 #grid settings
 @export var grid_enable = true
-@export var grid_color = Color(0,128,0,128)
+@export var grid_color = Color(0,0,0,0.7)
 @export var grid_thickness = 0.01
 @export var grid_size = 70
 @export var unit_size = 5
@@ -28,7 +28,7 @@ var token_comp = preload("res://components/token.tscn") #token component
 #preview
 @export var image = "res://images/Placeholder-1479066.png"
 #saved layers
-@export var saved_layers: PackedScene = null
+#@export var saved_layers: PackedScene = null
 var tokens = []
 #var token_paths = []
 #var token_indexes = []
@@ -69,8 +69,23 @@ func save_map(layers: Node2D):
 	
 	#save map meta data
 	map_save.store_var(map_desc)
-	map_save.store_var(grid_size)
+	map_save.store_var(background_color)
 	map_save.store_var(image)
+	
+	map_save.store_var(grid_enable)
+	map_save.store_var(grid_color)
+	map_save.store_var(grid_thickness)
+	map_save.store_var(grid_size)
+	map_save.store_var(unit_size)
+	map_save.store_var(unit)
+	#darkness settings
+	map_save.store_var(darkness_enable)
+	map_save.store_var(darkness_color)
+	map_save.store_var(DM_darkness_color)
+	#fov settings
+	map_save.store_var(fov_enable)
+	map_save.store_var(fov_opacity)
+	map_save.store_var(fov_color)
 	
 	#save map data
 	if layers != null:
@@ -84,7 +99,7 @@ func save_data_for_self_and_children(node, file: FileAccess):
 	if not node.has_meta("type"):
 		return
 	var object_data_arr = []
-	var is_token = false
+	#var is_token = false
 	var type = node.get_meta("type")
 	print("save object - ", type)
 	if type == "rect": #object is rectangle - panel
@@ -98,7 +113,7 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "line":
 		var line = node.get_child(0)
-		if not line is Light2D:
+		if not line is Line2D:
 			print("saving line - not line - need fix") 
 			return
 		var style_arr = [line.points, line.default_color, line.width]
@@ -110,33 +125,35 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, node.name])
 	elif type == "token":
 		var token = node.token_polygon
-		object_data_arr.append(["token"])
-		is_token = true
-		#save after light and shadow
+		object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), node.name])
+	elif type == "container":
+		var inventory = node.get_meta("inventory")
+		object_data_arr.append(["container", node.position, node.size, node.scale, node.rotation, inventory, node.name])
 
 	#light and shadow can be be on any object
 	if node.has_meta("light"):
 		var light: PointLight2D = Globals.draw_comp.get_object_light(node)
 		var remote: RemoteTransform2D = Globals.draw_comp.get_object_light_remote(node)
-		var light_arr = ["light", light.color, light.energy, light.texture.get_height(), light.texture_scale, remote.position, node.name]
+		var light_arr = ["light", light.color, light.energy, light.texture.get_height(), light.texture_scale, remote.position, light.name, remote.name]
 		object_data_arr.append(light_arr)
 	if node.has_meta("shadow"):
 		var occluder: LightOccluder2D = Globals.draw_comp.get_object_shadow(node)
-		var occluder_arr = ["shadow", occluder.occluder.polygon, occluder.occluder.cull_mode, node.name]
+		var occluder_arr = ["shadow", occluder.occluder.polygon, occluder.occluder.cull_mode, occluder.name]
 		object_data_arr.append(occluder_arr)
 		
 	if not object_data_arr.is_empty():
 		print("store - ",object_data_arr)
 		file.store_var(object_data_arr)
-		if is_token:
-			save_token(file, node)
+		#if is_token:
+			#save_token(file, node)
 		return
 		
 	if type == "layer": #name, visibility, GM, light layers
 		var name = node.get_meta("item_name")
 		var visibility = node.get_meta("visibility")
-		var GM = node.get_meta("GM")
-		object_data_arr.append(["layer", name, visibility, GM, node.light_mask, node.name])
+		var DM = node.get_meta("DM")
+		var player_layer = node.get_meta("player_layer")
+		object_data_arr.append(["layer", name, visibility, DM, player_layer, node.light_mask, node.name])
 		file.store_var(object_data_arr)
 		print("store - ",object_data_arr)
 		#save layer children
@@ -155,13 +172,28 @@ func load_map(map_name, load_map_data = true, map_save = null):
 		if map_save == null:
 			print("file open error - aborting")
 			return
-	#load map
+	#load map metadata
 	print("loading map")
 	map_desc = map_save.get_var()
-	grid_size = map_save.get_var()
+	background_color = map_save.get_var()
 	image = map_save.get_var()
-	print(map_desc, grid_size, image)
 	
+	grid_enable = map_save.get_var()
+	grid_color = map_save.get_var()
+	grid_thickness = map_save.get_var()
+	grid_size = map_save.get_var()
+	unit_size = map_save.get_var()
+	unit = map_save.get_var()
+
+	darkness_enable = map_save.get_var()
+	darkness_color = map_save.get_var()
+	DM_darkness_color = map_save.get_var()
+
+	fov_enable = map_save.get_var()
+	fov_opacity = map_save.get_var()
+	fov_color = map_save.get_var()
+	
+	#load map
 	if load_map_data:
 		print("load data", map_save.get_position(), " ",map_save.get_length())
 		tokens.clear()
@@ -183,9 +215,10 @@ func load_data_for_self_and_children(file: FileAccess):
 		var style
 		if object_data_arr[0][5].size() == 1: #texture:
 			style = StyleBoxTexture.new()
-			var texture = load(object_data_arr[0][5][0])
+			var texture = Globals.load_texture(object_data_arr[0][5][0])
 			if texture != null:
-				style.texture == texture
+				texture.resource_path = object_data_arr[0][5][0]
+				style.texture = texture
 		elif object_data_arr[0][5].size() == 3: #flat
 			style = StyleBoxFlat.new()
 			style.bg_color = object_data_arr[0][5][0]
@@ -245,23 +278,54 @@ func load_data_for_self_and_children(file: FileAccess):
 		Globals.draw_layer.add_child(node)
 		node.name = object_data_arr[0][6]
 	elif object_data_arr[0][0] == "token":
-		var token = token_comp.instantiate()
-		node = load_token(file)
+		print("loading token")
+		#var token = token_comp.instantiate()
+		#node = load_token(file)
+		node = token_comp.instantiate()
+		node.character = Character.new()
+		var token_polygon = node.get_node("TokenPolygon")
+		token_polygon.position = object_data_arr[0][1]
+		token_polygon.size = object_data_arr[0][2]
+		token_polygon.scale = object_data_arr[0][3]
+		token_polygon.rotation = object_data_arr[0][4]
+		node.character.get_char_data_from_buffer(object_data_arr[0][5])
+		node.set_meta("type", "token")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.draw_layer.add_child(node)
+		node.name = object_data_arr[0][6]
+	elif object_data_arr[0][0] == "container":
+		print("loading container")
+		node = Panel.new() 
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("inventory", object_data_arr[0][5])
+		node.set_meta("type", "container")
+		node.add_user_signal("inv_changed")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.draw_layer.add_child(node)
+		node.name = object_data_arr[0][6]
 	
 	elif object_data_arr[0][0] == "layer": #name, visibility, GM, light layers
 		node = Node2D.new()
 		node.set_meta("type", "layer")
 		node.set_meta("item_name", object_data_arr[0][1])
-		print(node.get_meta("item_name"))
 		node.set_meta("visibility", object_data_arr[0][2])
-		node.set_meta("GM", object_data_arr[0][3])
-		node.light_mask = object_data_arr[0][4]
+		node.set_meta("DM", object_data_arr[0][3])
+		node.set_meta("player_layer", object_data_arr[0][4])
+		node.light_mask = object_data_arr[0][5]
 		Globals.draw_layer.add_child(node)
-		node.name = object_data_arr[0][5]
+		node.name = object_data_arr[0][6]
 		Globals.draw_layer = node
+		if not object_data_arr[0][2] or not Globals.lobby.check_is_server() and object_data_arr[0][3]: #not visible or not server and is DM layer - hide layer
+			node.visible = false
 
-	elif object_data_arr[0][0] == "child_end": #put at end of children list
+	elif object_data_arr[0] == "child_end": #put at end of children list
+		print("end of children:")
+		print(Globals.draw_layer)
 		Globals.draw_layer = Globals.draw_layer.get_parent()
+		print(Globals.draw_layer)
 		
 	#load light and shadow for object:
 	if node != null and object_data_arr.size() > 1:
@@ -297,6 +361,7 @@ func load_data_for_self_and_children(file: FileAccess):
 			remote.set_meta("light", true)
 			remote.set_meta("type", "remote")
 			node.add_child(remote)
+			remote.name = object_data_arr[1][7]
 			remote.set_remote_node(remote.get_path_to(light))
 
 		elif object_data_arr[1][0] == "shadow":
@@ -310,6 +375,7 @@ func load_data_for_self_and_children(file: FileAccess):
 		if object_data_arr.size() > 2:
 			if object_data_arr[2][0] == "shadow":
 				var occluder = LightOccluder2D.new()
+				occluder.occluder = OccluderPolygon2D.new()
 				occluder.occluder.polygon = object_data_arr[2][1]
 				occluder.occluder.cull_mode = object_data_arr[2][2]
 				node.add_child(occluder)
@@ -377,7 +443,6 @@ func load_token(save_file: FileAccess):
 	character.connect("attr_updated", character.apply_modifiers_to_attr)
 	character.connect("item_equipped", character.equip_item)
 	character.connect("item_unequipped", character.unequip_item)
-	
 	character.load_equipped_items_from_equipment()
 	character.load_attr_modifiers_from_equipment()
 	

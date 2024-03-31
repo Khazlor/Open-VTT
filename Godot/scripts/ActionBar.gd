@@ -1,5 +1,7 @@
 extends FlowContainer
 
+var characters = []
+var macros_in_bar = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -10,12 +12,24 @@ func _ready():
 func _process(delta):
 	pass
 
+func disconnect_character_signals():
+	for character in characters:
+		if character != null:
+			character.disconnect("macro_bar_changed", on_macro_bar_changed)
+			print("disconnected character ", character)
+	characters.clear()
 
-func fill_action_bar(selected_tokens = []):
+func fill_action_bar(selected_tokens = [], reconnect = true):
+	print("fill action bar: ", macros_in_bar)
 	clear()
-	var macros_in_bar = {}
-	for token in selected_tokens: #create list of all macros in bar of selected tokens
-		macros_in_bar.merge(token.character.macros_in_bar)
+	if reconnect:
+		macros_in_bar = {}
+		disconnect_character_signals()
+		for token in selected_tokens: #create list of all macros in bar of selected tokens
+			token.character.connect("macro_bar_changed", on_macro_bar_changed)
+			print("connected character ", token.character)
+			characters.append(token.character)
+			macros_in_bar.merge(token.character.macros_in_bar)
 	for macro_key in macros_in_bar: #generate buttons for each macro in bar
 		var macro = macros_in_bar[macro_key]
 		var stylebox = StyleBoxFlat.new()
@@ -41,7 +55,7 @@ func fill_action_bar(selected_tokens = []):
 			panel.add_child(label)
 		else:
 			var tr = TextureRect.new() #icon
-			tr.texture = load(macro["icon"])
+			tr.texture = Globals.load_texture(macro["icon"])
 			tr.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			tr.custom_minimum_size.y = macro["b_icon_size"]
@@ -68,6 +82,11 @@ func fill_action_bar(selected_tokens = []):
 #		button.connect("pressed", button_pressed)
 		panel.add_child(button)
 		self.add_child(panel)
+	
+func on_macro_bar_changed():
+	print("is server: ",multiplayer.is_server())
+	print("macro_bar_changed")
+	fill_action_bar(null, false)
 	
 func clear():
 	for child in self.get_children():

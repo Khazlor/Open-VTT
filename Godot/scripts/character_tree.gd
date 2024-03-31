@@ -4,11 +4,10 @@
 
 extends Tree
 
-var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
-var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
-var button_add: Texture2D = load("res://icons/Add.svg")
-var button_remove: Texture2D = load("res://icons/Remove.svg")
-var icon: Texture2D = load("res://icon.svg")
+var button_edit: Texture2D = preload("res://icons/Edit.svg")
+var button_add: Texture2D = preload("res://icons/Add.svg")
+var button_remove: Texture2D = preload("res://icons/Remove.svg")
+var icon: Texture2D = preload("res://icon.svg")
 
 enum {BEFORE = -1, ON = 0, AFTER = 1}
 
@@ -23,7 +22,7 @@ func _ready():
 		return
 	var item = create_item() #root
 	item.set_selectable(0, false)
-	item.add_button(0, button_add, 0)
+	item.add_button(0, button_add, 1)
 	load_characters()
 	
 #	print("creating character tree ===========================================")
@@ -57,6 +56,7 @@ func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 	item.set_icon(0, icon)
 	item.set_icon_max_width(0, 25)
 	item.set_text(0, item_name)
+	item.add_button(0, button_edit)
 	item.add_button(0, button_add)
 	item.add_button(0, button_remove)
 	
@@ -209,17 +209,42 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 			var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
 		
+func rename_character(item: TreeItem, new_name: String):
+	var character = item.get_meta("character")
+	var old_name = character.name
+	var new_path = character.get_path_to_save(false)
+	var old_path = new_path + old_name
+	new_path = new_path + new_name
+	var new_path_org = new_path
+	var i = 0
+	#resolve conflict
+	while DirAccess.dir_exists_absolute(new_path):
+		i += 1
+		new_path = new_path_org + "_" + str(i)
+		
+	if i != 0: #filename was changed
+		character.name = new_name + "_" + str(i)
+		item.set_text(0, character.name)
+	else:
+		character.name = new_name
+	DirAccess.rename_absolute(old_path, new_path) #rename folder
+	DirAccess.rename_absolute(new_path + "/" + old_name, new_path + "/" + character.name) #rename file
+	print("rename: ", old_path, " ", new_path)
+	character.save(false)
+
 #loads all characters
 func load_characters():
 	#locals
 	var dir = DirAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters")
 	var item:TreeItem = add_new_item("Campaign", get_root(), false)
-	item.erase_button(0, 1)
+	item.erase_button(0, 0)
+	item.erase_button(0, 2)
 	if dir != null:
 		load_characters_in_dir(dir, "", item, false)
 	item = add_new_item("Globals", get_root(), false)
 	global_item = item
-	item.erase_button(0, 1)
+	item.erase_button(0, 0)
+	item.erase_button(0, 2)
 	#globals
 	dir = DirAccess.open("res://saves/Characters")
 	if dir != null:

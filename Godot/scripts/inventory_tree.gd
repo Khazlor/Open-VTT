@@ -4,6 +4,7 @@ var categories = {}
 var items = []
 var equipped_items = []
 var character = null
+var container = null
  
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -22,19 +23,15 @@ func _ready():
 	set_column_title(5, "Total Weight")
 	set_column_expand(5, false)
 	
-	#create root
-	hide_root = false
-	var root = create_item(null)
-	root.disable_folding = true
-	root.set_text(1, "Total")
-	root.set_cell_mode(5, TreeItem.CELL_MODE_RANGE)
-	root.set_range_config(5, 0, 99999999, 1)
-	root.set_range(5, 0)
+	create_root()
 	
 	#get inventory items
 	var char_sheet = $"../../../../.."
+	print("char sheet: ", char_sheet)
 	if char_sheet != null and "character" in char_sheet: #inventory in character sheet
+		print("char sheet OK - ", char_sheet.character)
 		character = char_sheet.character
+		print("char: ", character)
 		items = character.items
 		equipped_items = character.equipped_items
 	else:
@@ -64,7 +61,11 @@ func _ready():
 	#}
 	#])
 	
-	load_inventory(character)
+	if character != null:
+		character.connect("inv_changed", reload_inv)
+	elif container != null:
+		container.connect("inv_changed", reload_inv)
+	load_inventory()
 	
 
 
@@ -72,18 +73,55 @@ func _ready():
 func _process(delta):
 	pass
 
-func load_inventory(character):
+func create_root():
+	hide_root = false
+	var root = create_item(null)
+	root.disable_folding = true
+	root.set_text(1, "Total")
+	root.set_cell_mode(5, TreeItem.CELL_MODE_RANGE)
+	root.set_range_config(5, 0, 99999999, 1)
+	root.set_range(5, 0)
+
+func reload_inv():
+	print("reload inv")
+	if multiplayer.is_server():
+		print("reload inv on server")
+	else:
+		print("reload inv on client")
+	clear()
+	categories.clear()
+	create_root()
+	load_inventory()
+
+func load_inventory():
 	print("eq items: ", equipped_items)
 	for item in equipped_items:
-		add_item_treeitem(item, false, character)
+		add_item_treeitem(item, false)
 	print("items: ", items)
 	for item in items:
 		add_item_treeitem(item, false)
 		
 			
 #creates treeitem in tree representing item
-func add_item_treeitem(item_dict, add_to_inventory = true, character = null):
+func add_item_treeitem(item_dict, add_to_inventory = true, slot_arr = null):
 	print("add item start: ", items)
+	print("char: ", character)
+	if add_to_inventory:
+		if item_dict["equipped"]: #equipped item
+			equipped_items.append(item_dict)
+			Globals.draw_comp.synch_object_inventory_add.rpc(Globals.draw_comp.get_path_to(character.token), item_dict, slot_arr)
+			character.emit_signal("inv_changed")
+		else:
+			items.append(item_dict)
+			print("char, cont: ", character, container)
+			if character != null:
+				Globals.draw_comp.synch_object_inventory_add.rpc(Globals.draw_comp.get_path_to(character.token), item_dict)
+				character.emit_signal("inv_changed")
+			else: #container
+				Globals.draw_comp.synch_object_inventory_add.rpc(Globals.draw_comp.get_path_to(container), item_dict)
+				container.emit_signal("inv_changed")
+		return
+	
 	var category = item_dict["category"]
 	if not categories.has(category): #create category item
 		var category_item = create_item(null)
@@ -99,12 +137,16 @@ func add_item_treeitem(item_dict, add_to_inventory = true, character = null):
 	if item_dict["equipped"]: #set inventory for deleting
 		new_item.set_meta("item_char", character)
 		new_item.set_meta("inventory", equipped_items)
+	elif character != null:
+		new_item.set_meta("item_char", character)
+		new_item.set_meta("inventory", items)
 	else:
+		new_item.set_meta("item_container", container)
 		new_item.set_meta("inventory", items)
 	new_item.set_cell_mode(0, TreeItem.CELL_MODE_CHECK)
 	new_item.set_editable(0, false)
 	new_item.set_checked(0, item_dict["equipped"])
-	var icon = load(item_dict["icon"])
+	var icon = Globals.load_texture(item_dict["icon"])
 	if icon != null:
 		new_item.set_icon(1, icon)
 	new_item.set_text(1, item_dict["name"])
@@ -120,12 +162,6 @@ func add_item_treeitem(item_dict, add_to_inventory = true, character = null):
 	new_item.set_range_config(5, 0, 99999999, 1)
 	new_item.set_range(5, new_item.get_range(3) * new_item.get_range(4))
 	change_weight(new_item, new_item.get_range(5))
-	
-	if add_to_inventory:
-		if item_dict["equipped"]: #equipped item
-			equipped_items.append(item_dict)
-		else:
-			items.append(item_dict)
 	print("add item end: ", items)
 	return new_item
 		
@@ -171,17 +207,24 @@ func _drop_data(at_position, data):
 	var item_dict = data.get_meta("item_dict")
 	var new_item_dict = item_dict.duplicate(true)
 	new_item_dict["equipped"] = false
-	add_item_treeitem(new_item_dict)
 	if data.has_meta("inventory"): #dragging from inventory - remove from old
 		var inventory = data.get_meta("inventory")
 		if item_dict["equipped"]: #unequip
 			var char = data.get_meta("item_char")
 			char.unequip_item(item_dict)
+		var item_pos
 		for i in inventory.size():
 			if is_same(inventory[i], item_dict): #remove from inventory array
 				inventory.remove_at(i)
+				item_pos = i
 				break
-		data.free() #remove treeitem in old inventory
+		if data.has_meta("item_char"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_char").token), item_dict, item_pos)
+			data.get_meta("item_char").emit_signal("inv_changed")
+		elif data.has_meta("item_container"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_container")), item_dict, item_pos)
+			data.get_meta("item_container").emit_signal("inv_changed")
+	add_item_treeitem(new_item_dict)
 	Globals.drag_drop_canvas_layer.layer = -1
 
 #returns treeitem of searched item

@@ -82,7 +82,7 @@ func _ready():
 	#edited fov opacity in map options -> update all fov objects
 	tool_panel_map_menu.connect("fov_opacity_changed", _on_fov_opacity_changed_signal)
 	
-	unshaded_material = load("res://materials/canvas_item_material_unshaded.tres")
+	unshaded_material = Globals.load_texture("res://materials/canvas_item_material_unshaded.tres")
 	
 	#selected token in turn order:
 	Globals.turn_order.connect("token_turn_selected", select_token)
@@ -169,6 +169,7 @@ func _unhandled_input(event):
 			current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
 			current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 			current_line.position = -current_rect.position
+			create_object_on_remote_peers(current_rect)
 			current_rect = null
 
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "measure":
@@ -188,37 +189,16 @@ func _unhandled_input(event):
 			#rotating selection finished
 			if selected_rotating:
 				selected_rotating = false
+				for object in selected:
+					synch_object_properties.rpc(get_path_to(object), [["position", object.position], ["rotation", object.rotation]])
 				return
 			#scaling selection finished
 			if selected_scaling:
-				print("scaling end")
 				selected_scaling = false
+				for object in selected:
+					synch_object_properties.rpc(get_path_to(object), [["position", object.position], ["scale", object.scale]])
 				flip_x = false
 				flip_y = false
-				if mouse_over_tl:
-					current_panel = select_box.get_child(0)
-					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
-						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
-							return
-#					mouse_over_tl = false
-				if mouse_over_bl:
-					current_panel = select_box.get_child(1)
-					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
-						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
-							return
-#					mouse_over_bl = false
-				if mouse_over_tr:
-					current_panel = select_box.get_child(2)
-					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
-						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
-							return
-#					mouse_over_tr = false
-				if mouse_over_br:
-					current_panel = select_box.get_child(3)
-					if mouse_pos.x > current_panel.position.x and mouse_pos.x < current_panel.position.x + current_panel.size.x:
-						if mouse_pos.y > current_panel.position.y and mouse_pos.y < current_panel.position.y + current_panel.size.y:
-							return
-#					mouse_over_br = false
 				return
 			if !selected_creating:
 				return
@@ -240,7 +220,8 @@ func _unhandled_input(event):
 				if child.is_class("Node2D"): #inherits from Node2D
 					if Globals.select_recursive:
 						if child.get_class() == "Node2D": #is Node2D -> Layer
-							lines_children.append_array(child.get_children())
+							if child.visible:
+								lines_children.append_array(child.get_children())
 					continue
 				if child.rotation == 0: #no rotation - faster
 					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
@@ -343,8 +324,7 @@ func _unhandled_input(event):
 				current_panel.queue_free()
 				print("free")
 			else:
-				current_panel.name = current_panel.name
-				create_object.rpc(get_path_to(current_panel.get_parent()), current_panel.name, serialize_object_for_rpc(current_panel))
+				create_object_on_remote_peers(current_panel)
 		#else button held -> drawing
 		if draw_enable:
 			if Globals.tool == "rect":
@@ -485,9 +465,10 @@ func _unhandled_input(event):
 							current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
 							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
 							current_label.text = "text"
-							current_panel.set_meta("type", "text")
+							current_label.set_meta("type", "text")
 							Globals.draw_layer.add_child(current_label)
 							current_label.set_owner(layers_root)
+							create_object_on_remote_peers(current_label)
 						#didn't click on existing textedit
 						if found != 2:
 							current_textedit = TextEdit.new()
@@ -893,6 +874,7 @@ func _unhandled_input(event):
 					var light = get_object_light(child)
 					if light != null:
 						light.queue_free()
+				synch_object_removal.rpc(get_path_to(child))
 				child.queue_free()
 			#remove select box
 			if select_box != null:
@@ -975,9 +957,10 @@ func get_clicked(mouse_position: Vector2):
 	if Globals.select_recursive:
 		var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
 		for treeitem in treeitem_array:
-			lines_children = treeitem.get_meta("draw_layer").get_children()
-			lines_children.reverse()
-			array_list.append(lines_children)
+			if treeitem.get_meta("draw_layer").visible:
+				lines_children = treeitem.get_meta("draw_layer").get_children()
+				lines_children.reverse()
+				array_list.append(lines_children)
 	for array in array_list:
 		for child in array:
 			if "character" in child: #if character token
@@ -1275,27 +1258,43 @@ func _rotate_handle_mouse_exited():
 func on_files_dropped(files):
 	print(files)
 	for file in files:
-		var tex = ImageTexture.new()
-		var img = Image.new()
-		var err = img.load(file)
-		if err != OK:
-			print("import failed")
-			return
+		var panel = Panel.new()
+		var file_path = await Globals.lobby.handle_file_transfer(file)
+		var file_name = file_path.get_file()
+		print("dropped file name on server: ", file_name)
+		var tex: Texture2D
+		var tex_size
+		if FileAccess.file_exists(file_path):
+			print("file already exists")
+			#file exists - load and assign:
+			tex = Globals.load_texture(file_path)
+			if tex == null:
+				print("import failed")
+				return
+			else:
+				print("import done")
+				tex_size = tex.get_size()
 		else:
-			print("import done")
-			print(img.get_size())
-		tex.set_image(img)
-		current_panel = Panel.new()
-		current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
-		var begin = get_viewport().get_mouse_position()
-		current_panel.set_begin(begin)
-		current_panel.set_end(begin + Vector2(50,50))
+			print("file does not exist")
+			Globals.lobby.add_to_objects_waiting_for_file(file_path, panel)
+			Globals.lobby.tcp_client.send_file_request(file_name)
+		if tex == null: #texture not yet loaded - get size from file
+			var tex_file = Globals.load_texture(file)
+			tex_size = tex_file.get_size()
+			tex = Texture2D.new()
+		tex.resource_path = file_path
+		panel.mouse_filter = Control.MOUSE_FILTER_PASS
+		var begin = get_global_mouse_position()
+		panel.set_begin(begin)
+		panel.set_end(begin + tex_size)
 		var style = StyleBoxTexture.new()
 		style.texture = tex
-		current_panel.add_theme_stylebox_override("panel", style)
-		current_panel.set_meta("type", "rect")
-		Globals.draw_layer.add_child(current_panel)
-		current_panel.set_owner(layers_root)
+		print("texture size: ",tex_size)
+		panel.add_theme_stylebox_override("panel", style)
+		panel.set_meta("type", "rect")
+		Globals.draw_layer.add_child(panel)
+		panel.set_owner(layers_root)
+		create_object_on_remote_peers(panel)
 		
 		
 func _text_edit_finished():
@@ -1304,8 +1303,10 @@ func _text_edit_finished():
 	#lines.remove_child(currently_editing_textedit)
 	currently_editing_textedit.queue_free()
 	print("free")
+	synch_object_properties.rpc(get_path_to(currently_editing_label), [["text", currently_editing_label.text]])
 	if currently_editing_label.text.is_empty():
 		#lines.remove_child(currently_editing_label)
+		synch_object_removal.rpc(get_path_to(currently_editing_label))
 		currently_editing_label.queue_free()
 		print("free")
 	
@@ -1380,87 +1381,99 @@ func _on_object_change_signal(index, value):
 	if index == 0: #position x
 		for object in selected:
 			object.position.x = value
-	if index == 1: #position y
+			synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
+	elif index == 1: #position y
 		for object in selected:
 			object.position.y = value
-	if index == 2: #size x
+			synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
+	elif index == 2: #size x
 		for object in selected:
 			object.size.x = value
-			if object.name == "TokenPolygon": #token size - need to update polygon points
-				object.scale_shape_to_size()
-				object.get_parent().UI_set_position()
-	if index == 3: #size y
+			#if object.name == "TokenPolygon": #token size - need to update polygon points
+				#object.scale_shape_to_size()
+				#object.get_parent().UI_set_position()
+			synch_object_properties.rpc(get_path_to(object), [["size", object.size]])
+	elif index == 3: #size y
 		for object in selected:
 			object.size.y = value
-			if object.name == "TokenPolygon": #token size - need to update polygon points
-				object.scale_shape_to_size()
-				object.get_parent().UI_set_position()
-	if index == 4: #scale x
+			#if object.name == "TokenPolygon": #token size - need to update polygon points
+				#object.scale_shape_to_size()
+				#object.get_parent().UI_set_position()
+			synch_object_properties.rpc(get_path_to(object), [["size", object.size]])
+	elif index == 4: #scale x
 		for object in selected:
 			object.scale.x = value
-	if index == 5: #scale y
+			synch_object_properties.rpc(get_path_to(object), [["scale", object.scale]])
+	elif index == 5: #scale y
 		for object in selected:
 			object.scale.y = value
-	if index == 6: #rotation
+			synch_object_properties.rpc(get_path_to(object), [["scale", object.scale]])
+	elif index == 6: #rotation
 		for object in selected:
 			object.rotation = value
+			synch_object_properties.rpc(get_path_to(object), [["rotation", object.rotation]])
 			
 	#light
-	if index == 10: #light enable
+	elif index == 10: #light enable
 		if value == true:
 			for object in selected:
 				create_or_enable_light(object)
 		else:
 			for object in selected:
 				disable_light(object)
-	if index == 11: #light offset x
+	elif index == 11: #light offset x
 		for object in selected:
 			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
 				var light_remote = get_object_light_remote(object)
 				if light_remote != null:
 					light_remote.position.x = value
-	if index == 12: #light offset y
+					synch_object_properties.rpc(get_path_to(light_remote), [["position", light_remote.position]])
+	elif index == 12: #light offset y
 		for object in selected:
 			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
 				var light_remote = get_object_light_remote(object)
 				if light_remote != null:
 					light_remote.position.y = value
-			
-	if index == 13: #light texture resolution
+					synch_object_properties.rpc(get_path_to(light_remote), [["position", light_remote.position]])
+	elif index == 13: #light texture resolution
 		for object in selected:
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
 					light.texture.height = value
 					light.texture.width = value
-	if index == 14: #light radius
+					synch_light_texture_resolution.rpc(get_path_to(light), value)
+	elif index == 14: #light radius
 		for object in selected:
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
 					light.texture_scale = value/light.texture.get_height()*2
-	if index == 15: #light color
+					synch_object_properties.rpc(get_path_to(light), [["texture_scale", light.texture_scale]])
+	elif index == 15: #light color
 		for object in selected:
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
 					light.color = value
-	if index == 16: #light energy
+					synch_object_properties.rpc(get_path_to(light), [["color", value]])
+	elif index == 16: #light energy
 		for object in selected:
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
 					light.energy = value
+					synch_object_properties.rpc(get_path_to(light), [["energy", value]])
 	
 	#shadows
-	if index == 20: #shadow enable
+	elif index == 20: #shadow enable
 		if value == true:
 			for object in selected:
 				create_or_enable_shadow(object)
 		else:
 			for object in selected:
 				disable_shadow(object)
-	if index == 21: #shadow one sided
+	elif index == 21: #shadow one sided
 		for object in selected:
 			if object.has_meta("shadow"):
 				var shadow = get_object_shadow(object)
@@ -1472,8 +1485,8 @@ func _on_object_change_signal(index, value):
 						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
 					else:
 						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
-				
-	if index == 22: #shadow flip sides
+					synch_occluder_cull_mode.rpc(get_path_to(shadow), shadow.occluder.cull_mode)
+	elif index == 22: #shadow flip sides
 		for object in selected:
 			if object.has_meta("shadow"):
 				var shadow = get_object_shadow(object)
@@ -1485,11 +1498,13 @@ func _on_object_change_signal(index, value):
 						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
 					else:
 						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
+					synch_occluder_cull_mode.rpc(get_path_to(shadow), shadow.occluder.cull_mode)
 				
 func get_object_light(object):
 	for child in object.get_children():
 		if child is RemoteTransform2D and child.has_meta("light"):
 			return child.get_node(child.get_remote_node())
+	print("no light found")
 	return null
 	
 func get_object_light_remote(object):
@@ -1498,52 +1513,67 @@ func get_object_light_remote(object):
 			return child
 	return null
 
-func create_or_enable_light(object):
+func create_or_enable_light(object, light_dict = null):
 	if object.has_meta("light"):
 		var light = get_object_light(object)
 		if light != null:
 			light.visible = true
-	else: #create light
-		var light = PointLight2D.new()
-		light.position = Vector2(tool_panel_object_menu.get_position_x(), tool_panel_object_menu.get_position_y())
-		var texture = GradientTexture2D.new()
-		texture.gradient = Gradient.new()
-		texture.gradient.set_offset(0, 0.7)
-		texture.gradient.set_offset(1, 0)
+			synch_object_properties.rpc(get_path_to(light), [["visible", true]])
+			return
+	if light_dict == null:
+		light_dict = {
+			"position" = Vector2(tool_panel_object_menu.get_position_x(), tool_panel_object_menu.get_position_y()),
+			"resolution" = tool_panel_object_menu.get_light_resolution(),
+			"scale" = tool_panel_object_menu.get_light_radius()/tool_panel_object_menu.get_light_resolution()*2,
+			"color" = tool_panel_object_menu.get_light_color(),
+			"energy" = tool_panel_object_menu.get_light_energy(),
+			"offset" = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y())
+		}
+	#create light
+	var light = PointLight2D.new()
+	light.position = light_dict["position"]
+	var texture = GradientTexture2D.new()
+	texture.gradient = Gradient.new()
+	texture.gradient.set_offset(0, 0.7)
+	texture.gradient.set_offset(1, 0)
 #		texture.gradient.add_point(0.7, Color.BLACK)
 #		texture.gradient.add_point(0, Color.WHITE)
-		texture.height = tool_panel_object_menu.get_light_resolution()
-		texture.width = texture.height
-		texture.fill = GradientTexture2D.FILL_RADIAL
-		texture.fill_from = Vector2(0.5, 0.5)
-		texture.fill_to = Vector2(1, 0)
-		texture.repeat = GradientTexture2D.REPEAT_NONE
-		light.texture = texture
-		#light.offset = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y()) #changed to remote - offset does not change casting point
-		light.texture_scale = tool_panel_object_menu.get_light_radius()/texture.get_height()*2
-		light.color = tool_panel_object_menu.get_light_color()
-		light.energy = tool_panel_object_menu.get_light_energy()
-		light.range_z_max = 4095
-		light.range_z_min = -4096
-		light.range_layer_max = 0
-		light.range_layer_min = -512
-		light.shadow_enabled = true
-		light.set_meta("type", "light")
-		object.add_sibling(light)
-		object.set_meta("light", true)
-		var remote = RemoteTransform2D.new()
-		remote.update_scale = false
-		remote.position = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y())
-		remote.set_meta("light", true)
-		remote.set_meta("type", "remote")
-		object.add_child(remote)
-		remote.set_remote_node(remote.get_path_to(light))
+	texture.height = light_dict["resolution"]
+	texture.width = texture.height
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1, 0)
+	texture.repeat = GradientTexture2D.REPEAT_NONE
+	light.texture = texture
+	#light.offset = Vector2(tool_panel_object_menu.get_light_offset_x(), tool_panel_object_menu.get_light_offset_y()) #changed to remote - offset does not change casting point
+	light.texture_scale = light_dict["scale"]
+	light.color = light_dict["color"]
+	light.energy = light_dict["energy"]
+	light.range_z_max = 4095
+	light.range_z_min = -4096
+	light.range_layer_max = 0
+	light.range_layer_min = -512
+	light.shadow_enabled = true
+	light.set_meta("type", "light")
+	object.add_sibling(light)
+	light.name = light.name
+	object.set_meta("light", true)
+	var remote = RemoteTransform2D.new()
+	remote.update_scale = false
+	remote.position = light_dict["offset"]
+	remote.set_meta("light", true)
+	remote.set_meta("type", "remote")
+	object.add_child(remote)
+	remote.name = remote.name
+	remote.set_remote_node(remote.get_path_to(light))
+	create_object_on_remote_peers(object)
 		
 func disable_light(object):
 	if object.has_meta("light"):
 		var light = get_object_light(object)
 		if light != null:
 			light.visible = false
+			synch_object_properties.rpc(get_path_to(light), [["visible", false]])
 		
 		
 func get_object_shadow(object):
@@ -1558,6 +1588,7 @@ func create_or_enable_shadow(object):
 		var shadow = get_object_shadow(object)
 		if shadow != null:
 			shadow.visible = true
+			synch_object_properties.rpc(get_path_to(shadow), [["visible", true]])
 	else: #create shadow
 		var shadow = LightOccluder2D.new()
 		shadow.occluder = OccluderPolygon2D.new()
@@ -1585,12 +1616,15 @@ func create_or_enable_shadow(object):
 			shadow.occluder.polygon = points
 		object.add_child(shadow)
 		object.set_meta("shadow", true)
+		shadow.name = shadow.name
+		create_object_on_remote_peers(object)
 		
 func disable_shadow(object):
 	if object.has_meta("shadow"):
 		var shadow = get_object_shadow(object)
 		if shadow != null:
 			shadow.visible = false
+			synch_object_properties.rpc(get_path_to(shadow), [["visible", false]])
 		
 #value is new opacity, begin is in case of first call
 func _on_fov_opacity_changed_signal(value):
@@ -1741,7 +1775,8 @@ func end_targeting():
 		if child.is_class("Node2D"): #inherits from Node2D
 			if Globals.select_recursive:
 				if child.get_class() == "Node2D": #is Node2D -> Layer
-					lines_children.append_array(child.get_children())
+					if child.visible:
+						lines_children.append_array(child.get_children())
 			continue
 		if "character" in child: #if character token
 			child = child.get_child(0)
@@ -1774,6 +1809,10 @@ func get_object_center(object):
 
 # ============== multiplayer synch of objects on map =================
 
+func create_object_on_remote_peers(object):
+	object.name = object.name
+	create_object.rpc(get_path_to(object.get_parent()), object.name, serialize_object_for_rpc(object))
+
 #creates object on other peers
 @rpc("any_peer", "call_remote", "reliable", 0)
 func create_object(parent_path: NodePath, node_name: String, object_data_arr):
@@ -1787,18 +1826,29 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 	var node = null
 	if object_data_arr[0][0] == "rect": #object is rectangle - panel
 		print("rect object")
+		print("data arr: ", object_data_arr)
 		var style
+		node = Panel.new()
 		if object_data_arr[0][5].size() == 1: #texture:
+			print("texture rect on peer")
 			style = StyleBoxTexture.new()
-			var texture = load(object_data_arr[0][5][0])
+			var texture = Globals.load_texture(object_data_arr[0][5][0])
 			if texture != null:
-				style.texture == texture
+				texture.resource_path = object_data_arr[0][5][0]
+				style.texture = texture
+			else: #file not on client - check server
+				texture = Texture2D.new()
+				texture.resource_path = object_data_arr[0][5][0]
+				var file_name = object_data_arr[0][5][0].get_file()
+				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
+				if not multiplayer.is_server():
+					Globals.lobby.tcp_client.send_file_request(file_name)
+				#TODO server
 		elif object_data_arr[0][5].size() == 3: #flat
 			style = StyleBoxFlat.new()
 			style.bg_color = object_data_arr[0][5][0]
 			style.border_color = object_data_arr[0][5][1]
 			style.set_border_width_all(object_data_arr[0][5][2])
-		node = Panel.new()
 		node.position = object_data_arr[0][1]
 		node.size = object_data_arr[0][2]
 		node.scale = object_data_arr[0][3]
@@ -1844,23 +1894,48 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		node.set_meta("type", "text")
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	elif object_data_arr[0][0] == "token":
-		var token = token_comp.instantiate()
-		#node = load_token(file) TODO token create
-	
+		node = token_comp.instantiate()
+		node.character = Character.new()
+		var token_polygon = node.get_node("TokenPolygon")
+		token_polygon.position = object_data_arr[0][1]
+		token_polygon.size = object_data_arr[0][2]
+		token_polygon.scale = object_data_arr[0][3]
+		token_polygon.rotation = object_data_arr[0][4]
+		node.character.get_char_data_from_buffer(object_data_arr[0][5])
+		node.set_meta("type", "token")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	elif object_data_arr[0][0] == "container":
+		node = Panel.new() 
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("inventory", object_data_arr[0][5])
+		node.set_meta("type", "container")
+		node.add_user_signal("inv_changed")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	elif object_data_arr[0][0] == "layer": #name, visibility, GM, light layers
 		node = Node2D.new()
 		node.set_meta("type", "layer")
 		node.set_meta("item_name", object_data_arr[0][1])
 		print(node.get_meta("item_name"))
 		node.set_meta("visibility", object_data_arr[0][2])
-		node.set_meta("GM", object_data_arr[0][3])
-		node.light_mask = object_data_arr[0][4]
-		#TODO add layer to tree
+		node.set_meta("DM", object_data_arr[0][3])
+		node.set_meta("player_layer", object_data_arr[0][4])
+		node.light_mask = object_data_arr[0][5]
+		if not object_data_arr[0][2] or object_data_arr[0][3]: #not visible or dm - hide layer
+			node.visible = false
 		layer_tree.add_new_item(object_data_arr[0][1], parent.get_meta("tree_item"), node)
-		
+
 	if node != null:
 		node.name = node_name
+		var old_node = parent.get_node(node_name)
+		if old_node != null:
+			parent.remove_child(old_node)
+			old_node.queue_free()
 		parent.add_child(node, true)
+		if object_data_arr[0][0] == "layer":
+			parent.move_child(node, 0)
 	else:
 		print("no type uknown: ", object_data_arr[0][0])
 		return
@@ -1890,6 +1965,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			light.shadow_enabled = true
 			light.set_meta("type", "light")
 			node.add_sibling(light)
+			light.name = object_data_arr[1][6]
 			node.set_meta("light", true)
 			var remote = RemoteTransform2D.new()
 			remote.update_scale = false
@@ -1897,6 +1973,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			remote.set_meta("light", true)
 			remote.set_meta("type", "remote")
 			node.add_child(remote)
+			remote.name = object_data_arr[1][7]
 			remote.set_remote_node(remote.get_path_to(light))
 
 		elif object_data_arr[1][0] == "shadow":
@@ -1905,20 +1982,22 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			occluder.occluder.polygon = object_data_arr[1][1]
 			occluder.occluder.cull_mode = object_data_arr[1][2]
 			node.add_child(occluder)
+			occluder.name = object_data_arr[1][3]
 			node.set_meta("shadow", true)
 		if object_data_arr.size() > 2:
 			if object_data_arr[2][0] == "shadow":
 				var occluder = LightOccluder2D.new()
+				occluder.occluder = OccluderPolygon2D.new()
 				occluder.occluder.polygon = object_data_arr[2][1]
 				occluder.occluder.cull_mode = object_data_arr[2][2]
 				node.add_child(occluder)
+				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
 
 func serialize_object_for_rpc(node):
 	if not node.has_meta("type"):
 		return
 	var object_data_arr = []
-	var is_token = false
 	var type = node.get_meta("type")
 	print("save object - ", type)
 	if type == "rect": #object is rectangle - panel
@@ -1944,27 +2023,27 @@ func serialize_object_for_rpc(node):
 		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text])
 	elif type == "token":
 		var token = node.token_polygon
-		object_data_arr.append(["token"])
-		is_token = true
-		#save after light and shadow
+		object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer()])
+	elif type == "container":
+		var inventory = node.get_meta("inventory")
+		object_data_arr.append(["container", node.position, node.size, node.scale, node.rotation, inventory])
 	elif type == "layer": #name, visibility, GM, light layers
 		var name = node.get_meta("item_name")
 		var visibility = node.get_meta("visibility")
-		var GM = node.get_meta("GM")
-		object_data_arr.append(["layer", name, visibility, GM, node.light_mask])
+		var DM = node.get_meta("DM")
+		var player_layer = node.get_meta("player_layer")
+		object_data_arr.append(["layer", name, visibility, DM, player_layer, node.light_mask])
 
 	#light and shadow can be be on any object
 	if node.has_meta("light"):
-		var light: PointLight2D = Globals.draw_comp.get_object_light(node)
-		var remote: RemoteTransform2D = Globals.draw_comp.get_object_light_remote(node)
-		var light_arr = ["light", light.color, light.energy, light.texture.get_height(), light.texture_scale, remote.position]
+		var light: PointLight2D = get_object_light(node)
+		var remote: RemoteTransform2D = get_object_light_remote(node)
+		var light_arr = ["light", light.color, light.energy, light.texture.get_height(), light.texture_scale, remote.position, light.name, remote.name]
 		object_data_arr.append(light_arr)
 	if node.has_meta("shadow"):
-		var occluder: LightOccluder2D = Globals.draw_comp.get_object_shadow(node)
-		var occluder_arr = ["shadow", occluder.occluder.polygon, occluder.occluder.cull_mode]
+		var occluder: LightOccluder2D = get_object_shadow(node)
+		var occluder_arr = ["shadow", occluder.occluder.polygon, occluder.occluder.cull_mode, occluder.name]
 		object_data_arr.append(occluder_arr)
-		
-		
 	return object_data_arr
 		
 		
@@ -1977,3 +2056,157 @@ func synch_object_properties(path_to_object, property_arr):
 		return
 	for property in property_arr:
 		node.set(property[0], property[1])
+		
+@rpc("any_peer", "call_remote", "reliable")
+func synch_light_texture_resolution(path_to_light, resolution):
+	var light = get_node(path_to_light)
+	if light != null:
+		light.texture.height = resolution
+		light.texture.width = resolution
+		
+@rpc("any_peer", "call_remote", "reliable")
+func synch_occluder_cull_mode(path_to_occluder, cull_mode):
+	var occluder = get_node(path_to_occluder)
+	if occluder != null:
+		occluder.occluder.cull_mode = cull_mode
+		
+@rpc("any_peer", "call_remote", "reliable")
+func synch_object_removal(path_to_object):
+	var node = get_node(path_to_object)
+	if node == null:
+		print("synch removal path not found - ", path_to_object)
+		return
+	if node.has_meta("light"):
+		var light = get_object_light(node)
+		if light != null:
+			light.queue_free()
+	node.queue_free()
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_object_inventory_add(object_path, item, slot_arr = null):
+	print("added item on remote", item)
+	var object = get_node(object_path)
+	if object == null:
+		print("object not in tree !!!")
+		return
+	var equipped = item["equipped"]
+	var inventory
+	if object.has_meta("inventory"): #container
+		inventory = object.get_meta("inventory")
+	elif "character" in object: #token
+		if equipped:
+			if slot_arr != null:
+				var equip_slot = object.character.equip_slots[slot_arr[0]][slot_arr[1]]
+				if equip_slot["item"] != null:
+					object.character.unequip_item(equip_slot["item"])
+				equip_slot["item"] = item
+				object.character.emit_signal("reload_equip_slot", equip_slot)
+				object.character.equip_item(item)
+			inventory = object.character.equipped_items
+		else:
+			inventory = object.character.items
+	inventory.append(item)
+	print("emiting inv_changed")
+	if "character" in object: #token
+		object.character.emit_signal("inv_changed")
+	else: #container
+		object.emit_signal("inv_changed")
+	
+	
+@rpc("any_peer", "call_remote", "reliable")
+func synch_object_inventory_remove(object_path, item, item_pos = 0):
+	var object = get_node(object_path)
+	if object == null:
+		print("object not in tree !!!")
+		return
+	var equipped = item["equipped"]
+	var inventory
+	if object.has_meta("inventory"): #container
+		inventory = object.get_meta("inventory")
+	elif "character" in object: #token
+		if equipped:
+			inventory = object.character.equipped_items
+		else:
+			inventory = object.character.items
+	if inventory[item_pos] == item:
+		if equipped:
+			object.character.unequip_item(inventory[item_pos])
+		inventory.remove_at(item_pos)
+		object.emit_signal("inv_changed")
+		return
+	for i in inventory.size():
+		if inventory[i] == item: #remove from inventory array
+			if equipped:
+				object.character.unequip_item(inventory[item_pos])
+			inventory.remove_at(i)
+			object.emit_signal("inv_changed")
+			break
+
+#@rpc("any_peer", "call_remote", "reliable")
+#func synch_object_edit(index, value, object_path, dict):
+	#var object = get_node(object_path)
+	##light
+	#if index == 10: #light enable
+		#if value == true:
+			#create_or_enable_light(object, dict)
+		#else:
+			#disable_light(object)
+	#if index == 11: #light offset x
+		#if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
+			#var light_remote = get_object_light_remote(object)
+			#if light_remote != null:
+				#light_remote.position.x = value
+	#if index == 12: #light offset y
+		#if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
+			#var light_remote = get_object_light_remote(object)
+			#if light_remote != null:
+				#light_remote.position.y = value
+	#if index == 13: #light texture resolution
+		#if object.has_meta("light"):
+			#var light = get_object_light(object)
+			#if light != null:
+				#light.texture.height = value
+				#light.texture.width = value
+	#if index == 14: #light radius
+		#if object.has_meta("light"):
+			#var light = get_object_light(object)
+			#if light != null:
+				#light.texture_scale = value/light.texture.get_height()*2
+	#if index == 15: #light color
+		#if object.has_meta("light"):
+			#var light = get_object_light(object)
+			#if light != null:
+				#light.color = value
+	#if index == 16: #light energy
+		#if object.has_meta("light"):
+			#var light = get_object_light(object)
+			#if light != null:
+				#light.energy = value
+	##shadows
+	#if index == 20: #shadow enable
+		#if value == true:
+			#create_or_enable_shadow(object)
+		#else:
+			#disable_shadow(object)
+	#if index == 21: #shadow one sided
+		#if object.has_meta("shadow"):
+			#var shadow = get_object_shadow(object)
+			#if shadow != null:
+				#var flipped = tool_panel_object_menu.get_shadow_flipped()
+				#if value == false:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
+				#elif value == true and flipped:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
+				#else:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
+	#if index == 22: #shadow flip sides
+		#if object.has_meta("shadow"):
+			#var shadow = get_object_shadow(object)
+			#if shadow != null:
+				#var one_sided = tool_panel_object_menu.get_shadow_one_sided()
+				#if not one_sided:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
+				#elif one_sided and value == true:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
+				#else:
+					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE

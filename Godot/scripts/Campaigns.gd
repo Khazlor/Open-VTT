@@ -104,7 +104,7 @@ func _on_apply_button_pressed():
 	#setting map_card
 	campaigncard.get_node("PanelContainer/Name").text = campaign.campaign_name
 	campaigncard.get_node("PanelContainer/MarginContainer/VBoxContainer/Desc").text = campaign.campaign_desc
-	campaigncard.get_node("PanelContainer/preview").texture = load(campaign.image)
+	campaigncard.get_node("PanelContainer/preview").texture = Globals.load_texture(campaign.image)
 	
 	popup.hide()
 

@@ -6,16 +6,17 @@ class_name Tool
 extends Node
 
 var enet_peer = null #for multiplayer
-var spawner: MultiplayerSpawner = null
+var lobby: Node2D = null
 
 var campaign: Campaign_res
 var map: Map_res
 var new_map: Map_res
 
-var draw_comp = Node2D
+var draw_comp: Node2D
 var draw_layer: Node2D
 var drag_drop_canvas_layer: CanvasLayer #for dragging characters to map
 
+var layers: Control
 var roll_panel: Control
 var action_bar: FlowContainer
 var turn_order: Window
@@ -44,3 +45,12 @@ var clipboard_characters = []
 var clipboard_lights = []
 
 var tokenShapeDict = {"Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(0,1)]), "Pointed Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,0.8), Vector2(0.5,1), Vector2(0,0.8)])}
+
+
+func load_texture(file_path):
+	if not FileAccess.file_exists(file_path):
+		print("file does not exist")
+		return null
+	var image = Image.load_from_file(file_path)
+	var texture = ImageTexture.create_from_image(image)
+	return texture

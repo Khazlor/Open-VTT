@@ -4,11 +4,15 @@
 
 extends Tree
 
-var button_visible: Texture2D = load("res://icons/GuiVisibilityVisible.svg")
-var button_hidden: Texture2D = load("res://icons/GuiVisibilityHidden.svg")
-var button_add: Texture2D = load("res://icons/Add.svg")
-var button_remove: Texture2D = load("res://icons/Remove.svg")
-var button_light: Texture2D = load("res://icons/LightOccluder2D.svg")
+var button_visible: Texture2D = preload("res://icons/GuiVisibilityVisible.svg")
+var button_hidden: Texture2D = preload("res://icons/GuiVisibilityHidden.svg")
+var button_DM: Texture2D = preload("res://icons/DM.png")
+var button_DM_not: Texture2D = preload("res://icons/DM_not.png")
+var button_players: Texture2D = preload("res://icons/Players.png")
+var button_players_not: Texture2D = preload("res://icons/Players_not.png")
+var button_add: Texture2D = preload("res://icons/Add.svg")
+var button_remove: Texture2D = preload("res://icons/Remove.svg")
+var button_light: Texture2D = preload("res://icons/LightOccluder2D.svg")
 var layer = preload("res://components/draw.tscn")
 
 var draw_root
@@ -19,6 +23,8 @@ signal moved(item, to_item, shift)
 
 func _enter_tree():
 	create_root()
+	if multiplayer.is_server():
+		size.x = 320
 
 
 func _ready():
@@ -33,7 +39,7 @@ func create_root():
 	#set root of draw_layers - might no longer be needed
 	draw_root = $"../../../Draw/Layers"
 	item.set_meta("draw_layer", draw_root) 
-	item.add_button(0, button_add, 1)
+	item.add_button(0, button_add, 3)
 	
 
 func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Node2D = null):
@@ -46,18 +52,17 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 	else:
 		item = create_item(parent, 0)
 	item.set_text(0, item_name)
-	item.add_button(0, button_visible)
-	item.add_button(0, button_add)
-	item.add_button(0, button_remove)
-	item.add_button(0, button_light)
+	
+	var draw_layer
 	
 	if existing_node == null:
-		var draw_layer = Node2D.new()
+		draw_layer = Node2D.new()
 		#set meta for recreation after loading
 		draw_layer.set_meta("item_name", item_name)
 		draw_layer.set_meta("type", "layer")
-		draw_layer.set_meta("visibility", 0)
-		draw_layer.set_meta("DM", false)
+		draw_layer.set_meta("visibility", 1)
+		draw_layer.set_meta("player_layer", 1)
+		draw_layer.set_meta("DM", 0)
 
 		draw_layer.set_meta("tree_item", item)
 		
@@ -71,12 +76,33 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 			parent.get_meta("draw_layer").move_child(draw_layer, 0)
 		
 		draw_layer.set_owner(draw_root)
+		Globals.draw_comp.create_object_on_remote_peers(draw_layer)
 		
 		change_z_indexes()
 	
 	else:
+		draw_layer = existing_node
 		existing_node.z_as_relative = false
+		existing_node.set_meta("tree_item", item)
 		item.set_meta("draw_layer", existing_node)
+	if not multiplayer.is_server() and (not existing_node.get_meta("player_layer") or existing_node.get_meta("DM") or not existing_node.get_meta("visibility")): #hide layer for player:
+		item.visible = false
+	if multiplayer.is_server():
+		if draw_layer.get_meta("visibility"):
+			item.add_button(0, button_visible)
+		else:
+			item.add_button(0, button_hidden)
+		if draw_layer.get_meta("DM"):
+			item.add_button(0, button_DM)
+		else:
+			item.add_button(0, button_DM_not)
+		if draw_layer.get_meta("player_layer"):
+			item.add_button(0, button_players)
+		else:
+			item.add_button(0, button_players_not)
+		item.add_button(0, button_add)
+		item.add_button(0, button_remove)
+		item.add_button(0, button_light)
 		
 #	var draw_layer = Node2D.new()
 #	draw_layer.z_as_relative = false
@@ -89,8 +115,42 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 #	print("created item = " + item_name + ": " + str(draw_layer.get_index()))
 	return item
 
+#@rpc("any_peer", "call_remote", "reliable")
+#func create_layer_on_remote_peers():
+	#pass
+	
+@rpc("any_peer", "call_remote", "reliable")
+func move_layer_on_remote_peers(node_path, to_node_path, shift):
+	_move_item(get_node(node_path).get_meta("tree_item"), get_node(to_node_path).get_meta("tree_item"), shift, true)
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_layer_property(node_path, property_dict):
+	var layer = get_node(node_path)
+	var item = layer.get_meta("tree_item")
+	for property_key in property_dict:
+		if property_key == "item_name":
+			layer.set_meta("item_name", property_dict[property_key])
+		if property_key == "visibility":
+			layer.set_meta("visibility", property_dict[property_key])
+		if property_key == "DM":
+			layer.set_meta("DM", property_dict[property_key])
+		if property_key == "light":
+			pass
+	
+
+func is_child_of(child_treeitem, parent_treeitem):
+	if child_treeitem == parent_treeitem:
+		return false
+	var root = get_root()
+	while child_treeitem != root:
+		child_treeitem = child_treeitem.get_parent()
+		if child_treeitem == parent_treeitem:
+			return true
+	return false
 
 func _get_drag_data(_item_position):
+	if not multiplayer.is_server():
+		return
 	set_drop_mode_flags(DROP_MODE_INBETWEEN | DROP_MODE_ON_ITEM)
 	var selected = get_selected()
 	if not selected:
@@ -102,10 +162,14 @@ func _get_drag_data(_item_position):
 
 
 func _can_drop_data(_item_position, data):
+	if not multiplayer.is_server():
+		return false
 	return data is TreeItem
 
 
 func _drop_data(item_position, item):
+	if not multiplayer.is_server():
+		return
 	var to_item = get_item_at_position(item_position)
 	var shift = get_drop_section_at_position(item_position)
 	
@@ -113,15 +177,18 @@ func _drop_data(item_position, item):
 	emit_signal('moved', item, to_item, shift)
 
 
-func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
+func _move_item(item: TreeItem, to_item: TreeItem, shift: int, remote = false):
 	if item == null or to_item == null:
 		return
 	if item == to_item:
 		return
-		
+	if is_child_of(to_item, item):
+		return #dragging parent on child
 #	var prev_item = item.get_prev_in_tree() # to check if items were moved
 	var to_layer = to_item.get_meta("draw_layer")
 	var layer = item.get_meta("draw_layer")
+	if remote == false: #called on this peer - update other peers
+		move_layer_on_remote_peers.rpc(get_path_to(layer), get_path_to(to_layer), shift)
 	print_indexes()
 	match(shift):	
 		BEFORE:

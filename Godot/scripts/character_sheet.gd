@@ -8,9 +8,9 @@ var SelectedEdit
 
 var character: Character
 
-var bar_setting = load("res://components/bar_setting.tscn")
-var attr_bubble_setting = load("res://components/attr_bubble_setting.tscn")
-var macro_setting = load("res://components/macro_setting.tscn")
+var bar_setting = preload("res://components/bar_setting.tscn")
+var attr_bubble_setting = preload("res://components/attr_bubble_setting.tscn")
+var macro_setting = preload("res://components/macro_setting.tscn")
 
 @onready var inventory_sheet = $TabContainer/Inventory/Inventory
 @onready var equipment_slot_settings = $TabContainer/Inventory/EquipSlotSettings
@@ -28,13 +28,16 @@ var token: Control
 #called even before ready
 func _enter_tree():
 	token = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/TokenPreview/ScrollContainer/Token
+	token.preview = true
 	token.character = character
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	load_character()
+	print(character)
 	
 	character.connect("attr_modifier_applied", on_attr_modifier_applied)
+	character.connect("attr_created", on_attr_created)
 	character.apply_modifiers() #sets tooltips of modified attributes
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -82,10 +85,17 @@ func _on_add_attribute_button_pressed():
 		print("character already has " + name_line_edit.text + " attribute")
 		return
 	character.attributes[name_line_edit.text] = ["", ""]
-	add_attribute_to_attribute_list(name_line_edit.text, ["", ""])
+	if character.token != null:
+		character.token.on_attr_created(name_line_edit.text, false)
+	character.emit_signal("attr_created", name_line_edit.text, false)
+	
+func on_attr_created(attr_name, remote):
+	print("got signal: attr_created")
+	add_attribute_to_attribute_list(attr_name, ["", ""])
 
 
 func add_attribute_to_attribute_list(name: String, value: Array):
+	print("adding attribute to list in char sheet: ", name, character)
 	var flow = HBoxContainer.new()
 	var text_edit = LineEdit.new()
 	#attribute name LineEdit
@@ -116,7 +126,7 @@ func add_attribute_to_attribute_list(name: String, value: Array):
 	text_edit.tooltip_text = value[1]
 	flow.add_child(text_edit)
 	attribute_list.add_child(flow)
-
+	
 
 func _on_add_macro_button_pressed():
 	var new_marco_setting = macro_setting.instantiate()
@@ -127,6 +137,10 @@ func _on_add_macro_button_pressed():
 		new_marco_setting.macro_dict["ord"] = macro_list.get_child(macro_list.get_child_count() - 1).macro_dict["ord"] + 1
 	macro_list.add_child(new_marco_setting)
 	character.macros[name] = new_marco_setting.macro_dict
+	print("call synch macro: ", name, new_marco_setting.macro_dict)
+	if character.token != null:
+		character.token.on_synch_macro(name, new_marco_setting.macro_dict)
+	#character.emit_signal("synch_macro", name, new_marco_setting.macro_dict)
 
 #loads character from resource to character sheet
 func load_character():
@@ -159,7 +173,7 @@ func load_character():
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox.value = character.token_scale.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderWidthSpinBox.value = character.token_outline_width
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderColorPickerButton.color = character.token_outline_color
-	var texture = load(character.token_texture)
+	var texture = Globals.load_texture(character.token_texture)
 	if texture != null:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox.value = character.token_texture_offset.x
@@ -223,7 +237,8 @@ func _on_browse_image_button_pressed():
 
 
 func _on_token_image_file_dialog_file_selected(path):
-	var texture = load(path)
+	path = await Globals.lobby.handle_file_transfer(path)
+	var texture = Globals.load_texture(path)
 	character.token_texture = path
 	if texture != null:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
@@ -292,3 +307,8 @@ func on_attr_modifier_applied(attribute: StringName, tooltip):
 				print("set_tooltip: ", tooltip)
 				attr.get_child(2).tooltip_text = tooltip
 				return
+
+
+func _on_player_check_button_toggled(toggled_on):
+	Globals.layers.set_token_visibility.rpc(Globals.draw_layer.light_mask)
+	character.player_character = toggled_on

@@ -11,7 +11,7 @@ func _ready():
 	$PanelContainer/Name.text = map.map_name
 	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = map.map_desc
 	$PanelContainer/MarginContainer/VBoxContainer/Size.text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
-	$PanelContainer/preview.texture = load(map.image)
+	$PanelContainer/preview.texture = Globals.load_texture(map.image)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -77,7 +77,7 @@ func _on_gui_input(event):
 #	$PanelContainer/Name.text = map.map_name
 #	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = map.map_desc
 #	$PanelContainer/MarginContainer/VBoxContainer/Size.text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
-#	$PanelContainer/preview.texture = load(map.image)
+#	$PanelContainer/preview.texture = Globals.load_texture(map.image)
 #
 #func _on_duplicate():
 #	var newmap = map.duplicate(true)

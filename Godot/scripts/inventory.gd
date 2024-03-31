@@ -33,3 +33,4 @@ func _on_tree_item_edited():
 	var weight_diff = (tree_item.get_range(2) - item["count"]) * tree_item.get_range(3)
 	tree.change_weight(tree_item, weight_diff) #change total weights
 	item["count"] = tree_item.get_range(2)
+	tree.character.emit_signal("inv_changed")

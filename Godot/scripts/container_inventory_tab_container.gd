@@ -20,15 +20,22 @@ func _drop_data(at_position, data):
 	var item_dict = data.get_meta("item_dict")
 	var new_item_dict = item_dict.duplicate(true)
 	new_item_dict["equipped"] = false
-	inv.tree.add_item_treeitem(data.get_meta("item_dict").duplicate(true))
 	if data.has_meta("inventory"): #dragging from inventory - remove from old
 		var inventory = data.get_meta("inventory")
 		if item_dict["equipped"]: #unequip
 			var char = data.get_meta("item_char")
 			char.unequip_item(item_dict)
+		var item_pos
 		for i in inventory.size():
 			if is_same(inventory[i], item_dict): #remove from inventory array
 				inventory.remove_at(i)
+				item_pos = i
 				break
-		data.free() #remove treeitem in old inventory
+		if data.has_meta("item_char"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_char").token), item_dict, item_pos)
+			data.get_meta("item_char").emit_signal("inv_changed")
+		elif data.has_meta("item_container"):
+			Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_container")), item_dict, item_pos)
+			data.get_meta("item_container").emit_signal("inv_changed")
+	inv.tree.add_item_treeitem(data.get_meta("item_dict").duplicate(true))
 	Globals.drag_drop_canvas_layer.layer = -1
