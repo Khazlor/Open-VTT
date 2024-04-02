@@ -156,11 +156,12 @@ func _on_confirmation_dialog_confirmed():
 	custom_remove_item(dialog_item)
 	
 func custom_remove_item(item: TreeItem):
-	item.get_meta("draw_layer").queue_free()
+	var draw_layer = item.get_meta("draw_layer")
 	item.free()
-	
 	if tree.get_root().get_first_child() == null:
 		tree.hide_root = false
+	draw_layer.connect("tree_exited", Globals.new_map.remove_tokens_from_token_array)
+	draw_layer.queue_free()
 
 @rpc("any_peer", "call_remote", "reliable")
 func set_light_on_self_and_children_remote(layer_path, mask):
@@ -206,12 +207,19 @@ func set_token_visibility(mask = null):
 		if Globals.draw_layer == null:
 			return
 		mask = Globals.draw_layer.light_mask
+	var token_clear = false
 	for token in Globals.map.tokens:
-		if token.light_mask & mask: #if at least one bit same
-			if token.character.player_character:
-				token.fov.visible = true
+		if token != null:
+			if token.light_mask & mask: #if at least one bit same
+				if token.character.player_character:
+					token.fov.visible = true
+			else:
+				token.fov.visible = false
 		else:
-			token.fov.visible = false
+			token_clear = true
+	if token_clear:
+		Globals.new_map.remove_tokens_from_token_array()
+			
 			
 #set layers visibility based on selected layer when using FOV
 @rpc("any_peer", "call_local", "reliable")

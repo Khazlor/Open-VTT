@@ -6,11 +6,15 @@ extends Node2D
 
 var char_sheet = preload("res://UI/character_sheet.tscn")
 
+
+func _enter_tree():
+	Globals.BG_ColorRect = $BackgroundCanvasLayer/BackgroundColorRect
+	Globals.windows = $CanvasLayer/Windows
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#light
 	get_viewport().set_canvas_cull_mask_bit(2, false)
-	Globals.windows = $CanvasLayer/Windows
 	var layers = $Draw/Layers
 	var tree = $CanvasLayer/Layers/Tree
 	randomize()

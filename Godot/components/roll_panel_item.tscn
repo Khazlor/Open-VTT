@@ -17,6 +17,7 @@ layout_mode = 2
 [node name="Text" type="Label" parent="VBoxContainer"]
 clip_contents = true
 layout_mode = 2
+mouse_filter = 1
 text = "Text"
 autowrap_mode = 3
 

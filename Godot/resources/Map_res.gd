@@ -293,6 +293,7 @@ func load_data_for_self_and_children(file: FileAccess):
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
 		node.name = object_data_arr[0][6]
+		Globals.new_map.add_token(node)
 	elif object_data_arr[0][0] == "container":
 		print("loading container")
 		node = Panel.new() 
@@ -496,3 +497,11 @@ func add_token(token):
 
 func remove_token(token):
 	tokens.erase(token)
+
+func remove_tokens_from_token_array():
+	var erased_token_index_arr = []
+	for i in range(tokens.size()-1, -1, -1): #going in reverse order - for remove_at(i)
+		if tokens[i] == null:
+			erased_token_index_arr.append(i)
+	for i in erased_token_index_arr:
+		tokens.remove_at(i)

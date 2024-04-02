@@ -81,10 +81,20 @@ func _on_text_edit_gui_input(event):
 		await execute_macro(textEdit.text)
 	
 		
-func create_roll_panel():
-	roll_panel_item = roll_panel_item_template.instantiate()
-	result_node = roll_panel_item.get_node("VBoxContainer/Result")
-	$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(roll_panel_item)
+func create_roll_panel(text_in: String, DM = multiplayer.is_server(), set_global = true):
+	var roll_panel_item_local = roll_panel_item_template.instantiate()
+	var label = roll_panel_item_local.get_node("VBoxContainer/Text")
+	if DM:
+		label.text = "DM rolled:"
+	else:
+		label.text = "player rolled:"
+	label.tooltip_text = text_in
+	
+	var result_node_local = roll_panel_item_local.get_node("VBoxContainer/Result")
+	$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(roll_panel_item_local)
+	if set_global:
+		result_node = result_node_local
+	return result_node_local
 
 
 func evaluate_roll(roll_section: String):
@@ -331,10 +341,17 @@ func execute_macro(text_in: String, character: Character = null, targets = []):
 func execute_roll(text_in: String, character: Character = null, target: Character = null):
 	print("target = ", target)
 	
-	create_roll_panel()
+	create_roll_panel(text_in)
 	var text_in_arr = [text_in + "  "] #array passed by reference
 	await resolve_inner(text_in_arr, 0, "", character, target)
-	append_text(text_in_arr)
+	print("text_in_arr ", text_in_arr, " ||| ", roll_hints)
+	synch_roll_panel_to_other_peers.rpc(text_in, text_in_arr, multiplayer.is_server(), roll_hints, results)
+	append_text(text_in_arr, roll_hints)
+	
+@rpc("any_peer", "call_remote", "reliable")
+func synch_roll_panel_to_other_peers(text_in, text_in_arr, DM, roll_hints_arr, results_arr):
+	var result_node_local = create_roll_panel(text_in, DM, false)
+	append_text(text_in_arr, roll_hints_arr, result_node_local, results_arr)
 
 #replace all found attributes
 func replace_attributes(text_in: String, character: Character, target: Character):
@@ -731,7 +748,7 @@ func query(text_in, i: int, character: Character = null, target: Character = nul
 	else:
 		replace_text(text_in, query_diag_opt.get_item_text(query_diag_opt.selected) , i-2, n-i+4) #set from option vutton selection
 		
-func append_text(text_in):
+func append_text(text_in, roll_hints_arr = roll_hints, result_node = result_node, results = results):
 	print("appending text: ", text_in[0])
 	var mark_begin = text_in[0].find("\u001A")
 	var mark_end = 0
@@ -747,7 +764,7 @@ func append_text(text_in):
 		mark_end = mark_begin + results[num].length() #end of mark sequence - for next loop
 		mark_begin = text_in[0].find("\u001A")
 		#append number with hint
-		result_node.push_hint(roll_hints[num])
+		result_node.push_hint(roll_hints_arr[num])
 		result_node.append_text(results[num])
 		result_node.pop()
 	#append rest

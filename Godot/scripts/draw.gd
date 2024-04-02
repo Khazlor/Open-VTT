@@ -82,7 +82,7 @@ func _ready():
 	#edited fov opacity in map options -> update all fov objects
 	tool_panel_map_menu.connect("fov_opacity_changed", _on_fov_opacity_changed_signal)
 	
-	unshaded_material = Globals.load_texture("res://materials/canvas_item_material_unshaded.tres")
+	unshaded_material = load("res://materials/canvas_item_material_unshaded.tres")
 	
 	#selected token in turn order:
 	Globals.turn_order.connect("token_turn_selected", select_token)
@@ -1044,6 +1044,8 @@ func select_objects():
 	#				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
 
 	for token in selected_tokens: #reset unselected token opacity and UI visibility
+		if token == null:
+			continue
 		token.unselect()
 	selected_tokens.clear()
 	for object in selected: #set selected token opacity and UI visibility
@@ -1628,10 +1630,16 @@ func disable_shadow(object):
 		
 #value is new opacity, begin is in case of first call
 func _on_fov_opacity_changed_signal(value):
+	var tokens_clear = false
 	for token in Globals.new_map.tokens:
-		if token.is_inside_tree():
-			if not selected_tokens.has(token):
-				token.fov.color.a = value
+		if token != null:
+			if token.is_inside_tree():
+				if not selected_tokens.has(token):
+					token.fov.color.a = value
+		else:
+			tokens_clear = true
+	if tokens_clear:
+		Globals.new_map.remove_tokens_from_token_array()
 	
 func select_token(token):
 	selected = [token.token_polygon]
@@ -1904,6 +1912,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		node.character.get_char_data_from_buffer(object_data_arr[0][5])
 		node.set_meta("type", "token")
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.new_map.add_token(node)
 	elif object_data_arr[0][0] == "container":
 		node = Panel.new() 
 		node.position = object_data_arr[0][1]
@@ -2080,6 +2089,8 @@ func synch_object_removal(path_to_object):
 		var light = get_object_light(node)
 		if light != null:
 			light.queue_free()
+	if "character" in node:
+		Globals.new_map.remove_token(node)
 	node.queue_free()
 
 @rpc("any_peer", "call_remote", "reliable")

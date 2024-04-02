@@ -15,7 +15,7 @@ var macro_setting = preload("res://components/macro_setting.tscn")
 @onready var inventory_sheet = $TabContainer/Inventory/Inventory
 @onready var equipment_slot_settings = $TabContainer/Inventory/EquipSlotSettings
 
-@onready var name_line_edit = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/FlowContainer/Name_LineEdit
+@onready var name_line_edit = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/Name_LineEdit
 @onready var attribute_list = $TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer
 @onready var macro_list = $TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/MacroVBoxContainer
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
@@ -38,6 +38,7 @@ func _ready():
 	
 	character.connect("attr_modifier_applied", on_attr_modifier_applied)
 	character.connect("attr_created", on_attr_created)
+	character.connect("attr_removed", on_attr_removed)
 	character.apply_modifiers() #sets tooltips of modified attributes
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -86,17 +87,33 @@ func _on_add_attribute_button_pressed():
 		return
 	character.attributes[name_line_edit.text] = ["", ""]
 	if character.token != null:
-		character.token.on_attr_created(name_line_edit.text, false)
-	character.emit_signal("attr_created", name_line_edit.text, false)
+		character.token.on_attr_created(name_line_edit.text, ["", ""])
+	character.emit_signal("attr_created", name_line_edit.text, ["", ""])
 	
-func on_attr_created(attr_name, remote):
+	
+func on_attr_created(attr_name, value = ["", ""]):
 	print("got signal: attr_created")
-	add_attribute_to_attribute_list(attr_name, ["", ""])
+	add_attribute_to_attribute_list(attr_name, value)
+	
+func on_attr_removed(attr_name):
+	var node = find_attr_node(attr_name)
+	node.queue_free()
 
+func find_attr_node(attr_name):
+	var i = 0
+	for node in attribute_list.get_children():
+		if i < 2: #skip first 2
+			i += 1
+			continue
+		if node.get_child(0).get_meta("attr") == attr_name:
+			return node
+	print("attr not found")
+	return null
+	
 
 func add_attribute_to_attribute_list(name: String, value: Array):
 	print("adding attribute to list in char sheet: ", name, character)
-	var flow = HBoxContainer.new()
+	var Hbox = HBoxContainer.new()
 	var text_edit = LineEdit.new()
 	#attribute name LineEdit
 	text_edit.text = name
@@ -106,7 +123,7 @@ func add_attribute_to_attribute_list(name: String, value: Array):
 	text_edit.set_meta("attr", name)
 	text_edit.connect("focus_entered", on_edit_focus_entered)
 	text_edit.connect("text_submitted", _on_attr_name_edit_text_submitted)
-	flow.add_child(text_edit)
+	Hbox.add_child(text_edit)
 	#attribute value TextEdit
 	text_edit = TextEdit.new()
 	text_edit.text = value[0]
@@ -115,7 +132,7 @@ func add_attribute_to_attribute_list(name: String, value: Array):
 	text_edit.scroll_fit_content_height = true
 	text_edit.connect("focus_entered", on_edit_focus_entered)
 	text_edit.connect("text_changed", _on_attr_val_text_changed)
-	flow.add_child(text_edit)
+	Hbox.add_child(text_edit)
 	#modified attribute value TextEdit (attribute modified by attribute modifiers)
 	text_edit = TextEdit.new()
 	text_edit.text = value[1] #might be modified later
@@ -124,8 +141,8 @@ func add_attribute_to_attribute_list(name: String, value: Array):
 	text_edit.custom_minimum_size.y = 35
 	text_edit.scroll_fit_content_height = true
 	text_edit.tooltip_text = value[1]
-	flow.add_child(text_edit)
-	attribute_list.add_child(flow)
+	Hbox.add_child(text_edit)
+	attribute_list.add_child(Hbox)
 	
 
 func _on_add_macro_button_pressed():
@@ -199,37 +216,51 @@ func load_character():
 
 func _on_option_button_item_selected(index):
 	character.token_shape = shape.get_item_text(index)
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_shape", character.token_shape])
 	character.emit_signal("token_changed", true)
 
 
 func _on_shape_size_x_spin_box_value_changed(value):
 	character.token_size.x = value
 	token.custom_minimum_size = character.token_size * character.token_scale
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_size", character.token_size])
 	character.emit_signal("token_changed", false)
 
 func _on_shape_size_y_spin_box_value_changed(value):
 	character.token_size.y = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_size", character.token_size])
 	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed", false)
 
 
 func _on_shape_scale_x_spin_box_value_changed(value):
 	character.token_scale.x = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_scale", character.token_scale])
 	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed", false)
 
 
 func _on_shape_scale_y_spin_box_value_changed(value):
 	character.token_scale.y = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_scale", character.token_scale])
 	token.custom_minimum_size = character.token_size * character.token_scale
 	character.emit_signal("token_changed", false)
 
 func _on_border_width_spin_box_value_changed(value):
 	character.token_outline_width = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_outline_width", value])
 	character.emit_signal("token_changed", false)
 	
 func _on_border_color_picker_button_color_changed(color):
 	character.token_outline_color = color
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_outline_color", color])
 	character.emit_signal("token_changed", false)
 
 func _on_browse_image_button_pressed():
@@ -240,6 +271,8 @@ func _on_token_image_file_dialog_file_selected(path):
 	path = await Globals.lobby.handle_file_transfer(path)
 	var texture = Globals.load_texture(path)
 	character.token_texture = path
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_texture", path])
 	if texture != null:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
 	character.emit_signal("token_changed", false)
@@ -247,26 +280,34 @@ func _on_token_image_file_dialog_file_selected(path):
 
 func _on_image_offset_x_spin_box_value_changed(value):
 	character.token_texture_offset.x = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_texture_offset", character.token_texture_offset])
 	character.emit_signal("token_changed", false)
 
 
 func _on_image_offset_y_spin_box_value_changed(value):
 	character.token_texture_offset.y = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_texture_offset", character.token_texture_offset])
 	character.emit_signal("token_changed", false)
 
 
 func _on_image_scale_x_spin_box_value_changed(value):
 	character.token_texture_scale.x = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_texture_scale", character.token_texture_scale])
 	character.emit_signal("token_changed", false)
 
 
 func _on_image_scale_y_spin_box_value_changed(value):
 	character.token_texture_scale.y = value
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["token_texture_scale", character.token_texture_scale])
 	character.emit_signal("token_changed", false)
 
 
 # Bar settings
-func _on_add_bar_button_pressed():
+func _on_add_bar_button_pressed(): #TODO synch
 	var bar = bar_setting.instantiate()
 	character.bars.insert(0, bar.bar_dict)
 	bars.add_child(bar)
@@ -278,8 +319,11 @@ func _on_attr_name_edit_text_submitted(new_text):
 	if character.attributes.has(new_text): #already exists - set text back to old
 		SelectedEdit.text = old_text
 	else:
+		SelectedEdit.set_meta("attr", new_text)
 		character.attributes[new_text] = character.attributes[old_text]
 		character.attributes.erase(old_text)
+		if character.token != null:
+			character.token.synch_rename_attr_on_other_peers.rpc(old_text, new_text)
 
 func on_edit_focus_entered():
 	SelectedEdit = gui_get_focus_owner()
@@ -310,5 +354,7 @@ func on_attr_modifier_applied(attribute: StringName, tooltip):
 
 
 func _on_player_check_button_toggled(toggled_on):
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["player_character", toggled_on])
 	Globals.layers.set_token_visibility.rpc(Globals.draw_layer.light_mask)
 	character.player_character = toggled_on

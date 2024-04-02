@@ -10,6 +10,8 @@ extends MarginContainer
 @onready var layers = $"../../../../../../CanvasLayer/Layers"
 @onready var fov = $"../../../../../../FovCanvasLayer/FovColorRect"
 
+var world
+
 signal fov_opacity_changed(value)
 
 # Called when the node enters the scene tree for the first time.
@@ -24,17 +26,17 @@ func _ready():
 	
 	#darkness and fov
 	darkness.visible = Globals.new_map.darkness_enable
-	RenderingServer.set_default_clear_color(Globals.new_map.background_color)
+	Globals.BG_ColorRect.color = Globals.new_map.background_color
 	fov.visible = Globals.new_map.fov_enable
 	if not multiplayer.is_server():  #client
 		darkness.color = Globals.new_map.darkness_color
 		if darkness.visible:
-			RenderingServer.set_default_clear_color(Globals.new_map.darkness_color)
+			Globals.BG_ColorRect.color = Globals.new_map.darkness_color
 		return
 	else:
 		darkness.color = Globals.new_map.DM_darkness_color
 		if darkness.visible:
-			RenderingServer.set_default_clear_color(Globals.new_map.DM_darkness_color)
+			Globals.BG_ColorRect.color = Globals.new_map.DM_darkness_color
 	$ScrollContainer/VBoxContainer/BackgroundColor/BackgroundColorPickerButton.color = Globals.new_map.background_color
 	$ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/GridEnable.button_pressed = grid.visible
 	$ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Thickness/HSlider.value = 1 - grid.texture.gradient.get_offset(1)
@@ -63,7 +65,7 @@ func set_map_setting_on_other_peers(property, value):
 
 func _on_background_color_picker_button_color_changed(color):
 	if not Globals.new_map.darkness_enable:
-		RenderingServer.set_default_clear_color(color)
+		Globals.BG_ColorRect.color = color
 	Globals.new_map.background_color = color
 	set_map_setting_on_other_peers.rpc("background_color", color)
 
@@ -107,18 +109,18 @@ func _on_darkness_enable_toggled(button_pressed):
 	darkness.visible = button_pressed
 	if button_pressed: #set backgroud color to darkness
 		if multiplayer.is_server():
-			RenderingServer.set_default_clear_color(Globals.new_map.DM_darkness_color)
+			Globals.BG_ColorRect.color = Globals.new_map.DM_darkness_color
 		else:
-			RenderingServer.set_default_clear_color(Globals.new_map.darkness_color)
+			Globals.BG_ColorRect.color = Globals.new_map.darkness_color
 	else:
-		RenderingServer.set_default_clear_color(Globals.new_map.background_color)
+		Globals.BG_ColorRect.color = Globals.new_map.background_color
 	set_map_setting_on_other_peers.rpc("darkness_enable", button_pressed)
 
 func _on_darkness_color_picker_button_color_changed(color):
 	if not multiplayer.is_server():
 		darkness.color = color
 		if Globals.new_map.darkness_enable: #backgroud color is darkness
-			RenderingServer.set_default_clear_color(color)
+			Globals.BG_ColorRect.color = color
 	Globals.new_map.darkness_color = color
 	set_map_setting_on_other_peers.rpc("darkness_color", color)
 
@@ -126,7 +128,7 @@ func _on_dm_darkness_color_picker_button_color_changed(color):
 	if multiplayer.is_server():
 		darkness.color = color
 		if Globals.new_map.darkness_enable: #backgroud color is darkness
-			RenderingServer.set_default_clear_color(color)
+			Globals.BG_ColorRect.color = color
 	Globals.new_map.DM_darkness_color = color
 	set_map_setting_on_other_peers.rpc("DM_darkness_color", color)
 

@@ -12,7 +12,6 @@ var bars: VBoxContainer
 var attr_bubbles: VBoxContainer
 var bar_bubbles: VBoxContainer
 var fov: PointLight2D
-var timer: Timer
 
 var in_turn_order: PanelContainer
 
@@ -32,8 +31,6 @@ func _ready():
 	fov = $UI/FovLight
 	if not character.player_character:
 		fov.visible = false
-	timer = $UI/Timer
-	timer.connect("timeout", timer_update)
 	change_bars(true)
 	change_attr_bubbles(true)
 	character.connect("bars_changed", change_bars)
@@ -68,7 +65,7 @@ func UI_set_position():
 	var center = get_center_offset()
 	#bars
 	bars.size.x = token_polygon.size.x * abs(token_polygon.scale.x)
-	bars.position = center + Vector2(-(token_polygon.size.x * abs(token_polygon.scale.x))/2, - bars.size.y - token_polygon.size.y/2 - 10)
+	bars.position = center + Vector2(-(token_polygon.size.x * abs(token_polygon.scale.x))/2, - bars.size.y - token_polygon.size.y * abs(token_polygon.scale.y)/2 - 10)
 	fov.position = center
 	#attr_bubbles (right side)
 	attr_bubbles.size.x = 0
@@ -90,6 +87,7 @@ func change_bars_on_remote_peers(bars):
 	#change_bars(true)
 	
 func change_bars(remote = false):
+	print("change bars")
 	if remote == false: #if change was local call change on other peers
 		change_bars_on_remote_peers.rpc(character.bars)
 	var flatstyle = StyleBoxFlat.new()
@@ -134,7 +132,8 @@ func change_bars(remote = false):
 		le.add_theme_stylebox_override("normal", flatstyle)
 		le.self_modulate = bar.self_modulate
 		bar_bubbles.add_child(le)
-	timer.start(0.01) # UI_set_position() after timer
+	await get_tree().create_timer(0.01).timeout
+	UI_set_position()
 	
 @rpc("any_peer", "call_remote", "reliable")
 func update_bars_on_remote_peers(attr, value):
@@ -173,6 +172,7 @@ func change_attr_bubbles_on_remote_peers(attr_bubbles):
 	character.emit_signal("attr_bubbles_changed", true)
 			
 func change_attr_bubbles(remote = false):
+	print("change attr bubbles")
 	if remote == false: #if change was local call change on other peers
 		change_attr_bubbles_on_remote_peers.rpc(character.attr_bubbles)
 	for child in attr_bubbles.get_children():
@@ -232,7 +232,8 @@ func change_attr_bubbles(remote = false):
 					hb.set_meta("text", label)
 					attr_bubbles.add_child(hb)
 			
-	timer.start(0.01) # UI_set_position() after timer
+	await get_tree().create_timer(0.01).timeout
+	UI_set_position()
 
 
 func bar_bubble_submit(new_text):
@@ -280,10 +281,7 @@ func on_le_focus_entered():
 		max_attr = le.get_meta("attr2")
 	else:
 		max_attr = ""
-	
-#update position after timer has run out
-func timer_update():
-	UI_set_position()
+
 	
 #set fov opacity and UI visibility for selected token
 func select():
@@ -307,10 +305,6 @@ func on_synch_macro(macro_name, macro_dict, old_macro_name = "", remove = false)
 
 @rpc("any_peer", "call_remote", "reliable")
 func synch_macro_to_peers(macro_name, macro_dict, old_macro_name = "", remove = false):
-	
-	var org_dict = character.macros[macro_name]
-	print("macro start - ", character.macros[macro_name])
-	print("synch macro: ", macro_name, macro_dict)
 	if remove:
 		character.macros.erase(macro_name)
 		if character.macros_in_bar.erase(macro_name):
@@ -339,17 +333,15 @@ func synch_macro_to_peers(macro_name, macro_dict, old_macro_name = "", remove = 
 		character.emit_signal("macro_bar_changed")
 
 
-func on_attr_created(attr_name, remote = false):
-	print("remote - ", remote, character, self)
-	if not remote:
-		create_attr_on_other_peers.rpc(attr_name)
+func on_attr_created(attr_name, value = ["", ""]):
+		create_attr_on_other_peers.rpc(attr_name, value)
 
 @rpc("any_peer", "call_remote", "reliable")
-func create_attr_on_other_peers(attr_name):
+func create_attr_on_other_peers(attr_name, value):
 	if character.attributes.has(attr_name):
 		return
-	character.attributes[attr_name] = ["", ""]
-	character.emit_signal("attr_created", attr_name, true)
+	character.attributes[attr_name] = value
+	character.emit_signal("attr_created", attr_name, value)
 	print("attr_created emited", character)
 	
 func on_synch_equip_slot(side, ind, move_ind, slot_dict, new, remove):
@@ -372,3 +364,18 @@ func synch_equip_slot_on_remote(side, ind, move_ind, slot_dict, new, remove):
 		character.equip_slots[side][ind] = slot_dict
 	#update any opened char_sheet of character
 	character.emit_signal("equip_slot_synched")
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_token_settings_on_other_peers(setting_arr):
+	character.set(setting_arr[0], setting_arr[1])
+	if setting_arr[0] == "token_shape":
+		character.emit_signal("token_changed", true)
+	else:
+		character.emit_signal("token_changed", false)
+	
+@rpc("any_peer", "call_remote", "reliable")
+func synch_rename_attr_on_other_peers(old_name, new_name):
+	character.attributes[new_name] = character.attributes[old_name]
+	character.attributes.erase(old_name)
+	character.emit_signal("attr_created", new_name, character.attributes[new_name])
+	character.emit_signal("attr_removed", old_name)
