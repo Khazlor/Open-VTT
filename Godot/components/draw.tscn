@@ -30,5 +30,92 @@ script = ExtResource("2_enpjm")
 z_index = 4096
 material = SubResource("CanvasItemMaterial_unuec")
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-spawn_path = NodePath("../Layers")
+[node name="TutorialWindow" type="Window" parent="."]
+title = "Tutorial"
+initial_position = 2
+size = Vector2i(600, 700)
+visible = false
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TutorialWindow"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TutorialWindow/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="RichTextLabel" type="RichTextLabel" parent="TutorialWindow/ScrollContainer/MarginContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "This tutorial can be accessed at any time by pressing the F1 key
+[font_size=25]Tool menu[/font_size]
+On the left side of UI is tool menu, here you can pick the tool you wish to use. The tools allow you to draw shapes or text, select and modify them.
+[ul]
+▦ snapping options
+[img=15x15]res://icons/select.png[/img] selection tool - can select and then transform objects on map. Objects can also be moved by pressing the arrow keys by one square at a time.
+[indent] Selection can also be saved by pressing CTRL + number key, and later selected by pressing said number key.
+Selection can be broken by pressing ESC key or deleted by presssing the DELETE key. Selection can also be copy-pasted.[/indent]
+▧ draw shape tool - draw rectangles, lines and elipses
+[indent]params can be set in options at the bottom of the page
+holding SHIFT makes drawing dimensions square[/indent]
+[font_size=12]📏[/font_size] measure tool - distances, angles, circle radii
+T - text tool - text params can be set in text options below layer tree
+[img=15x15]res://icons/Timer.svg[/img] open or close Turn Order
+[/ul]
+[font_size=25]Layer tree[/font_size]
+Before you can place object on the map, you need to create or select a layer on which you wish to add this object.
+This you do in Layer Tree which is just bellow [img=15x15]res://icons/Timer.svg[/img] Turn Order Button over which the DM has full control
+Created layers will be organised in a tree hierarchy and can be freely rearranged by dragging them around. The layers at the top are in front of lower ones.
+This layer system was created to ease the creation of multi-level maps
+Layers have following options:
+[ul]
+Layer_name - double clicking will allow renaming layer
+[img=15x15]res://icons/GuiVisibilityVisible.svg[/img] - toggles layer visibility for DM and all players
+DM - layer visible and accessible by DM only
+P - layer accessible by players (will still be visible if disabled)
+[img=15x15]res://icons/Add.svg[/img],[img=15x15]res://icons/Remove.svg[/img] - add new or remove this layer
+[img=15x15]res://icons/LightOccluder2D.svg[/img] - opens light options for this layer - allows selection of which light layer should be used for lights and shadows on this layer, multiple light layers can be selected at once
+[indent][img=15x15]res://icons/Tree.svg[/img] - propagates these light settings to all child layers[/indent]
+[/ul]
+Currently the only way to move objects between layers, is through selection and Copy/Cut and Pasting to new layer using CTRL-C/X and CTRL-V. This will be worked on in the future.
+[font_size=25]Tool Panel[/font_size]
+The DM can access tool panel on the right side of the screen, above chat / roll panel. This panel contains advanced tools, such as character and item trees, object and map settings.
+[font_size=20]Characters[/font_size]
+Character tree is divided into two sections - Global characters - are available across all campaigns, Campaign characters - are only available in the current campaign.
+Characters are organised in tree hierarchy to allow better organisation, renaming characters in done directly in character tree using [img=15x15]res://icons/Edit.svg[/img] button.
+Double clicking character will open character sheet for that character, dragging character to map will place the character on selected layer.
+[font_size=20]Items[/font_size]
+Items are also organised in tree hierarchy to allow better organisation. Double clicking item will open it's configuration.
+[b]Item attributes[/b] - can be set and accessed on equipped items in character macro by using $equip.equip_slot_name.attribute_name syntax - more in ? on chat / roll panel
+[b]Attribute modifier[/b] - will modify specified attribute when equipped - modifiers of the same type are mutually exclusive - out of two rings of deflection - only the stronger or the one with higher priority will get used.
+Drag and dropping item on token, or on inventory window will add the item to the inventory. Drag and dropping item on map, where no token in container is located will create a new container and place the item in it.
+Inventory of all selected tokens / containers cam be accessed by pressing [b]I[/b]
+[font_size=20]Object[/font_size]
+Contains object settings, can set object properties for all selected objects. Contains transformations, light and shadow settings.
+[font_size=20]Map[/font_size]
+Contains map settings including grid, measurement units, darkness and fov settings.
+[font_size=25]Chat / Roll panel[/font_size]
+Used for chat between players, and executing dice rolls and other macros.
+The tutorial to this component is in it's own section accessed by pressing the ? button on Roll panel.
+[font_size=25]Turn order[/font_size]
+Turn order contains tokens that can be sorted based on initiative and go through them in order. Is used for tracking order of character macros during a round.
+New tokens are added by changing the value of \"Iniciative\" attribute in character attributes, either manually or by using assignment macro
+[font_size=25]Character sheet[/font_size]
+Character sheet is the place where character information is stored. Can be accessed by double clicking on character in character tree by the DM, or double clicking a token in selected layer.
+Has section for notes, used in place of regullar character sheet, which will be worked on in the future.
+Section for attributes and macros where attributes and marcos can be created and modified, by setting \"In Bar\" property on macro, the macro will be usable in action bar, when token is selected.
+Section for token, where image, size, shape, bars, and attribute preview can all be set and modified.
+Section for inventory and equip slots. Equip slots cam be created and modified in menu accessed by clicking the [img=15x15]res://icons/Edit.svg[/img] button, and can be set to allow only a certain type of items to be equipped in said slot.
+[font_size=25]Changing maps[/font_size]
+maps can be changed by the DM by pressing the maps button on top-right side of map and choosing a new map, or by pressing ESC key and returning to map selection.
+"
+
+[connection signal="close_requested" from="TutorialWindow" to="." method="_on_tutorial_window_close_requested"]

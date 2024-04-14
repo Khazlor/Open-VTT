@@ -1,24 +1,16 @@
 extends Node
 
 var peer = StreamPeerTCP.new()
+var connecting_func_running = false
 
 signal recv_file(file_path)
 signal connected
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var ip = multiplayer.multiplayer_peer.get_peer(1).get_remote_address()
 	var error = 1
-	while true: #try until connection success
-		error = peer.connect_to_host(ip, 8080)
-		if error == OK:
-			print("TCP Connected successfully!")
-			peer.poll()
-			print(peer.get_status())
-			break
-		else:
-			print("TCP Failed to connect.")
-		await get_tree().create_timer(0.5).timeout
+	connecting_func_running = true
+	await connecting_func()
 	emit_signal("connected")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -35,11 +27,29 @@ func _process(delta):
 			file.store_buffer(data)
 			file.close()
 			emit_signal("recv_file", file_path) #set file to objects waiting on file
+	elif not connecting_func_running: #start connecting function
+		connecting_func_running = true
+		
+func connecting_func():
+	while true: #try until connection success
+		var error = peer.connect_to_host(Globals.ip, 8080)
+		if error == OK:
+			print("TCP Connected successfully!")
+			peer.poll()
+			while peer.get_status() == 1:
+				await get_tree().create_timer(0.5).timeout
+				peer.poll()
+			print("TCP status : ",peer.get_status())
+			break
+		else:
+			print("TCP Failed to connect.")
+		await get_tree().create_timer(0.5).timeout
+	connecting_func_running = false
 
 
 func send_image(file_path):
 	if not FileAccess.file_exists(file_path):
-		print("file does not exist")
+		print("send image - file does not exist")
 		return
 	var file_name = file_path.get_file()
 	var data: PackedByteArray = []
@@ -68,9 +78,14 @@ func send_file_request(file_name: String):
 	send_data(data)
 
 func send_data(data: PackedByteArray):
+	print("peer status : ", peer.get_status())
 	print("sending size :", data.size())
 	peer.put_u64(data.size())
 	var data_print = data.slice(0, 50)
 	print("sending data :", data_print)
 	var err = peer.put_data(data)
 	print("send err = ", err)
+
+
+func _on_tree_exiting():
+	peer.disconnect_from_host()

@@ -39,7 +39,6 @@ func start_async_server():
 
 func _thread_function():
 	while run_thread:
-		print("check for data")
 		for peer in peer_pool:
 			if peer.get_available_bytes() > 0:
 				#var av_bytes = peer.get_available_bytes()
@@ -80,7 +79,7 @@ func process_data(data: PackedByteArray, peer):
 	print("server received data: ", data_arr[0])
 	if data_arr[0] == "req":
 		#send requested data
-		var file_path = "res://images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
+		var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
 		if FileAccess.file_exists(file_path):
 			var s_data: PackedByteArray = []
 			s_data.resize(512)
@@ -97,11 +96,11 @@ func process_data(data: PackedByteArray, peer):
 			else:
 				print("file is empty: ", file_path)
 		else:
-			print("file does not exist: ", file_path)
+			print("request - file does not exist: ", file_path)
 	elif data_arr[0] == "put":
 		print("put")
 		#recieve sent data - create image in folder
-		var file_path = "res://images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
+		var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
 		#if FileAccess.file_exists(file_path): - done in rpc
 			#name = rename_file(name)
 		var file = FileAccess.open(file_path, FileAccess.WRITE)
@@ -130,7 +129,7 @@ func rename_file(old_name):
 	var name = old_name
 	var i = 2
 	var ind = old_name.rfind(".")
-	while FileAccess.file_exists("res://images/" + Globals.campaign.campaign_name + "/" + name):
+	while FileAccess.file_exists(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + name):
 		name = old_name.insert(ind, "_" + str(i))
 		print(name)
 		i += 1

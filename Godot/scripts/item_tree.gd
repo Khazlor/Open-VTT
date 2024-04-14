@@ -109,7 +109,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 		
 func save_items():
 	var item_list = get_treeitem_dict_and_children(self.get_root())
-	var file = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json", FileAccess.WRITE)
+	var file = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json", FileAccess.WRITE)
 	file.store_var(item_list[1])
 	file.close()
 	
@@ -121,8 +121,8 @@ func get_treeitem_dict_and_children(tree_item: TreeItem):
 	return [tree_item.get_meta("item_dict"), child_list]
 	
 func load_items():
-	if FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json"):
-		var file = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json", FileAccess.READ)
+	if FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json"):
+		var file = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/items.json", FileAccess.READ)
 		var item_list = file.get_var()
 		file.close()
 		for item in item_list:

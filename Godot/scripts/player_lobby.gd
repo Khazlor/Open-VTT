@@ -20,17 +20,20 @@ func _ready():
 	if Globals.enet_peer != null: #multiplayer
 		if multiplayer.is_server(): #server
 			#create image folder if it does not exists
-			if not DirAccess.dir_exists_absolute("res://images/" + Globals.campaign.campaign_name):
-				DirAccess.make_dir_recursive_absolute("res://images/" + Globals.campaign.campaign_name)
+			if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name):
+				DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
 			#start tcp server for file transfer:
 			tcp_server = tcp_server_comp.instantiate()
 			tcp_server.connect("recv_file", on_tcp_server_recv_file)
 			add_child(tcp_server)
 			
 			map = map_comp.instantiate()
+			if has_node("Map"):
+				remove_child(get_node("map"))
 			add_child(map)
+			map.name = "Map"
 			#set all connected peers to this map
-			var file_buffer = FileAccess.get_file_as_bytes("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name)
+			var file_buffer = FileAccess.get_file_as_bytes(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name)
 			var file_buffer_size = file_buffer.size()
 			file_buffer = file_buffer.compress()
 			client_set_map.rpc(file_buffer, file_buffer_size)
@@ -42,7 +45,10 @@ func _ready():
 			add_child(tcp_client)
 	else: #singleplayer
 		map = map_comp.instantiate()
+		if has_node("Map"):
+			remove_child(get_node("map"))
 		add_child(map)
+		map.name = "Map"
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -56,7 +62,7 @@ func on_tcp_client_connected(): #connected to server with loaded scene - load ma
 	server_get_map.rpc_id(1)
 
 func on_tcp_server_recv_file(file_name):
-	var file_path = "res://images/" + Globals.campaign.campaign_name + "/" + file_name
+	var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + file_name
 	server_recvd_file.rpc(file_name) #notify all peers that new file was uploaded to server
 	on_tcp_client_recv_file(file_path) #check if any objects on server need file
 	
@@ -69,6 +75,9 @@ func server_recvd_file(file_name):
 	else:
 		print("no object waiting for file")
 	
+@rpc("authority", "call_remote", "reliable")
+func remove_map():
+	map.queue_free()
 
 func on_tcp_client_recv_file(file_path):
 	print("client got file - check waiting objects for file")
@@ -106,9 +115,9 @@ func server_get_map():
 		var layers = $Map/Draw/Layers
 		if layers != null:
 			Globals.new_map.save_map(layers)
-			#var file = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name, FileAccess.READ)
+			#var file = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name, FileAccess.READ)
 			#var file_buffer = file.get_buffer(file.get_length())
-			var file_buffer = FileAccess.get_file_as_bytes("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name)
+			var file_buffer = FileAccess.get_file_as_bytes(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + Globals.new_map.map_name)
 			var file_buffer_size = file_buffer.size()
 			file_buffer = file_buffer.compress()
 			#call_rpc_client_set_map(sender_id, file_buffer, file_buffer_size)
@@ -120,19 +129,22 @@ func call_rpc_client_set_map(sender_id, file_buffer, file_buffer_size):
 		
 @rpc("authority", "call_remote", "reliable")
 func client_set_campaign(campaign_name):
-	Globals.campaign = load("res://resources/Campaign_res.gd").new()
+	if Globals.campaign == null:
+		Globals.campaign = Campaign_res.new()
 	Globals.campaign.campaign_name = campaign_name
 	#create image folder if it does not exists
-	if not DirAccess.dir_exists_absolute("res://images/" + Globals.campaign.campaign_name):
-		DirAccess.make_dir_recursive_absolute("res://images/" + Globals.campaign.campaign_name)
+	if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name):
+		DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
+
 
 @rpc("authority", "call_remote", "reliable")
 func client_set_map(server_map_file_buffer, file_buffer_size):
 	if map != null: #free old map
+		remove_child(map)
 		map.queue_free()
 	print(multiplayer.get_unique_id(), " client set map")
 	server_map_file_buffer = server_map_file_buffer.decompress(file_buffer_size)
-	var file = FileAccess.open("res://temp.file", FileAccess.WRITE_READ)
+	var file = FileAccess.open(Globals.base_dir_path + "/temp.file", FileAccess.WRITE_READ)
 	file.store_var(server_map_file_buffer)
 	file.flush()
 	print("set ", file.get_length())
@@ -142,7 +154,17 @@ func client_set_map(server_map_file_buffer, file_buffer_size):
 	map = map_comp.instantiate()
 	Globals.draw_layer = map.get_node("Draw/Layers")
 	Globals.new_map.load_map("", true, file)
+	if has_node("Map"):
+		remove_child(get_node("map"))
 	add_child(map)
+	map.name = "Map"
+	
+	#tutorial
+	if Globals.campaign == null:
+		Globals.campaign = Campaign_res.new()
+	if Globals.campaign.tutorial:
+		Globals.draw_comp.get_node("TutorialWindow").popup()
+		Globals.campaign.tutorial = false
 
 #call on server to request file
 @rpc("any_peer", "call_remote", "reliable")
@@ -160,8 +182,8 @@ func check_file_on_server(file_name, file_hash, id):
 	var new_file_name = file_name
 	var ext_pos = file_name.rfind(".") #find end of file name - before extension (image|.png)
 	var i = 1
-	while FileAccess.file_exists("res://images/" + Globals.campaign.campaign_name + "/" + new_file_name):
-		if file_hash == FileAccess.get_md5("res://images/" + Globals.campaign.campaign_name + "/" + new_file_name):
+	while FileAccess.file_exists(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name):
+		if file_hash == FileAccess.get_md5(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name):
 			#same file - do not upload:
 			check_file_on_server_response.rpc_id(peer_id, true, new_file_name, id)
 			return
@@ -169,7 +191,7 @@ func check_file_on_server(file_name, file_hash, id):
 			new_file_name = file_name.insert(ext_pos, "_" + str(i))
 			i += 1
 	#else not found - create file:
-	var new_file = FileAccess.open("res://images/" + Globals.campaign.campaign_name + "/" + new_file_name, FileAccess.WRITE)
+	var new_file = FileAccess.open(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name, FileAccess.WRITE)
 	new_file.close()
 	check_file_on_server_response.rpc_id(peer_id, false, new_file_name, id)
 
@@ -201,7 +223,7 @@ func handle_file_transfer(file_path: String, set_image = true):
 			result = await file_check_done
 			recv_id = result[2]
 		print("signal recvd")
-		var new_file_path = "res://images/" + Globals.campaign.campaign_name + "/" + result[1]
+		var new_file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + result[1]
 		if result[0] == true: #upload
 			if tcp_client != null: #client
 				tcp_client.send_image(file_path)
@@ -216,7 +238,7 @@ func handle_file_transfer(file_path: String, set_image = true):
 				print("file already exists")
 		return new_file_path
 	else:
-		print("file does not exist")
+		print("handle file transfer - file does not exist")
 		
 #adds object that does not have (image) file yet to list of objects waiting for file
 func add_to_objects_waiting_for_file(file_name: String, object):

@@ -15,7 +15,7 @@ var campaigncard
 func _ready():
 	popup.transient = true
 	popup.exclusive = true
-	var save_dir = DirAccess.open("res://saves/Campaigns")
+	var save_dir = DirAccess.open(Globals.base_dir_path + "/saves/Campaigns")
 	if save_dir == null:
 		return
 	var dirs = save_dir.get_directories()
@@ -49,20 +49,14 @@ func _on_back_pressed():
 func _on_new_map_pressed():
 	var campaign = Campaign_res.new()
 	
-	var dir = DirAccess.open("res://saves/Campaigns")
-	if dir == null:
-		dir = DirAccess.open("res://")
-		dir.make_dir("saves")
-		dir.change_dir("saves")
-		dir.make_dir("Campaign")
-		dir.change_dir("Campaign")
+	if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/saves/Campaigns"):
+		DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/saves/Campaigns")
 	var i = 0
 	var oldname = campaign.campaign_name
-	while dir.make_dir(campaign.campaign_name) == Error.ERR_ALREADY_EXISTS:
+	while DirAccess.dir_exists_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name):
 		i += 1
 		campaign.campaign_name = oldname + "_" + str(i)
-	dir.change_dir(campaign.campaign_name)
-	
+	DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name)
 	_add_campaigncard(campaign)
 	
 func _add_campaigncard(campaign: Campaign_res):
@@ -94,10 +88,10 @@ func _on_apply_button_pressed():
 		var oldname = campaign.map_name
 		campaign.campaign_name = newname
 		var i = 0
-		while DirAccess.dir_exists_absolute("res://saves/Campaigns/" + campaign.campaign_name):
+		while DirAccess.dir_exists_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name):
 			i += 1
 			campaign.campaign_name = newname + "_" + str(i)
-		if DirAccess.rename_absolute("res://saves/Campaigns/" + campaign.campaign_name, "res://saves/Campaigns/" + campaign.campaign_name) != Error.OK:
+		if DirAccess.rename_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name, Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name) != Error.OK:
 			campaign.campaign_name = oldname
 	campaign.campaign_desc = popup.get_node("VBoxContainer/MapDesc").text
 	
@@ -117,7 +111,7 @@ func _on_duplicate_button_pressed():
 	var newcampaign = campaign.duplicate(true)
 	var i = 0
 	var oldname = newcampaign.campaign_name
-	while DirAccess.dir_exists_absolute("res://saves/Campaigns/" + campaign.campaign_name):
+	while DirAccess.dir_exists_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name):
 		i += 1
 		newcampaign.campaign_name = oldname + "_" + str(i)
 	newcampaign.save_map()
@@ -127,8 +121,8 @@ func _on_duplicate_button_pressed():
 
 
 func _on_delete_button_pressed():
-	OS.move_to_trash(ProjectSettings.globalize_path("res://saves/Campaigns/" + campaign.campaign_name))
-#	DirAccess.remove_absolute("res://saves/Campaigns/" + campaign.campaign_name)
+	OS.move_to_trash(ProjectSettings.globalize_path(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name))
+#	DirAccess.remove_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name)
 	campaigncard.queue_free()
 	campaign = null
 	popup.hide()

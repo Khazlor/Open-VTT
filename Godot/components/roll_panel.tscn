@@ -41,15 +41,24 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 8
-size_flags_stretch_ratio = 0.0
 mouse_force_pass_scroll_events = false
 placeholder_text = "/r"
 scroll_fit_content_height = true
 
+[node name="HelpButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "?"
+
 [node name="QueryDialog" type="AcceptDialog" parent="."]
+title = "Query"
+initial_position = 1
 size = Vector2i(200, 126)
 ok_button_text = "Submit"
 dialog_close_on_escape = false
@@ -62,14 +71,138 @@ offset_bottom = 77.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="OptionButton" type="OptionButton" parent="QueryDialog/VBoxContainer"]
-custom_minimum_size = Vector2(0, 30)
-layout_mode = 2
-
 [node name="TextEdit" type="TextEdit" parent="QueryDialog/VBoxContainer"]
 visible = false
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 scroll_fit_content_height = true
 
-[connection signal="gui_input" from="MarginContainer/VBoxContainer/TextEdit" to="." method="_on_text_edit_gui_input"]
+[node name="OptionButton" type="OptionButton" parent="QueryDialog/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="Window" type="Window" parent="."]
+title = "Roll panel - usage"
+initial_position = 1
+size = Vector2i(600, 600)
+visible = false
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Window"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Window/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Label" type="RichTextLabel" parent="Window/ScrollContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "Rollpanel is part of the UI where DM and players can chat, roll dice, run queries, resolve conditions and run macros.
+[font_size=25]Rolling Dice[/font_size]
+Basic syntax of a roll commans is:
+		[b]/r roll_command //[/b]
+where:
+[ul]
+[b][i]/r[/i][/b]  marks start of roll or evaluation
+[b][i]//[/i][/b]  marks the end of roll or evaluation
+[b][i]roll_command[/i][/b] contains all the parameters for a dice roll, or mathematical expression
+[/ul]
+The following parameters for dice roll are currently supported:
+[indent][number of dice]d[sides of dice][keep or drop][number of dice to be kept or dropped]
+where only [b][i]d[sides of dice][/i] [/b]is mandatory
+[/indent]For example:
+/r d20 // will roll one twenty-sided die,
+/r 2d20 // will roll two twenty-sided die and sum them up
+
+In addition a number of lowest or highest dice can be dropped based on [keep or drop][number of dice to be kept or dropped] params
+[ul]k, kh - (keep, keep highest) - will keep only specified number of highest rolled dice
+kl - (keep lowest) - will keep only specified number of lowest rolled dice
+d, dl - (drop, drop lowest) - will drop specified number of lowest rolled dice
+dh - (drop highest) - will drop specified number of highest rolled dice[/ul]
+/r 2d20d1 // will roll two twenty-sided die and take the result from the higher one
+
+In addition any mathematical expression inside the roll_command will get calculated
+/r (2d20 + 5)/2 // will return the result of roll added to 5 and divided by 2
+
+[font_size=25]Queries[/font_size]
+Basic syntax of a query command is:
+		?{Query title|Option 1|Option 2| ... }
+A Dialog will then appear on screen prompting the selection of one of the options - after which the command will get replaced by the selected option.
+Optionally one can enter \"?\" as a parameter option which will add a textbox in which the result can be entered manually.
+?{Which way will the party head?|Right|Straight|Left|?}
+
+[font_size=25]Conditions[/font_size]
+Basic syntax of a condition command is:
+		?{Condition variable;cond 1: val 1; cond 2: val 2;: default var}
+Condition will then get evaluted from left to right and the condition command will be replaced by value of the first correct contition
+Condition examples:
+[ul]1: - equal to 1
+>1: - greater than 1
+>=1: - greater or equal to 1
+<1: - less than 1
+<=1: - less or equal to 1
+: - default
+[/ul]
+
+[font_size=25]Character attributes and macros[/font_size]
+character attributes and macros can be accessed from a macro rolled by said character
+[ul]
+$attr_name accesses character attribute
+#macro_name accesses character macro
+$equip.equipment_slot_name.item_attribute accesses attribute of item equiped in specified equipment slot
+[/ul]
+example:
+/r 3d6 + $str_bonus + $magic_bonus //
+
+Command can also assign value to an attribute by usin following syntax:
+		$attr_name = [value]
+example:
+$hp = [/r $hp + 2d6 //]
+setting attribute $iniciative will add token to Turn Order
+
+[font_size=25]Targetting system[/font_size]
+Command can also access and assign attributes to targets
+[ul]
+@attr_name accesses target attribute
+%macro_name accesses target macro
+[/ul]
+
+Targets are selected based on parameters optionally set after the initial command, like so:
+	command || [shape_params][position_params]
+shape_params - specify shape of targeted area
+position_params - specify the emanating point of specified shape
+	
+shape_params are optional and have following options:
+[ul]
+rect [x] [y] - targets in rectangle [x,y], or [x,x] if y not entered
+circle [radius] - targets in circle with specified radius
+cone [start_width] [end_width] [length]  - targets in a cone
+cone_angle [angle] [length]  - targets in a cone
+[/ul]
+if missing - target will be single target
+
+position_params are mandatory and have following options:
+[ul]
+self - position of selected object or token
+target - click anywhere
+target [distance] - click anywhere within distance of selected object or token
+[/ul]
+
+example:
+@hp = [/r @hp - 6d6 //] || circle 50 target 120
+"
+autowrap_mode = 2
+
+[connection signal="gui_input" from="MarginContainer/VBoxContainer/HBoxContainer/TextEdit" to="." method="_on_text_edit_gui_input"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/HelpButton" to="." method="_on_help_button_pressed"]
+[connection signal="close_requested" from="Window" to="." method="_on_window_close_requested"]

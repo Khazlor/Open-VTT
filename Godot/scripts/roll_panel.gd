@@ -34,7 +34,7 @@ var assign_start_regex
 var inner_regex
 
 @onready var scroll_bar = $MarginContainer/VBoxContainer/ScrollContainer.get_v_scroll_bar()
-@onready var textEdit = $MarginContainer/VBoxContainer/TextEdit
+@onready var textEdit = $MarginContainer/VBoxContainer/HBoxContainer/TextEdit
 @onready var query_diag = $QueryDialog
 @onready var query_diag_opt = $QueryDialog/VBoxContainer/OptionButton
 @onready var query_diag_te = $QueryDialog/VBoxContainer/TextEdit
@@ -418,14 +418,14 @@ func assign_attributes(text_in: String, character: Character, target: Character)
 			var attr = attr_regex.search(result_str).get_string()
 			if character.attributes.has(attr):
 				character.attributes[attr][1] = value_regex.search(result_str).get_string()
-				character.emit_signal("attr_updated", attr)
+				character.emit_signal("attr_updated", attr, false)
 		else: #target
 			if target == null:
 				continue
 			var attr = attr_regex.search(result_str).get_string()
 			if target.attributes.has(attr):
 				target.attributes[attr] = value_regex.search(result_str).get_string()
-				target.emit_signal("attr_updated", attr)
+				target.emit_signal("attr_updated", attr, false)
 
 #text_in = array with single string - pass by reference
 func resolve_inner(text_in, i: int, closing_str: String, character: Character, target: Character, ignore: int = 0):
@@ -611,7 +611,7 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 				print("error in assignment value")
 				return
 			character.attributes[attr.substr(1)][1] = sub_str[0]
-			character.emit_signal("attr_updated", attr.substr(1))
+			character.emit_signal("attr_updated", attr.substr(1), false)
 			return
 	elif attr[0] == "@" and target != null: #target
 		if target.attributes.has(attr.substr(1)):
@@ -624,7 +624,7 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 				print("error in assignment value")
 				return
 			target.attributes[attr.substr(1)][1] = sub_str[0]
-			target.emit_signal("attr_updated", attr.substr(1))
+			target.emit_signal("attr_updated", attr.substr(1), false)
 			return
 	#error cannot access attribute - resolve and skip
 	var n = await resolve_inner(text_in, i, "]", character, target)
@@ -865,3 +865,11 @@ func targeting(text_in: String):
 		return null
 	return [shape_arr, point_arr]
 
+
+
+func _on_help_button_pressed():
+	$Window.popup()
+
+
+func _on_window_close_requested():
+	$Window.hide()

@@ -39,18 +39,24 @@ func create_root():
 	#set root of draw_layers - might no longer be needed
 	draw_root = $"../../../Draw/Layers"
 	item.set_meta("draw_layer", draw_root) 
-	item.add_button(0, button_add, 3)
+	if multiplayer.is_server():
+		item.add_button(0, button_add, 3)
+	else:
+		hide_root = true
 	
 
-func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Node2D = null):
+func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Node2D = null, end = false):
 	#if tree was empty, hide root
 	if hide_root == false:
 		hide_root = true
+	var index = 0 #add at start of children
+	if end:
+		index = -1 #add to end of children
 	var item
 	if parent == null: 
-		item = create_item(null, 0)
+		item = create_item(null, index)
 	else:
-		item = create_item(parent, 0)
+		item = create_item(parent, index)
 	item.set_text(0, item_name)
 	
 	var draw_layer
@@ -85,7 +91,7 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 		existing_node.z_as_relative = false
 		existing_node.set_meta("tree_item", item)
 		item.set_meta("draw_layer", existing_node)
-	if not multiplayer.is_server() and (not existing_node.get_meta("player_layer") or existing_node.get_meta("DM") or not existing_node.get_meta("visibility")): #hide layer for player:
+	if not multiplayer.is_server() and (not existing_node.get_meta("player_layer") or existing_node.get_meta("DM") or not existing_node.get_meta("visibility")): #hide layer tree_item for player:
 		item.visible = false
 	if multiplayer.is_server():
 		if draw_layer.get_meta("visibility"):
@@ -313,7 +319,7 @@ func change_z_indexes():
 		
 #add child based on existing layer
 func load_self_and_children(node: Node2D, parent: TreeItem):
-	var item = add_new_item(node.get_meta("item_name"), parent, node)
+	var item = add_new_item(node.get_meta("item_name"), parent, node, true)
 	for child in node.get_children(true):
 		if child.has_meta("item_name"):
 			load_self_and_children(child, item)

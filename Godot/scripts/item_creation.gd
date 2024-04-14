@@ -66,7 +66,7 @@ func _on_count_spin_box_value_changed(value):
 
 
 func _on_description_text_edit_text_changed():
-	item_dict["description"] = $ScrollContainer/VBoxContainer/Description/HBoxContainer/DescriptionTextEdit.text_changed
+	item_dict["description"] = $ScrollContainer/VBoxContainer/Description/HBoxContainer/DescriptionTextEdit.text
 
 
 func _on_texture_button_pressed():

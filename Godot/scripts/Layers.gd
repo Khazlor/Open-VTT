@@ -28,7 +28,8 @@ func _process(delta):
 	
 
 func _on_tree_item_activated():
-	tree.edit_selected(true)
+	if multiplayer.is_server():
+		tree.edit_selected(true)
 
 
 func _on_tree_item_selected():
@@ -121,13 +122,22 @@ func set_tree_item_visibility(layer):
 	var item = layer.get_meta("tree_item")
 	if not layer.get_meta("visibility") or layer.get_meta("DM") or not layer.get_meta("player_layer"):
 		item.visible = false
-		if Globals.draw_layer == layer:
-			var first_item = tree.get_root().get_next_visible()
+		if Globals.draw_layer == layer or layer.is_ancestor_of(Globals.draw_layer):
+			var first_item = null
+			for tree_item in tree.get_root().get_children():
+				if tree_item.visible:
+					first_item = tree_item
+			print("hidden used layer - switching to: ", first_item)
 			if first_item != null:
 				tree.set_selected(first_item, 0)
 				Globals.draw_layer = first_item.get_meta("draw_layer")
+			else:
+				Globals.draw_layer = null
 	else:
 		item.visible = true
+		if Globals.draw_layer == null:
+			tree.set_selected(item, 0)
+			Globals.draw_layer = item.get_meta("draw_layer")
 	
 
 func set_layer_visibility(layer):
@@ -152,7 +162,7 @@ func _on_tree_item_edited():
 
 
 func _on_confirmation_dialog_confirmed():
-	synch_button_press_on_remote.rpc(get_path_to(dialog_item.get_meta("draw_layer")), 0, 2, 0)
+	synch_button_press_on_remote.rpc(get_path_to(dialog_item.get_meta("draw_layer")), 0, 4, 0)
 	custom_remove_item(dialog_item)
 	
 func custom_remove_item(item: TreeItem):
@@ -232,4 +242,11 @@ func set_layers_visibility():
 			return #want to see layers below
 		else:
 			layer.visible = false
-	
+			
+#reset layer visibility after FOV disabled
+@rpc("any_peer", "call_local", "reliable")
+func reset_layers_visibility():
+	var tree_layers = tree.get_root().get_children()
+	for tree_layer in tree_layers:
+		set_layer_visibility(tree_layer.get_meta("draw_layer"))
+

@@ -75,7 +75,7 @@ func _process(delta):
 
 func create_root():
 	hide_root = false
-	var root = create_item(null)
+	var root = create_item()
 	root.disable_folding = true
 	root.set_text(1, "Total")
 	root.set_cell_mode(5, TreeItem.CELL_MODE_RANGE)
@@ -124,7 +124,7 @@ func add_item_treeitem(item_dict, add_to_inventory = true, slot_arr = null):
 	
 	var category = item_dict["category"]
 	if not categories.has(category): #create category item
-		var category_item = create_item(null)
+		var category_item = create_item(get_root())
 		category_item.set_text(1, category)
 		category_item.set_cell_mode(5, TreeItem.CELL_MODE_RANGE)
 		category_item.set_range_config(5, 0, 99999999, 1)

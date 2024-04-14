@@ -8,6 +8,11 @@ var char_sheet = preload("res://UI/character_sheet.tscn")
 var inventory_sheet = preload("res://components/container_inventory.tscn")
 var token_comp = preload("res://components/token.tscn")
 
+var update_other_peers = true #for multiplayer synch interval when dragging
+var update_timer_interval = 0.05 #how often synch when dragging
+
+var control_groups = [[],[],[],[],[],[],[],[],[],[]]
+
 #drawing
 var pressed = false
 var draw_enable = true
@@ -73,6 +78,9 @@ var unshaded_material: CanvasItemMaterial
 
 signal targeting_end(selected_targets)
 
+signal line_settings_changed(setting)
+signal font_settings_changed(setting)
+
 func _ready():
 	Globals.draw_comp = self
 	
@@ -86,6 +94,9 @@ func _ready():
 	
 	#selected token in turn order:
 	Globals.turn_order.connect("token_turn_selected", select_token)
+	
+	connect("line_settings_changed", on_line_settings_changed)
+	connect("font_settings_changed", on_font_settings_changed)
 	
 
 func _unhandled_input(event):
@@ -150,8 +161,8 @@ func _unhandled_input(event):
 		#pressed (not button)
 		if Input.is_action_just_pressed("mouseleft"):
 			print("mouse pressed")
-			Globals.tool_bar.grab_focus()
 			draw_enable = true
+			Globals.tool_bar.grab_focus()
 		#end any dragging
 		if Input.is_action_just_released("mouseleft"):
 			print("mouse released")
@@ -177,7 +188,7 @@ func _unhandled_input(event):
 				child.queue_free()
 			current_measure.clear()
 
-		#select box drawing | scaling finished
+		#select box
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
 			print("mouse released with select - scaling: " + str(selected_scaling))
 			#drag finished
@@ -219,7 +230,9 @@ func _unhandled_input(event):
 					child = child.get_child(0)
 				if child.is_class("Node2D"): #inherits from Node2D
 					if Globals.select_recursive:
-						if child.get_class() == "Node2D": #is Node2D -> Layer
+						if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+							if not multiplayer.is_server() and not child.get_meta("player_layer"):
+								continue
 							if child.visible:
 								lines_children.append_array(child.get_children())
 					continue
@@ -312,19 +325,20 @@ func _unhandled_input(event):
 				
 			select_objects()
 		#circle or rect drawing finished
-		if Input.is_action_just_released("mouseleft") and (Globals.tool == "rect" or Globals.tool == "circle"):
+		if Input.is_action_just_released("mouseleft") and Globals.tool == "rect":
 			if current_panel == null:
 				return
-			print("rect finished")
-			print(current_panel.size)
-			print(current_panel.position)
-			print(get_global_mouse_position())
 			if current_panel.size.x == 0 or current_panel.size.y == 0:
-				#lines.remove_child(current_panel)
 				current_panel.queue_free()
-				print("free")
 			else:
 				create_object_on_remote_peers(current_panel)
+		if Input.is_action_just_released("mouseleft") and Globals.tool == "circle":
+			if current_ellipse == null:
+				return
+			if current_ellipse.size.x == 0 or current_ellipse.size.y == 0:
+				current_ellipse.queue_free()
+			else:
+				create_object_on_remote_peers(current_ellipse)
 		#else button held -> drawing
 		if draw_enable:
 			if Globals.tool == "rect":
@@ -461,9 +475,9 @@ func _unhandled_input(event):
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_label.set_position(mouse_pos)
 							if Globals.fontName != "default":
-								current_label.add_theme_font_override(Globals.fontName, Globals.font)
-							current_label.add_theme_font_size_override(Globals.fontName, Globals.fontSize)
-							current_label.add_theme_color_override(Globals.fontName, Globals.fontColor)
+								current_label.add_theme_font_override("font", Globals.font)
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_color_override("font_color", Globals.fontColor)
 							current_label.text = "text"
 							current_label.set_meta("type", "text")
 							Globals.draw_layer.add_child(current_label)
@@ -664,6 +678,11 @@ func _unhandled_input(event):
 						for object in selected:
 							object.position += relative_offset
 						select_box.position += relative_offset
+						if update_other_peers:
+							for object in selected:
+								print("call synch on other peers")
+								synch_object_properties_udp.rpc(get_path_to(object), [["position", object.position]])
+							update_other_peers_timer_start()
 						return
 					#rotate objects
 					elif selected_rotating:
@@ -885,8 +904,20 @@ func _unhandled_input(event):
 			selected.clear()
 			mouse_over_clear()
 			
-		elif Input.is_action_just_pressed("Escape"): #go back to map selection
-			get_tree().change_scene_to_file("res://scenes/Maps.tscn")
+		elif Input.is_action_just_pressed("Escape"): #cancel selection or go back to map selection
+			if selected != null and select_box != null: #cancel selection
+				#remove select box
+				select_box.queue_free()
+				#resetting select box state variables
+				selected_tokens.clear()
+				selected.clear()
+				mouse_over_clear()
+				return
+			if multiplayer.is_server():
+				get_tree().change_scene_to_file("res://scenes/Maps.tscn")
+			else:
+				multiplayer.multiplayer_peer = null #terminate multiplayer
+				get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 			
 		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
 			print("released I")
@@ -897,10 +928,10 @@ func _unhandled_input(event):
 				inv_sheet.selected = selected
 				Globals.windows.add_child(inv_sheet)
 				
-		if Input.is_action_just_pressed("ui_copy"):
+		elif Input.is_action_just_pressed("ui_copy"):
 			copy_to_clipboard()
 				
-		if Input.is_action_just_pressed("ui_paste"):
+		elif Input.is_action_just_pressed("ui_paste"):
 			var c = Globals.clipboard_characters.size() - 1 #index for character array
 			var l = Globals.clipboard_lights.size() - 1 #index for light array
 			for i in range(Globals.clipboard_objects.size()-1, -1, -1): #iterate backwards
@@ -916,6 +947,104 @@ func _unhandled_input(event):
 					new_object.add_sibling(light)
 					var remote = get_object_light_remote(new_object)
 					remote.remote_path = remote.get_path_to(light)
+				create_object_on_remote_peers(new_object)
+		#control groups
+		elif Input.is_action_just_pressed("Control-Group_0"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[0] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[0].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_1"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				print("created control group - ", selected)
+				control_groups[1] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[1].duplicate()
+				print("selected control group - ", selected)
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_2"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[2] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[2].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_3"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[3] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[3].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_4"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[4] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[4].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_5"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[5] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[5].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_6"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[6] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[6].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_7"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[7] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[7].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_8"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[8] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[8].duplicate()
+				get_selection_size()
+				select_objects()
+		elif Input.is_action_just_pressed("Control-Group_9"):
+			if Input.is_key_pressed(KEY_CTRL):#create control group
+				control_groups[9] = selected.duplicate()
+			else: #select control group
+				selected = control_groups[9].duplicate()
+				get_selection_size()
+				select_objects()
+		#arrow movement
+		elif Input.is_action_just_pressed("up"):
+			for object in selected:
+				object.position.y -= Globals.new_map.grid_size
+			if select_box != null:
+				select_box.position.y -= Globals.new_map.grid_size
+		elif Input.is_action_just_pressed("down"):
+			for object in selected:
+				object.position.y += Globals.new_map.grid_size
+			if select_box != null:
+				select_box.position.y += Globals.new_map.grid_size
+		elif Input.is_action_just_pressed("right"):
+			for object in selected:
+				object.position.x += Globals.new_map.grid_size
+			if select_box != null:
+				select_box.position.x += Globals.new_map.grid_size
+		elif Input.is_action_just_pressed("left"):
+			for object in selected:
+				object.position.x -= Globals.new_map.grid_size
+			if select_box != null:
+				select_box.position.x -= Globals.new_map.grid_size
+		elif Input.is_action_just_pressed("help"):
+			$TutorialWindow.popup()
+
 
 func mouse_over_clear():
 	mouse_over_selected = false
@@ -957,7 +1086,10 @@ func get_clicked(mouse_position: Vector2):
 	if Globals.select_recursive:
 		var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
 		for treeitem in treeitem_array:
-			if treeitem.get_meta("draw_layer").visible:
+			var layer = treeitem.get_meta("draw_layer")
+			if not multiplayer.is_server() and not layer.get_meta("player_layer"):
+				continue
+			if layer.visible:
 				lines_children = treeitem.get_meta("draw_layer").get_children()
 				lines_children.reverse()
 				array_list.append(lines_children)
@@ -1004,6 +1136,89 @@ func get_clicked(mouse_position: Vector2):
 					return child
 	return null
 
+#get size of selection for selectbox
+func get_selection_size():
+	if selected.is_empty():
+		return
+	var max_x = selected[0].position.x
+	var max_y = selected[0].position.y
+	var min_x = selected[0].position.x
+	var min_y = selected[0].position.y
+	for child in selected:
+		if child.rotation == 0: #no rotation - faster
+			if child.scale.x > 0:
+				if child.position.x < min_x:
+					min_x = child.position.x
+				if child.position.x + child.size.x*child.scale.x > max_x:
+					max_x = child.position.x + child.size.x*child.scale.x
+			else:
+				if child.position.x + child.size.x*child.scale.x < min_x:
+					min_x = child.position.x + child.size.x*child.scale.x
+				if child.position.x > max_x:
+					max_x = child.position.x
+			if child.scale.y > 0:
+				if child.position.y < min_y:
+					min_y = child.position.y
+				if child.position.y + child.size.y*child.scale.y > max_y:
+					max_y = child.position.y + child.size.y*child.scale.y
+			else:
+				if child.position.y + child.size.y*child.scale.y < min_y:
+					min_y = child.position.y + child.size.y*child.scale.y
+			if child.position.y > max_y:
+					max_y = child.position.y
+		else: #rotated object - locate corners then decide
+			var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+			var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+			var top_left = child.position
+			var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+			var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+			var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+			print("located corners: ", top_left, top_right, bottom_left, bottom_right)
+			print ("bounds: ", select_box.get_begin(), select_box.get_end())
+			var max = Vector2()#max x,y of rotated polygon
+			var min = Vector2()#min x,y of rotated polygon
+			#get max
+			max.x = top_left.x
+			max.y = top_left.y
+			if top_right.x > max.x:
+				max.x = top_right.x
+			if top_right.y > max.y:
+				max.y = top_right.y
+			if bottom_right.x > max.x:
+				max.x = bottom_right.x
+			if bottom_right.y > max.y:
+				max.y = bottom_right.y
+			if bottom_left.x > max.x:
+				max.x = bottom_left.x
+			if bottom_left.y > max.y:
+				max.y = bottom_left.y
+			#get min
+			min.x = top_left.x
+			min.y = top_left.y
+			if top_right.x < min.x:
+				min.x = top_right.x
+			if top_right.y < min.y:
+				min.y = top_right.y
+			if bottom_right.x < min.x:
+				min.x = bottom_right.x
+			if bottom_right.y < min.y:
+				min.y = bottom_right.y
+			if bottom_left.x < min.x:
+				min.x = bottom_left.x
+			if bottom_left.y < min.y:
+				min.y = bottom_left.y
+			#compare with max and min
+			if max.x > max_x:
+				max_x = max.x
+			if max.y > max_y:
+				max_y = max.y
+			if min.x < min_x:
+				min_x = min.x
+			if min.y < min_y:
+				min_y = min.y
+	min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
+
+
 #sets select box size to selection size, selects tokens
 func select_objects():
 	if select_box == null:
@@ -1042,7 +1257,6 @@ func select_objects():
 		select_box.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 		select_box.rotation = 0
 	#				select_box.pivot_offset = Vector2(min_x + select_box.size.x/2, min_y + select_box.size.y/2)
-
 	for token in selected_tokens: #reset unselected token opacity and UI visibility
 		if token == null:
 			continue
@@ -1053,6 +1267,7 @@ func select_objects():
 			var token = object.get_parent()
 			selected_tokens.append(token)
 			token.select()
+	_on_fov_opacity_changed_signal(Globals.new_map.fov_opacity)
 	Globals.action_bar.fill_action_bar(selected_tokens) #fill action bar based on selected tokens
 	if selected.is_empty():
 		select_box.queue_free()
@@ -1277,7 +1492,7 @@ func on_files_dropped(files):
 				print("import done")
 				tex_size = tex.get_size()
 		else:
-			print("file does not exist")
+			print("files dropped - file does not exist")
 			Globals.lobby.add_to_objects_waiting_for_file(file_path, panel)
 			Globals.lobby.tcp_client.send_file_request(file_name)
 		if tex == null: #texture not yet loaded - get size from file
@@ -1568,7 +1783,10 @@ func create_or_enable_light(object, light_dict = null):
 	object.add_child(remote)
 	remote.name = remote.name
 	remote.set_remote_node(remote.get_path_to(light))
-	create_object_on_remote_peers(object)
+	if "character" in object: #token
+		create_object_on_remote_peers(object.get_parent())
+	else:
+		create_object_on_remote_peers(object)
 		
 func disable_light(object):
 	if object.has_meta("light"):
@@ -1782,7 +2000,9 @@ func end_targeting():
 	for child in lines_children:
 		if child.is_class("Node2D"): #inherits from Node2D
 			if Globals.select_recursive:
-				if child.get_class() == "Node2D": #is Node2D -> Layer
+				if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+					if not multiplayer.is_server() and not child.get_meta("player_layer"):
+						continue
 					if child.visible:
 						lines_children.append_array(child.get_children())
 			continue
@@ -1815,6 +2035,63 @@ func get_object_center(object):
 	return center
 
 
+func on_line_settings_changed(setting):
+	print(setting)
+	for object in selected:
+		if object.has_meta("type"):
+			var type = object.get_meta("type")
+			if type == "rect":
+				var style = object.get_theme_stylebox("panel")
+				if style == null:
+					print("style is null !!!!")
+					return
+				if setting == "lc":
+					style.border_color = Globals.colorLines
+				elif setting == "lw":
+					style.set_border_width_all(Globals.lineWidth)
+				elif setting == "bg":
+					style.bg_color = Globals.colorBack
+				create_object_on_remote_peers(object)
+			elif type == "circle":
+				if setting == "lc":
+					object.line_color = Globals.colorLines
+				elif setting == "bg":
+					object.back_color = Globals.colorBack
+				elif setting == "lw":
+					object.line_width = Globals.lineWidth
+				object.queue_redraw()
+				create_object_on_remote_peers(object)
+			elif type == "line":
+				var line
+				for child in object.get_children():
+					if child is Line2D:
+						line = child
+						break
+				if line == null:
+					print("saving line - not line - need fix") 
+					return
+				if setting == "lw":
+					line.width = Globals.lineWidth
+				elif setting == "lc":
+					line.default_color = Globals.colorLines
+				create_object_on_remote_peers(object)
+				
+func on_font_settings_changed(setting):
+	print(setting)
+	for object in selected:
+		if object.has_meta("type"):
+			var type = object.get_meta("type")
+			if type == "text":
+				if setting == "f":
+					if Globals.fontName != "default":
+						object.add_theme_font_override("font", Globals.font)
+				elif setting == "fs":
+					object.add_theme_font_size_override("font_size", Globals.fontSize)
+				elif setting == "fc":
+					object.add_theme_color_override("font_color", Globals.fontColor)
+				create_object_on_remote_peers(object)
+
+
 # ============== multiplayer synch of objects on map =================
 
 func create_object_on_remote_peers(object):
@@ -1825,6 +2102,7 @@ func create_object_on_remote_peers(object):
 @rpc("any_peer", "call_remote", "reliable", 0)
 func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 	print("creating object")
+	print("data arr: ", object_data_arr)
 	print(parent_path)
 	var parent = get_node(parent_path)
 	if parent == null:
@@ -1834,7 +2112,6 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 	var node = null
 	if object_data_arr[0][0] == "rect": #object is rectangle - panel
 		print("rect object")
-		print("data arr: ", object_data_arr)
 		var style
 		node = Panel.new()
 		if object_data_arr[0][5].size() == 1: #texture:
@@ -1901,7 +2178,11 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		node.text = object_data_arr[0][5]
 		node.set_meta("type", "text")
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	elif object_data_arr[0][0] == "token":
+		node.add_theme_font_override("font", object_data_arr[0][6][0])
+		node.add_theme_font_size_override("font_size", object_data_arr[0][6][1])
+		node.add_theme_color_override("font_color", object_data_arr[0][6][2])
+	elif object_data_arr[0][0] == "token" or object_data_arr[0][0] == "token-s":
+		print("creating token")
 		node = token_comp.instantiate()
 		node.character = Character.new()
 		var token_polygon = node.get_node("TokenPolygon")
@@ -1909,7 +2190,23 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		token_polygon.size = object_data_arr[0][2]
 		token_polygon.scale = object_data_arr[0][3]
 		token_polygon.rotation = object_data_arr[0][4]
-		node.character.get_char_data_from_buffer(object_data_arr[0][5])
+		if object_data_arr[0][0] == "token-s":
+			if multiplayer.is_server():
+				var tree_item = Globals.char_tree.get_char_at_path(str_to_var(object_data_arr[0][6]))
+				if tree_item == null: #character no longer in tree
+					node.character.get_char_data_from_buffer(object_data_arr[0][5]) #get node backup
+				else:
+					node.character = tree_item.get_meta("character")
+			else:
+				var key = object_data_arr[0][6]
+				if Globals.new_map.singleton_token_chars.has(key):
+					node.character = Globals.new_map.singleton_token_chars[key]
+				else:
+					node.character.get_char_data_from_buffer(object_data_arr[0][7])
+					node.character.singleton_dict_key = key
+					Globals.new_map.singleton_token_chars[key] = node.character
+		else:
+			node.character.get_char_data_from_buffer(object_data_arr[0][5])
 		node.set_meta("type", "token")
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.new_map.add_token(node)
@@ -1950,7 +2247,10 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		return
 	#load light and shadow for object:
 	if node != null and object_data_arr.size() > 1:
+		if "character" in node: #token
+			node = node.token_polygon
 		if object_data_arr[1][0] == "light":
+			print("has light")
 			var light = PointLight2D.new()
 			light.position = node.position
 			var texture = GradientTexture2D.new()
@@ -1986,6 +2286,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			remote.set_remote_node(remote.get_path_to(light))
 
 		elif object_data_arr[1][0] == "shadow":
+			print("has shadow")
 			var occluder = LightOccluder2D.new()
 			occluder.occluder = OccluderPolygon2D.new()
 			occluder.occluder.polygon = object_data_arr[1][1]
@@ -1995,6 +2296,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			node.set_meta("shadow", true)
 		if object_data_arr.size() > 2:
 			if object_data_arr[2][0] == "shadow":
+				print("has shadow")
 				var occluder = LightOccluder2D.new()
 				occluder.occluder = OccluderPolygon2D.new()
 				occluder.occluder.polygon = object_data_arr[2][1]
@@ -2019,20 +2321,33 @@ func serialize_object_for_rpc(node):
 			style_arr = [style.texture.resource_path]
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "line":
-		var line = node.get_child(0)
-		if not line is Light2D:
+		var line
+		for child in node.get_children():
+			if child is Line2D:
+				line = child
+				break
+		if line == null:
 			print("saving line - not line - need fix") 
 			return
 		var style_arr = [line.points, line.default_color, line.width]
 		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "circle":
+		print("circle")
 		var style_arr = [node.line_color, node.back_color, node.line_width]
 		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "text":
-		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text])
+		var style_arr = [node.get_theme_font("font"), node.get_theme_font_size("font_size"), node.get_theme_color("font_color")]
+		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, style_arr])
 	elif type == "token":
 		var token = node.token_polygon
-		object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer()])
+		if token.character.save_as_token:
+			object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer()])
+		else:
+			if multiplayer.is_server():
+				object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), Globals.char_tree.get_char_path(token.character.tree_item)])
+			else:
+				object_data_arr.append(["token-s", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), token.character.singleton_dict_key])
+				
 	elif type == "container":
 		var inventory = node.get_meta("inventory")
 		object_data_arr.append(["container", node.position, node.size, node.scale, node.rotation, inventory])
@@ -2044,6 +2359,8 @@ func serialize_object_for_rpc(node):
 		object_data_arr.append(["layer", name, visibility, DM, player_layer, node.light_mask])
 
 	#light and shadow can be be on any object
+	if "character" in node: #token
+		node = node.token_polygon
 	if node.has_meta("light"):
 		var light: PointLight2D = get_object_light(node)
 		var remote: RemoteTransform2D = get_object_light_remote(node)
@@ -2059,6 +2376,16 @@ func serialize_object_for_rpc(node):
 @rpc("any_peer", "call_remote", "reliable")
 func synch_object_properties(path_to_object, property_arr):
 	print("synch")
+	var node = get_node(path_to_object)
+	if node == null:
+		print("synch path not found - ", path_to_object)
+		return
+	for property in property_arr:
+		node.set(property[0], property[1])
+		
+@rpc("any_peer", "call_remote", "unreliable_ordered")
+func synch_object_properties_udp(path_to_object, property_arr):
+	print("udp synch")
 	var node = get_node(path_to_object)
 	if node == null:
 		print("synch path not found - ", path_to_object)
@@ -2153,71 +2480,11 @@ func synch_object_inventory_remove(object_path, item, item_pos = 0):
 			object.emit_signal("inv_changed")
 			break
 
-#@rpc("any_peer", "call_remote", "reliable")
-#func synch_object_edit(index, value, object_path, dict):
-	#var object = get_node(object_path)
-	##light
-	#if index == 10: #light enable
-		#if value == true:
-			#create_or_enable_light(object, dict)
-		#else:
-			#disable_light(object)
-	#if index == 11: #light offset x
-		#if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
-			#var light_remote = get_object_light_remote(object)
-			#if light_remote != null:
-				#light_remote.position.x = value
-	#if index == 12: #light offset y
-		#if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
-			#var light_remote = get_object_light_remote(object)
-			#if light_remote != null:
-				#light_remote.position.y = value
-	#if index == 13: #light texture resolution
-		#if object.has_meta("light"):
-			#var light = get_object_light(object)
-			#if light != null:
-				#light.texture.height = value
-				#light.texture.width = value
-	#if index == 14: #light radius
-		#if object.has_meta("light"):
-			#var light = get_object_light(object)
-			#if light != null:
-				#light.texture_scale = value/light.texture.get_height()*2
-	#if index == 15: #light color
-		#if object.has_meta("light"):
-			#var light = get_object_light(object)
-			#if light != null:
-				#light.color = value
-	#if index == 16: #light energy
-		#if object.has_meta("light"):
-			#var light = get_object_light(object)
-			#if light != null:
-				#light.energy = value
-	##shadows
-	#if index == 20: #shadow enable
-		#if value == true:
-			#create_or_enable_shadow(object)
-		#else:
-			#disable_shadow(object)
-	#if index == 21: #shadow one sided
-		#if object.has_meta("shadow"):
-			#var shadow = get_object_shadow(object)
-			#if shadow != null:
-				#var flipped = tool_panel_object_menu.get_shadow_flipped()
-				#if value == false:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
-				#elif value == true and flipped:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
-				#else:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
-	#if index == 22: #shadow flip sides
-		#if object.has_meta("shadow"):
-			#var shadow = get_object_shadow(object)
-			#if shadow != null:
-				#var one_sided = tool_panel_object_menu.get_shadow_one_sided()
-				#if not one_sided:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_DISABLED
-				#elif one_sided and value == true:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
-				#else:
-					#shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
+func update_other_peers_timer_start():
+	update_other_peers = false
+	await get_tree().create_timer(update_timer_interval).timeout
+	update_other_peers = true
+
+
+func _on_tutorial_window_close_requested():
+	$TutorialWindow.hide()

@@ -16,6 +16,7 @@ signal moved(item, to_item, shift)
 var global_item: TreeItem
 
 func _ready():
+	Globals.char_tree = self
 	hide_root = true
 	connect("moved", _move_item)
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():  #multiplayer - client
@@ -235,7 +236,7 @@ func rename_character(item: TreeItem, new_name: String):
 #loads all characters
 func load_characters():
 	#locals
-	var dir = DirAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters")
+	var dir = DirAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters")
 	var item:TreeItem = add_new_item("Campaign", get_root(), false)
 	item.erase_button(0, 0)
 	item.erase_button(0, 2)
@@ -246,7 +247,7 @@ func load_characters():
 	item.erase_button(0, 0)
 	item.erase_button(0, 2)
 	#globals
-	dir = DirAccess.open("res://saves/Characters")
+	dir = DirAccess.open(Globals.base_dir_path + "/saves/Characters")
 	if dir != null:
 		load_characters_in_dir(dir, "", item, true)
 
@@ -268,5 +269,28 @@ func load_characters_in_dir(dir: DirAccess, char_name: String, parent_item: Tree
 		load_characters_in_dir(dir, d, item, global)
 		dir.change_dir("..")
 
-	
+func get_char_path(tree_item: TreeItem):
+	var path_arr = []
+	var root = get_root()
+	while tree_item != root:
+		path_arr.append(tree_item.get_text(0))
+		tree_item = tree_item.get_parent()
+	return path_arr
 
+func get_char_at_path(path_arr):
+	var i = path_arr.size() - 1
+	var tree_item = get_root()
+	while i >= 0:
+		var found = false
+		for child_item in tree_item.get_children():
+			if child_item.get_text(0) == path_arr[i]:
+				print("found i: ", i)
+				tree_item = child_item
+				i -= 1
+				found = true
+				break
+		if not found:
+			print("character not found in tree")
+			return null
+	print("char found")
+	return tree_item

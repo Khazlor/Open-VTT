@@ -63,10 +63,10 @@ func _on_gui_input(event):
 #		var newname = $"../../PopupPanel/VBoxContainer/MapName".text
 #		map.map_name = $"../../PopupPanel/VBoxContainer/MapName".text
 #		var i = 0
-#		while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
+#		while FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name):
 #			i += 1
 #			map.map_name = newname + "_" + str(i)
-#		if DirAccess.rename_absolute("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + oldname, "res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name) != Error.OK:
+#		if DirAccess.rename_absolute(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + oldname, Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map.map_name) != Error.OK:
 #			map.map_name = oldname
 #	map.map_desc = $"../../PopupPanel/VBoxContainer/MapDesc".text
 #	map.grid_size = $"../../PopupPanel/VBoxContainer/GridSizePx".value
@@ -87,7 +87,7 @@ func _on_gui_input(event):
 #	print(map.map_desc)
 #	print(newmap.map_name)
 #	print(newmap.map_desc)
-#	while FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + newmap.map_name):
+#	while FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + newmap.map_name):
 #		i += 1
 #		newmap.map_name = oldname + "_" + str(i)
 #	newmap.save_map()

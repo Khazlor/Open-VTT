@@ -767,7 +767,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-split_offset = -225
+split_offset = -300
 
 [node name="VboxContainer" type="VBoxContainer" parent="CanvasLayer/HSplitContainer"]
 light_mask = 2
@@ -842,7 +842,7 @@ anchors_preset = 0
 mouse_filter = 2
 
 [node name="TurnOrder" parent="CanvasLayer/Windows" instance=ExtResource("16_8sr77")]
-position = Vector2i(1450, 80)
+visible = false
 
 [connection signal="child_exiting_tree" from="." to="." method="_on_child_exiting_tree"]
 [connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]

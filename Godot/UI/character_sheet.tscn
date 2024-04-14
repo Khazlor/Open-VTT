@@ -22,8 +22,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_tab = 1
+current_tab = 2
 use_hidden_tabs_for_min_size = true
+
+[node name="Character Sheet" type="MarginContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="ChShTextEdit" type="TextEdit" parent="TabContainer/Character Sheet"]
+layout_mode = 2
+placeholder_text = "Placeholder for Character Sheet, while we work on proper customizable implementation. Write your character information here, or in Attributes tab for use in macros. "
+wrap_mode = 1
 
 [node name="Attributes" type="HBoxContainer" parent="TabContainer"]
 visible = false
@@ -140,6 +153,13 @@ layout_mode = 2
 tooltip_text = "Enables FOV on this character, players will be able to open character sheet"
 button_pressed = true
 text = "Player character"
+
+[node name="SingletonCheckButton" type="CheckButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
+layout_mode = 2
+tooltip_text = "Link all tokens of this character together. Stats will be persistent across all tokens of this character on all maps."
+disabled = true
+button_pressed = true
+text = "Link tokens:"
 
 [node name="ShapePanel" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
 layout_mode = 2
@@ -412,13 +432,17 @@ size = Vector2i(400, 400)
 always_on_top = true
 ok_button_text = "Open"
 file_mode = 0
+access = 2
 show_hidden_files = true
+use_native_dialog = true
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
+[connection signal="text_changed" from="TabContainer/Character Sheet/ChShTextEdit" to="." method="_on_ch_sh_text_edit_text_changed"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/Add_Attribute_Button" to="." method="_on_add_attribute_button_pressed"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer/AddMacroButton" to="." method="_on_add_macro_button_pressed"]
 [connection signal="toggled" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/PlayerCheckButton" to="." method="_on_player_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton" to="." method="_on_singleton_check_button_toggled"]
 [connection signal="item_selected" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton" to="." method="_on_option_button_item_selected"]
 [connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox" to="." method="_on_shape_size_x_spin_box_value_changed"]
 [connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox" to="." method="_on_shape_size_y_spin_box_value_changed"]

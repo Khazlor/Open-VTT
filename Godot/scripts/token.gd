@@ -101,10 +101,10 @@ func change_bars(remote = false):
 		bar.use_parent_material = true
 		bar.self_modulate = bar_data["color"]
 		bar.custom_minimum_size.y = bar_data["size"]
-		if character.attributes.has(bar_data["attr1"]):
-			bar.value = character.attributes[bar_data["attr1"]][1].to_float()
 		if character.attributes.has(bar_data["attr2"]):
 			bar.max_value = character.attributes[bar_data["attr2"]][1].to_float()
+		if character.attributes.has(bar_data["attr1"]):
+			bar.value = character.attributes[bar_data["attr1"]][1].to_float()
 		bar.show_percentage = false
 		bars.add_child(bar)
 		var text = Label.new()
@@ -116,6 +116,7 @@ func change_bars(remote = false):
 		else:
 			text.text = "0/" + str(bar.max_value)
 		text.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		
 		text.add_theme_font_size_override("t", bar.custom_minimum_size.y)
 		bar.add_child(text)
 		#bar bubble
@@ -142,6 +143,7 @@ func update_bars_on_remote_peers(attr, value):
 	#update_bars(attr, true)
 	
 func update_bars(attr: StringName, remote = false):
+	print("update bars on - ", multiplayer.get_unique_id())
 	if remote == false: #if change was local call change on other peers
 		update_bars_on_remote_peers.rpc(attr, character.attributes[attr])
 	for i in range(character.bars.size()):
@@ -150,21 +152,26 @@ func update_bars(attr: StringName, remote = false):
 			var bar = bars.get_child(i)
 			bar.max_value = character.attributes[attr][1].to_float()
 			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
+			bar.get_child(0).set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+			UI_set_position()
 		if bar_data["attr1"] == attr:
 			var bar = bars.get_child(i)
 			bar.value = character.attributes[attr][1].to_float()
 			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
+			bar.get_child(0).set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 			bar_bubbles.get_child(i).text = str(character.attributes[attr][1].to_float())
+			UI_set_position()
 	for i in range(character.attr_bubbles.size()):
 		var attr_bubble = character.attr_bubbles[i]
 		if attr_bubble["name"] == attr:
 			attr_bubbles.get_child(i).get_meta("text").text = character.attributes[attr][1]
+			UI_set_position()
 	#update initiative
-	if attr == "initiative":
+	if attr == "initiative" and not preview:
 		if in_turn_order == null:
 			in_turn_order = Globals.turn_order.create_item(self)
 		else:
-			in_turn_order.update() #TODO
+			in_turn_order.update()
 			
 @rpc("any_peer", "call_remote", "reliable")
 func change_attr_bubbles_on_remote_peers(attr_bubbles):
@@ -237,6 +244,7 @@ func change_attr_bubbles(remote = false):
 
 
 func bar_bubble_submit(new_text):
+	print("submitted text: ", new_text)
 	if character.attributes.has(edited_attr):
 		var s = character.attributes[edited_attr][1]
 		if new_text[0] == '+': #add to attribute
@@ -270,8 +278,14 @@ func bar_bubble_submit(new_text):
 		elif new_text[0] == '/': #divide attribute
 			character.attributes[edited_attr][1] = str(s.to_float() / new_text.erase(0,1).to_float())
 		else: #set attribute
+			print("attr set to: ", new_text, " before: ", character.attributes[edited_attr])
 			character.attributes[edited_attr][1] = new_text
-		character.emit_signal("attr_updated", edited_attr)
+			print("attr set to: ", new_text, " after: ", character.attributes[edited_attr])
+		if s.is_valid_float() and character.attributes[edited_attr][1].is_valid_float():
+			var diff = s.to_float() - character.attributes[edited_attr][1].to_float()
+			print("diff: ", diff)
+			character.attributes[edited_attr][0] = str(character.attributes[edited_attr][0].to_float() - diff)
+		character.emit_signal("attr_updated", edited_attr, false)
 			
 			
 func on_le_focus_entered():
@@ -379,3 +393,8 @@ func synch_rename_attr_on_other_peers(old_name, new_name):
 	character.attributes.erase(old_name)
 	character.emit_signal("attr_created", new_name, character.attributes[new_name])
 	character.emit_signal("attr_removed", old_name)
+
+@rpc("any_peer", "call_remote", "reliable")
+func synch_char_sheet_text_on_other_peers(new_text):
+	character.char_sheet_text = new_text
+	character.emit_signal("char_sheet_text_changed", null)

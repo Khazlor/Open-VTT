@@ -7,6 +7,7 @@ extends Window
 var SelectedEdit
 
 var character: Character
+var token_sheet = true #character sheet opened from token
 
 var bar_setting = preload("res://components/bar_setting.tscn")
 var attr_bubble_setting = preload("res://components/attr_bubble_setting.tscn")
@@ -21,6 +22,7 @@ var macro_setting = preload("res://components/macro_setting.tscn")
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var bars = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/BarsVBoxContainer
 @onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
+@onready var ch_sh_text_edit = $"TabContainer/Character Sheet/ChShTextEdit"
 
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
@@ -39,7 +41,12 @@ func _ready():
 	character.connect("attr_modifier_applied", on_attr_modifier_applied)
 	character.connect("attr_created", on_attr_created)
 	character.connect("attr_removed", on_attr_removed)
+	character.connect("attr_updated", on_attr_updated)
+	character.connect("char_sheet_text_changed", on_char_sheet_text_changed)
 	character.apply_modifiers() #sets tooltips of modified attributes
+	
+	if not token_sheet:
+		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.disabled = false
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -98,6 +105,27 @@ func on_attr_created(attr_name, value = ["", ""]):
 func on_attr_removed(attr_name):
 	var node = find_attr_node(attr_name)
 	node.queue_free()
+	
+func on_attr_updated(attr_name, remote = false):
+	print("attr updated char sheet - ", multiplayer.get_unique_id())
+	if not character.attributes.has(attr_name):
+		print("no attr")
+		return
+	var node = find_attr_node(attr_name)
+	if node == null:
+		print("no attr node")
+		return
+	var attr_val = character.attributes[attr_name]
+	var te: TextEdit = node.get_child(1)
+	if te.is_caret_visible():
+		var line = te.get_caret_line()
+		var column = te.get_caret_column()
+		te.text = attr_val[0]
+		te.set_caret_line(line)
+		te.set_caret_column(column)
+	else:
+		te.text = attr_val[0]
+	node.get_child(2).text = attr_val[1]
 
 func find_attr_node(attr_name):
 	var i = 0
@@ -163,10 +191,11 @@ func _on_add_macro_button_pressed():
 func load_character():
 	#name
 	title = character.name + " - Character sheet"
+	#character sheet
+	ch_sh_text_edit.text = character.char_sheet_text
 	#attributes
 	for attribute in character.attributes:
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
-		
 		
 	#macros
 	for macro_dict_key in character.macros:
@@ -184,6 +213,8 @@ func load_character():
 			shape.select(shape.item_count-1)
 	token.custom_minimum_size = character.token_size
 	token.select()
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/PlayerCheckButton.button_pressed = character.player_character
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.button_pressed = character.singleton
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox.value = character.token_size.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox.value = character.token_size.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleXSpinBox.value = character.token_scale.x
@@ -269,6 +300,7 @@ func _on_browse_image_button_pressed():
 
 func _on_token_image_file_dialog_file_selected(path):
 	path = await Globals.lobby.handle_file_transfer(path)
+	print("uploaded new file path: ", path)
 	var texture = Globals.load_texture(path)
 	character.token_texture = path
 	if character.token != null:
@@ -307,7 +339,7 @@ func _on_image_scale_y_spin_box_value_changed(value):
 
 
 # Bar settings
-func _on_add_bar_button_pressed(): #TODO synch
+func _on_add_bar_button_pressed():
 	var bar = bar_setting.instantiate()
 	character.bars.insert(0, bar.bar_dict)
 	bars.add_child(bar)
@@ -329,11 +361,11 @@ func on_edit_focus_entered():
 	SelectedEdit = gui_get_focus_owner()
 	
 func _on_attr_val_text_changed():
-	var attr = SelectedEdit.get_parent().get_child(0).text
+	var attr = SelectedEdit.get_parent().get_child(0).get_meta("attr")
 	var new_text = SelectedEdit.text
 	character.attributes[attr][0] = new_text
 	character.apply_modifiers_to_attr(attr)
-	character.emit_signal("attr_updated", attr)
+	character.emit_signal("attr_updated", attr, false)
 	
 # Attribute Bubble settings
 func _on_add_attr_button_pressed():
@@ -358,3 +390,21 @@ func _on_player_check_button_toggled(toggled_on):
 		character.token.synch_token_settings_on_other_peers.rpc(["player_character", toggled_on])
 	Globals.layers.set_token_visibility.rpc(Globals.draw_layer.light_mask)
 	character.player_character = toggled_on
+
+
+func _on_ch_sh_text_edit_text_changed():
+	character.char_sheet_text = ch_sh_text_edit.text
+	character.emit_signal("char_sheet_text_changed", self)
+	if character.token != null:
+		character.token.synch_char_sheet_text_on_other_peers.rpc(character.char_sheet_text)
+
+func on_char_sheet_text_changed(char_sheet):
+	if is_same(char_sheet, self):
+		return
+	ch_sh_text_edit.text = character.char_sheet_text
+
+
+func _on_singleton_check_button_toggled(toggled_on):
+	if character.token != null:
+		character.token.synch_token_settings_on_other_peers.rpc(["singleton", toggled_on])
+	character.singleton = toggled_on

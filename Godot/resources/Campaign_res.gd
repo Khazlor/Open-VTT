@@ -11,6 +11,7 @@ var DM_name = "DM Name"
 var players = []
 var map_list = []
 var image = "res://images/Placeholder-1479066.png"
+var tutorial = true
 
 
 func save_campaign():
@@ -18,9 +19,10 @@ func save_campaign():
 		"campaign_desc" : campaign_desc,
 		"DM_name" : DM_name,
 		"players" : players,
-		"image" : image
+		"image" : image,
+		"tutorial": tutorial
 	}
-	var campaign_save = FileAccess.open("res://saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.WRITE)
+	var campaign_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.WRITE)
 	if campaign_save == null:
 		print("file open error - aborting")
 		return
@@ -29,10 +31,10 @@ func save_campaign():
 	
 func load_campaign(campaign_name):
 	self.campaign_name = campaign_name
-	if not FileAccess.file_exists("res://saves/Campaigns/" + campaign_name + "/campaign.json"):
+	if not FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + campaign_name + "/campaign.json"):
 		return #no save to load
 	
-	var campaign_save = FileAccess.open("res://saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.READ)
+	var campaign_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + campaign_name + "/campaign.json", FileAccess.READ)
 	if campaign_save == null:
 		print("file open error - aborting")
 		return
@@ -43,6 +45,6 @@ func load_campaign(campaign_name):
 		return
 	var save_dict = json.get_data()
 	for i in save_dict.keys():
-		if i == "campaign_desc" or i == "DM_name" or i == "players" or i == "image":
+		if i == "campaign_desc" or i == "DM_name" or i == "players" or i == "image" or i == "tutorial":
 			self.set(i, save_dict[i])#load data
 	campaign_save.close()

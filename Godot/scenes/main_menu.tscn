@@ -62,7 +62,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("1_8y4y0")
 theme_override_font_sizes/font_size = 40
-text = "Mordenkainen's Virtual Table Top"
+text = "Open Virtual Tabletop"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -172,6 +172,7 @@ max_value = 1024.0
 value = 4.0
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="HostGameDialog/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="HostGameDialog/VBoxContainer/HBoxContainer3"]
@@ -207,6 +208,7 @@ text = "Ip Address: "
 [node name="IPLineEdit" type="LineEdit" parent="JoinGameDialog/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+placeholder_text = "127.0.0.1"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="JoinGameDialog/VBoxContainer"]
 layout_mode = 2
@@ -222,6 +224,7 @@ max_value = 65535.0
 value = 7000.0
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="JoinGameDialog/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="JoinGameDialog/VBoxContainer/HBoxContainer3"]

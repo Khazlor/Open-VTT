@@ -30,6 +30,7 @@ var token_comp = preload("res://components/token.tscn") #token component
 #saved layers
 #@export var saved_layers: PackedScene = null
 var tokens = []
+var singleton_token_chars = {}
 #var token_paths = []
 #var token_indexes = []
 
@@ -45,7 +46,7 @@ var tokens = []
 ##stored var includes attached script as plain text -> leads to multiple scripts with same class_name -> parse error
 ##work around - saving tokens separately -> will no longer be needed if issue is fixed
 #func save_map():
-	#var map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
+	#var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
 	#if map_save == null:
 		#print("file open error - aborting")
 		#return
@@ -62,7 +63,7 @@ var tokens = []
 	
 
 func save_map(layers: Node2D):
-	var map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
+	var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
 	if map_save == null:
 		print("file open error - aborting")
 		return
@@ -112,20 +113,31 @@ func save_data_for_self_and_children(node, file: FileAccess):
 			style_arr = [style.texture.resource_path]
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "line":
-		var line = node.get_child(0)
-		if not line is Line2D:
+		var line
+		for child in node.get_children():
+			if child is Line2D:
+				line = child
+				break
+		if line == null:
 			print("saving line - not line - need fix") 
 			return
 		var style_arr = [line.points, line.default_color, line.width]
 		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "circle":
+		print("circle")
 		var style_arr = [node.line_color, node.back_color, node.line_width]
 		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "text":
-		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, node.name])
+		var style_arr = [node.get_theme_font("font"), node.get_theme_font_size("font_size"), node.get_theme_color("font_color")]
+		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, node.name, style_arr])
 	elif type == "token":
 		var token = node.token_polygon
-		object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), node.name])
+		if token.character.save_as_token:
+			object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), node.name])
+		else:
+			object_data_arr.append(["token-s", token.position, token.size, token.scale, token.rotation, Globals.char_tree.get_char_path(token.character.tree_item), node.name, token.character.store_char_data_to_buffer()])
+			token.character.save()
+		node = token
 	elif type == "container":
 		var inventory = node.get_meta("inventory")
 		object_data_arr.append(["container", node.position, node.size, node.scale, node.rotation, inventory, node.name])
@@ -150,6 +162,7 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		
 	if type == "layer": #name, visibility, GM, light layers
 		var name = node.get_meta("item_name")
+		print("save layer: ", name)
 		var visibility = node.get_meta("visibility")
 		var DM = node.get_meta("DM")
 		var player_layer = node.get_meta("player_layer")
@@ -166,9 +179,9 @@ func save_data_for_self_and_children(node, file: FileAccess):
 func load_map(map_name, load_map_data = true, map_save = null):
 	self.map_name = map_name
 	if map_save == null: #save not opened - open save
-		if not FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
+		if not FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
 			return #no save to load
-		map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
+		map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
 		if map_save == null:
 			print("file open error - aborting")
 			return
@@ -195,14 +208,11 @@ func load_map(map_name, load_map_data = true, map_save = null):
 	
 	#load map
 	if load_map_data:
-		print("load data", map_save.get_position(), " ",map_save.get_length())
 		tokens.clear()
 		while map_save.get_position() < map_save.get_length(): #read all data
 			load_data_for_self_and_children(map_save)
 		
 	map_save.close()
-	if Globals.campaign != null:
-		print("string: ",FileAccess.get_file_as_string("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name))
 	return 
 	
 
@@ -277,18 +287,38 @@ func load_data_for_self_and_children(file: FileAccess):
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
 		node.name = object_data_arr[0][6]
-	elif object_data_arr[0][0] == "token":
+		node.add_theme_font_override("font", object_data_arr[0][7][0])
+		node.add_theme_font_size_override("font_size", object_data_arr[0][7][1])
+		node.add_theme_color_override("font_color", object_data_arr[0][7][2])
+	elif object_data_arr[0][0] == "token" or object_data_arr[0][0] == "token-s":
 		print("loading token")
 		#var token = token_comp.instantiate()
 		#node = load_token(file)
 		node = token_comp.instantiate()
 		node.character = Character.new()
 		var token_polygon = node.get_node("TokenPolygon")
+		node.token_polygon = token_polygon
 		token_polygon.position = object_data_arr[0][1]
 		token_polygon.size = object_data_arr[0][2]
 		token_polygon.scale = object_data_arr[0][3]
 		token_polygon.rotation = object_data_arr[0][4]
-		node.character.get_char_data_from_buffer(object_data_arr[0][5])
+		if object_data_arr[0][0] == "token-s": #singleton on server
+			if Globals.lobby.check_is_server():
+				var tree_item = Globals.char_tree.get_char_at_path(object_data_arr[0][5])
+				if tree_item == null: #character no longer in tree
+					node.character.get_char_data_from_buffer(object_data_arr[0][7]) #get node backup
+				else:
+					node.character = tree_item.get_meta("character")
+			else: #client - currently does not have character tree
+				var key = str(object_data_arr[0][5])
+				if singleton_token_chars.has(key):
+					node.character = singleton_token_chars[key]
+				else:
+					node.character.get_char_data_from_buffer(object_data_arr[0][7])
+					node.character.singleton_dict_key = key
+					singleton_token_chars[key] = node.character
+		else: #token - not singleton
+			node.character.get_char_data_from_buffer(object_data_arr[0][5])
 		node.set_meta("type", "token")
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
@@ -312,6 +342,7 @@ func load_data_for_self_and_children(file: FileAccess):
 		node = Node2D.new()
 		node.set_meta("type", "layer")
 		node.set_meta("item_name", object_data_arr[0][1])
+		print("load layer: ", object_data_arr[0][1])
 		node.set_meta("visibility", object_data_arr[0][2])
 		node.set_meta("DM", object_data_arr[0][3])
 		node.set_meta("player_layer", object_data_arr[0][4])
@@ -323,13 +354,13 @@ func load_data_for_self_and_children(file: FileAccess):
 			node.visible = false
 
 	elif object_data_arr[0] == "child_end": #put at end of children list
-		print("end of children:")
-		print(Globals.draw_layer)
 		Globals.draw_layer = Globals.draw_layer.get_parent()
-		print(Globals.draw_layer)
 		
 	#load light and shadow for object:
 	if node != null and object_data_arr.size() > 1:
+		if "character" in node: #token
+			print("node, polygon", node, node.token_polygon)
+			node = node.token_polygon
 		if object_data_arr[1][0] == "light":
 			var light = PointLight2D.new()
 			light.position = node.position
@@ -385,10 +416,10 @@ func load_data_for_self_and_children(file: FileAccess):
 
 #func load_map(map_name, load_tokens = true):
 	#self.map_name = map_name
-	#if not FileAccess.file_exists("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
+	#if not FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
 		#return #no save to load
 	#
-	#var map_save = FileAccess.open("res://saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
+	#var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
 	#if map_save == null:
 		#print("file open error - aborting")
 		#return

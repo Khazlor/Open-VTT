@@ -26,6 +26,7 @@ func _process(delta):
 
 func _on_tree_item_activated():
 	var ch_sh = char_sheet.instantiate()
+	ch_sh.token_sheet = false
 	ch_sh.character = tree.get_selected().get_meta("character")
 	Globals.windows.add_child(ch_sh)
 

@@ -25,11 +25,25 @@ func _ready():
 	if multiplayer.is_server():
 		Globals.new_map.load_map(Globals.new_map.map_name)
 		#else load in player_lobby
+	else:
+		$CanvasLayer/MapsButton.visible = false
 		
 	#recursively create treeitem for each layer
 	for child in layers.get_children():
 		if child.has_meta("item_name"):
 			tree.load_self_and_children(child, null)
+	tree.change_z_indexes()
+			
+	#tutorial
+	if multiplayer.is_server():
+		if Globals.campaign.tutorial:
+			$Draw/TutorialWindow.popup()
+			Globals.campaign.tutorial = false
+			Globals.campaign.save_campaign()
+	
+	#turn order position:
+	var turn_order = $CanvasLayer/Windows/TurnOrder
+	turn_order.position.x = get_viewport_rect().size.x + $CanvasLayer/HSplitContainer.split_offset - turn_order.size.x - 20
 	
 	#if Globals.new_map.saved_layers != null:
 		#layers.replace_by(Globals.new_map.saved_layers.instantiate())
@@ -94,10 +108,12 @@ func _on_child_exiting_tree(node):
 		#var saved_layers = PackedScene.new()
 		#saved_layers.pack($Draw/Layers);
 		#Globals.map.save($Draw/Layers)
-		Globals.map.save_map($Draw/Layers)
+		if multiplayer.is_server():
+			Globals.map.save_map($Draw/Layers)
 
 func _on_tree_exiting():
-	pass
+	if multiplayer.is_server():
+		Globals.lobby.remove_map.rpc()
 
 func _on_maps_button_pressed():
 	$CanvasLayer/VSplitContainer.visible = true

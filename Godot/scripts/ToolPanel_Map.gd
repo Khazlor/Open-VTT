@@ -15,7 +15,7 @@ var world
 signal fov_opacity_changed(value)
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
+func _ready(token_fov = true):
 	#load map settings
 	#grid
 	grid.visible = Globals.new_map.grid_enable
@@ -28,6 +28,9 @@ func _ready():
 	darkness.visible = Globals.new_map.darkness_enable
 	Globals.BG_ColorRect.color = Globals.new_map.background_color
 	fov.visible = Globals.new_map.fov_enable
+	print(token_fov)
+	if token_fov:
+		emit_signal("fov_opacity_changed", Globals.new_map.fov_opacity)
 	if not multiplayer.is_server():  #client
 		darkness.color = Globals.new_map.darkness_color
 		if darkness.visible:
@@ -60,7 +63,11 @@ func _process(delta):
 @rpc("authority", "call_remote", "reliable")
 func set_map_setting_on_other_peers(property, value):
 	Globals.new_map.set(property, value) #set property
-	_ready() #apply properties
+	print("property set: ", property)
+	if property == "fov_opacity":
+		_ready() #apply properties and set token fov opacity
+	else:
+		_ready(false) #apply properties
 	
 
 func _on_background_color_picker_button_color_changed(color):
@@ -136,7 +143,10 @@ func _on_dm_darkness_color_picker_button_color_changed(color):
 func _on_fov_enable_toggled(button_pressed):
 	Globals.new_map.fov_enable = button_pressed
 	fov.visible = button_pressed
-	layers.set_layers_visibility.rpc()
+	if button_pressed:
+		layers.set_layers_visibility.rpc()
+	else:
+		layers.reset_layers_visibility.rpc()
 	layers.set_token_visibility.rpc()
 	set_map_setting_on_other_peers.rpc("fov_enable", button_pressed)
 	
