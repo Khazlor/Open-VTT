@@ -28,7 +28,7 @@ func _draw(): #draw polygon and polyline
 	for i in range(shapePointArray.size()):
 		texture_uvs.append((shapePointArray[i] - Vector2(0.5, 0.5)) / character.token_texture_scale + texture_offset)
 	
-	draw_colored_polygon(ScaledPointArray, Globals.colorBack, texture_uvs, texture)
+	draw_colored_polygon(ScaledPointArray, Color.WHITE, texture_uvs, texture)
 	draw_polyline(ScaledPointArray + PackedVector2Array([ScaledPointArray[0]]), character.token_outline_color, character.token_outline_width, false)
 	
 
@@ -50,7 +50,7 @@ func update_token(shape: bool):
 		texture.resource_path = character.token_texture
 		var file_name = character.token_texture.get_file()
 		Globals.lobby.add_to_objects_waiting_for_file(file_name, get_parent())
-		if not multiplayer.is_server():
+		if not Globals.lobby.check_is_server():
 			Globals.lobby.tcp_client.send_file_request(file_name)
 	if shape:
 		if Globals.tokenShapeDict.has(character.token_shape):

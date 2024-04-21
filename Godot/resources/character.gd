@@ -76,8 +76,9 @@ func get_token():
 	token = await get_token_response
 	
 func emit_get_token_request_after_delay():
-	token = await Globals.draw_layer.get_tree().create_timer(0.01).timeout
-	emit_signal("get_token_request")
+	if Globals.draw_layer.get_tree() != null:
+		token = await Globals.draw_layer.get_tree().create_timer(0.01).timeout
+		emit_signal("get_token_request")
 		
 #save character resource to file
 func save(resolve_conflict: bool = false):
@@ -284,6 +285,7 @@ func apply_modifiers_to_attr(attribute, remote = false):
 	if not attribute_modifiers.has(attribute):
 		print("no modifier")
 		if attributes.has(attribute):
+			print(attributes[attribute][1], " --- ", attributes[attribute][0])
 			attributes[attribute][1] = attributes[attribute][0]
 			emit_signal("attr_modifier_applied", attribute, attributes[attribute][0])
 		return

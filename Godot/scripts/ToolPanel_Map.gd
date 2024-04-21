@@ -31,7 +31,7 @@ func _ready(token_fov = true):
 	print(token_fov)
 	if token_fov:
 		emit_signal("fov_opacity_changed", Globals.new_map.fov_opacity)
-	if not multiplayer.is_server():  #client
+	if not Globals.lobby.check_is_server():  #client
 		darkness.color = Globals.new_map.darkness_color
 		if darkness.visible:
 			Globals.BG_ColorRect.color = Globals.new_map.darkness_color
@@ -115,7 +115,7 @@ func _on_darkness_enable_toggled(button_pressed):
 	Globals.new_map.darkness_enable = button_pressed
 	darkness.visible = button_pressed
 	if button_pressed: #set backgroud color to darkness
-		if multiplayer.is_server():
+		if Globals.lobby.check_is_server():
 			Globals.BG_ColorRect.color = Globals.new_map.DM_darkness_color
 		else:
 			Globals.BG_ColorRect.color = Globals.new_map.darkness_color
@@ -124,7 +124,7 @@ func _on_darkness_enable_toggled(button_pressed):
 	set_map_setting_on_other_peers.rpc("darkness_enable", button_pressed)
 
 func _on_darkness_color_picker_button_color_changed(color):
-	if not multiplayer.is_server():
+	if not Globals.lobby.check_is_server():
 		darkness.color = color
 		if Globals.new_map.darkness_enable: #backgroud color is darkness
 			Globals.BG_ColorRect.color = color
@@ -132,7 +132,7 @@ func _on_darkness_color_picker_button_color_changed(color):
 	set_map_setting_on_other_peers.rpc("darkness_color", color)
 
 func _on_dm_darkness_color_picker_button_color_changed(color):
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		darkness.color = color
 		if Globals.new_map.darkness_enable: #backgroud color is darkness
 			Globals.BG_ColorRect.color = color

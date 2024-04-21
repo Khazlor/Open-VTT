@@ -13,9 +13,11 @@ var objects_waiting_for_file = {}
 signal file_check_done(upload, file_name, id)
 
 
+func _enter_tree():
+	Globals.lobby = self
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	Globals.lobby = self
 	#multiplayer.allow_object_decoding = true
 	if Globals.enet_peer != null: #multiplayer
 		if multiplayer.is_server(): #server
@@ -39,6 +41,7 @@ func _ready():
 			client_set_map.rpc(file_buffer, file_buffer_size)
 		
 		else: #client
+			Globals.client = true
 			tcp_client = tcp_client_comp.instantiate()
 			tcp_client.connect("recv_file", on_tcp_client_recv_file)
 			tcp_client.connect("connected", on_tcp_client_connected)
@@ -56,7 +59,9 @@ func _process(delta):
 
 #for checking inside a resource
 func check_is_server():
-	return multiplayer.is_server()
+	if multiplayer.multiplayer_peer != null:
+		return multiplayer.is_server()
+	return true
 
 func on_tcp_client_connected(): #connected to server with loaded scene - load map
 	server_get_map.rpc_id(1)
@@ -177,7 +182,9 @@ func tcp_server_get_file(path):
 #returns true if same file already exists, false if not and file should be uploaded, and filename which should be used
 @rpc("any_peer", "call_local", "reliable")
 func check_file_on_server(file_name, file_hash, id):
-	var peer_id = multiplayer.get_remote_sender_id()
+	var peer_id = null
+	if multiplayer.multiplayer_peer != null:
+		peer_id = multiplayer.get_remote_sender_id()
 	print("peer :", peer_id)
 	var new_file_name = file_name
 	var ext_pos = file_name.rfind(".") #find end of file name - before extension (image|.png)
@@ -185,15 +192,18 @@ func check_file_on_server(file_name, file_hash, id):
 	while FileAccess.file_exists(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name):
 		if file_hash == FileAccess.get_md5(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name):
 			#same file - do not upload:
-			check_file_on_server_response.rpc_id(peer_id, true, new_file_name, id)
-			return
+			if peer_id != null:
+				check_file_on_server_response.rpc_id(peer_id, true, new_file_name, id)
+			return [false, new_file_name, id]
 		else:
 			new_file_name = file_name.insert(ext_pos, "_" + str(i))
 			i += 1
 	#else not found - create file:
 	var new_file = FileAccess.open(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name, FileAccess.WRITE)
 	new_file.close()
-	check_file_on_server_response.rpc_id(peer_id, false, new_file_name, id)
+	if peer_id != null:
+		check_file_on_server_response.rpc_id(peer_id, false, new_file_name, id)
+	return [true, new_file_name, id]
 
 
 @rpc("authority", "call_local", "reliable")
@@ -216,12 +226,15 @@ func handle_file_transfer(file_path: String, set_image = true):
 		var first = true
 		var result
 		print("entering while")
-		while recv_id != id: #wait for signal with correct id
-			if first:
-				first = false
-				check_file_on_server.rpc_id(1, file_name, file_hash, id)
-			result = await file_check_done
-			recv_id = result[2]
+		if multiplayer.multiplayer_peer != null:
+			while recv_id != id: #wait for signal with correct id
+				if first:
+					first = false
+					check_file_on_server.rpc_id(1, file_name, file_hash, id)
+				result = await file_check_done
+				recv_id = result[2]
+		else:
+			result = check_file_on_server(file_name, file_hash, id)
 		print("signal recvd")
 		var new_file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + result[1]
 		if result[0] == true: #upload

@@ -16,6 +16,9 @@ func _ready():
 func _process(delta):
 	pass
 
+func _unhandled_input(event):
+	if Input.is_action_just_pressed("mouseleft"):
+		Globals.drag_drop_canvas_layer.layer = -1
 
 func _can_drop_data(position, data):
 	return data is TreeItem

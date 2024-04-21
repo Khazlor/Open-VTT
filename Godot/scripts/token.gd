@@ -37,15 +37,16 @@ func _ready():
 	character.connect("attr_updated", update_bars)
 	character.connect("attr_bubbles_changed", change_attr_bubbles)
 	if not preview:
+		fov.shadow_item_cull_mask = get_parent().light_mask
 		character.connect("get_token_request", on_get_token_request)
 		#synch through signals triggers multiple times when multiple tokens have the same character - use character.token instead
 		#character.connect("synch_macro", on_synch_macro)
 		#character.connect("attr_created", on_attr_created)
 		#character.connect("synch_equip_slot", on_synch_equip_slot)
-		character.token = self
 		character.connect("attr_updated", character.apply_modifiers_to_attr)
 		character.connect("item_equipped", character.equip_item)
 		character.connect("item_unequipped", character.unequip_item)
+		character.token = self
 		character.load_equipped_items_from_equipment()
 		character.load_attr_modifiers_from_equipment()
 

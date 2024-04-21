@@ -383,6 +383,8 @@ func load_data_for_self_and_children(file: FileAccess):
 			light.range_layer_max = 0
 			light.range_layer_min = -512
 			light.shadow_enabled = true
+			light.range_item_cull_mask = Globals.draw_layer.light_mask
+			light.shadow_item_cull_mask = Globals.draw_layer.light_mask
 			light.set_meta("type", "light")
 			node.add_sibling(light)
 			light.name = object_data_arr[1][6]
@@ -401,6 +403,7 @@ func load_data_for_self_and_children(file: FileAccess):
 			occluder.occluder = OccluderPolygon2D.new()
 			occluder.occluder.polygon = object_data_arr[1][1]
 			occluder.occluder.cull_mode = object_data_arr[1][2]
+			occluder.occluder_light_mask = Globals.draw_layer.light_mask
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
 			node.set_meta("shadow", true)
@@ -410,6 +413,7 @@ func load_data_for_self_and_children(file: FileAccess):
 				occluder.occluder = OccluderPolygon2D.new()
 				occluder.occluder.polygon = object_data_arr[2][1]
 				occluder.occluder.cull_mode = object_data_arr[2][2]
+				occluder.occluder_light_mask = Globals.draw_layer.light_mask
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
@@ -472,9 +476,9 @@ func load_token(save_file: FileAccess):
 	token.character = character
 	token_polygon.character = character
 	
-	character.connect("attr_updated", character.apply_modifiers_to_attr)
-	character.connect("item_equipped", character.equip_item)
-	character.connect("item_unequipped", character.unequip_item)
+	#character.connect("attr_updated", character.apply_modifiers_to_attr)
+	#character.connect("item_equipped", character.equip_item)
+	#character.connect("item_unequipped", character.unequip_item)
 	character.load_equipped_items_from_equipment()
 	character.load_attr_modifiers_from_equipment()
 	

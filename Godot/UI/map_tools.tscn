@@ -253,7 +253,9 @@ popup/item_0/id = 0
 [node name="FontSizeSpinBox" type="SpinBox" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
 layout_mode = 2
 focus_mode = 1
-value = 10.0
+min_value = 1.0
+value = 20.0
+allow_greater = true
 
 [node name="FontColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/TextOptions/Panel/VBoxContainer"]
 layout_mode = 2
@@ -283,6 +285,7 @@ text = "Lines"
 layout_mode = 2
 focus_mode = 1
 value = 10.0
+allow_greater = true
 
 [node name="LineColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/LineOptions/Panel/VBoxContainer"]
 layout_mode = 2

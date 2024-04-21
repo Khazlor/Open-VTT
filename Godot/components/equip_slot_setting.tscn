@@ -90,6 +90,7 @@ size = Vector2i(400, 400)
 always_on_top = true
 ok_button_text = "Open"
 file_mode = 0
+access = 2
 show_hidden_files = true
 
 [connection signal="focus_exited" from="VBoxContainer/HBoxContainer/SlotName" to="." method="_on_slot_name_focus_exited"]

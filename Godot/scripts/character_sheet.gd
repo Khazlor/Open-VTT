@@ -224,6 +224,7 @@ func load_character():
 	var texture = Globals.load_texture(character.token_texture)
 	if texture != null:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
+		$TabContainer/Inventory/Equipment/BackgroundTextureRect.texture = texture
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox.value = character.token_texture_offset.x
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox.value = character.token_texture_offset.y
 	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
@@ -307,6 +308,7 @@ func _on_token_image_file_dialog_file_selected(path):
 		character.token.synch_token_settings_on_other_peers.rpc(["token_texture", path])
 	if texture != null:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
+		$TabContainer/Inventory/Equipment/BackgroundTextureRect.texture = texture
 	character.emit_signal("token_changed", false)
 
 

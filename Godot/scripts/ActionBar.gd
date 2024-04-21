@@ -84,7 +84,7 @@ func fill_action_bar(selected_tokens = [], reconnect = true):
 		self.add_child(panel)
 	
 func on_macro_bar_changed():
-	print("is server: ",multiplayer.is_server())
+	print("is server: ",Globals.lobby.check_is_server())
 	print("macro_bar_changed")
 	fill_action_bar(null, false)
 	

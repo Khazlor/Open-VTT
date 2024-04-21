@@ -1,5 +1,5 @@
 # Godot 4+ specific ignores
-Godot_v4.2.1-stable_win64.exe
+Godot_v4.*
 .godot/
 Godot/saves/
 Godot/images/

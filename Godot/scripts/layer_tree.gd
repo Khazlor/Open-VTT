@@ -23,7 +23,7 @@ signal moved(item, to_item, shift)
 
 func _enter_tree():
 	create_root()
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		size.x = 320
 
 
@@ -39,7 +39,7 @@ func create_root():
 	#set root of draw_layers - might no longer be needed
 	draw_root = $"../../../Draw/Layers"
 	item.set_meta("draw_layer", draw_root) 
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		item.add_button(0, button_add, 3)
 	else:
 		hide_root = true
@@ -91,9 +91,9 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 		existing_node.z_as_relative = false
 		existing_node.set_meta("tree_item", item)
 		item.set_meta("draw_layer", existing_node)
-	if not multiplayer.is_server() and (not existing_node.get_meta("player_layer") or existing_node.get_meta("DM") or not existing_node.get_meta("visibility")): #hide layer tree_item for player:
+	if not Globals.lobby.check_is_server() and (not existing_node.get_meta("player_layer") or existing_node.get_meta("DM") or not existing_node.get_meta("visibility")): #hide layer tree_item for player:
 		item.visible = false
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		if draw_layer.get_meta("visibility"):
 			item.add_button(0, button_visible)
 		else:
@@ -155,7 +155,7 @@ func is_child_of(child_treeitem, parent_treeitem):
 	return false
 
 func _get_drag_data(_item_position):
-	if not multiplayer.is_server():
+	if not Globals.lobby.check_is_server():
 		return
 	set_drop_mode_flags(DROP_MODE_INBETWEEN | DROP_MODE_ON_ITEM)
 	var selected = get_selected()
@@ -168,13 +168,13 @@ func _get_drag_data(_item_position):
 
 
 func _can_drop_data(_item_position, data):
-	if not multiplayer.is_server():
+	if not Globals.lobby.check_is_server():
 		return false
 	return data is TreeItem
 
 
 func _drop_data(item_position, item):
-	if not multiplayer.is_server():
+	if not Globals.lobby.check_is_server():
 		return
 	var to_item = get_item_at_position(item_position)
 	var shift = get_drop_section_at_position(item_position)
@@ -320,6 +320,7 @@ func change_z_indexes():
 #add child based on existing layer
 func load_self_and_children(node: Node2D, parent: TreeItem):
 	var item = add_new_item(node.get_meta("item_name"), parent, node, true)
+	set_light_on_self_and_children(node, node.light_mask)
 	for child in node.get_children(true):
 		if child.has_meta("item_name"):
 			load_self_and_children(child, item)
@@ -329,7 +330,7 @@ func set_light_on_self_and_children(node, mask):
 	if node.is_class("CanvasItem"):
 		node.light_mask = mask
 		if node is PointLight2D:
-			if not node.has_meta("fov"): #fov light
+			if not node.has_meta("fov"): #not fov light
 				node.range_item_cull_mask = mask
 			node.shadow_item_cull_mask = mask
 		if node is LightOccluder2D:

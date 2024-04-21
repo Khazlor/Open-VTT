@@ -19,11 +19,15 @@ func _process(delta):
 		if peer.get_available_bytes() > 0:
 			var size = peer.get_u64()
 			var data: PackedByteArray = peer.get_data(size)[1]
-			print("Received data: ", data)
-			var file_path = data.decode_var(0)
+			print("Received data: ")
+			var file_path = Globals.base_dir_path + data.decode_var(0)
+			print("path: ", file_path)
 			var len = data.decode_var_size(0)
 			data = data.slice(len) #separate data from header
 			var file = FileAccess.open(file_path, FileAccess.WRITE)
+			if file == null:
+				print("file open failed: ", FileAccess.get_open_error())
+				return
 			file.store_buffer(data)
 			file.close()
 			emit_signal("recv_file", file_path) #set file to objects waiting on file

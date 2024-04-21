@@ -19,6 +19,7 @@ var radius = 0:
 var angle_direction = 0
 var angle_size = 0
 var polygon: PackedVector2Array
+var back_color = Globals.colorBack
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -40,6 +41,6 @@ func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/
 	angle = angle_direction+deg_to_rad(angle_size)/2
 	polygon.append(Vector2(radius * cos(angle), radius * sin(angle)))
 	polygon.append(Vector2(0,0))
-	draw_colored_polygon(polygon, Globals.colorBack)
+	draw_colored_polygon(polygon, back_color)
 	draw_polyline(polygon, Globals.colorLines, Globals.lineWidth, false)
 	

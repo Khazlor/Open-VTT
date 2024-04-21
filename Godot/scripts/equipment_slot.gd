@@ -27,7 +27,7 @@ func _process(delta):
 func _get_drag_data(_item_position):
 	if equip_slot_dict["item"] != null:
 		#place drag and drop layer on top - in case of dragging to map
-		Globals.drag_drop_canvas_layer.layer = 128
+		Globals.drag_drop_canvas_layer.layer = 2
 		var item = equip_slot_dict["item"]
 		var preview = Label.new()
 		preview.text = item["name"]

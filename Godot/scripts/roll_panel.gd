@@ -81,7 +81,7 @@ func _on_text_edit_gui_input(event):
 		await execute_macro(textEdit.text)
 	
 		
-func create_roll_panel(text_in: String, DM = multiplayer.is_server(), set_global = true):
+func create_roll_panel(text_in: String, DM = Globals.lobby.check_is_server(), set_global = true):
 	var roll_panel_item_local = roll_panel_item_template.instantiate()
 	var label = roll_panel_item_local.get_node("VBoxContainer/Text")
 	if DM:
@@ -345,7 +345,7 @@ func execute_roll(text_in: String, character: Character = null, target: Characte
 	var text_in_arr = [text_in + "  "] #array passed by reference
 	await resolve_inner(text_in_arr, 0, "", character, target)
 	print("text_in_arr ", text_in_arr, " ||| ", roll_hints)
-	synch_roll_panel_to_other_peers.rpc(text_in, text_in_arr, multiplayer.is_server(), roll_hints, results)
+	synch_roll_panel_to_other_peers.rpc(text_in, text_in_arr, Globals.lobby.check_is_server(), roll_hints, results)
 	append_text(text_in_arr, roll_hints)
 	
 @rpc("any_peer", "call_remote", "reliable")
@@ -406,26 +406,6 @@ func resolve_queries_and_conditions(text_in):
 		if i != -1:
 			pass
 			
-
-#assigns values to attributes
-#syntax = $hp_name = [hit points] | @hp = [5]
-func assign_attributes(text_in: String, character: Character, target: Character):
-	for result in assignment_regex.search_all(text_in):
-		var result_str = result.get_string()
-		if result_str[0] == "$": #character
-			if character == null:
-				continue
-			var attr = attr_regex.search(result_str).get_string()
-			if character.attributes.has(attr):
-				character.attributes[attr][1] = value_regex.search(result_str).get_string()
-				character.emit_signal("attr_updated", attr, false)
-		else: #target
-			if target == null:
-				continue
-			var attr = attr_regex.search(result_str).get_string()
-			if target.attributes.has(attr):
-				target.attributes[attr] = value_regex.search(result_str).get_string()
-				target.emit_signal("attr_updated", attr, false)
 
 #text_in = array with single string - pass by reference
 func resolve_inner(text_in, i: int, closing_str: String, character: Character, target: Character, ignore: int = 0):
@@ -598,39 +578,88 @@ func replace_text(text_in, text: String, i: int, len: int):
 	print("replaced: ", text_in[0])
 
 #text_in = array with single string - pass by reference
-#assigns value between [] to attribute, returns skip bool - if 
+#assigns value between [] to attribute, returns skip bool - if
 func assignment(text_in, i: int, attr: String, character: Character = null, target: Character = null):
 	print("assign")
 	if attr[0] == "$" and character != null: #character
-		if character.attributes.has(attr.substr(1)):
+		attr = attr.substr(1)
+		if character.attributes.has(attr):
 			var n = await resolve_inner(text_in, i, "]", character, target)
-			var sub_str = [text_in[0].substr(i, n-i+2)]
+			var sub_str = [text_in[0].substr(i, n-i+1)]
 			n -= remove_marks(sub_str)
 			print("assignment value: ", sub_str, " | or | ", sub_str[0])
 			if sub_str[0].find("<null>") != -1 or sub_str[0].find("<expression error>") != -1: #error in assignment value - do nothing
 				print("error in assignment value")
 				return
-			character.attributes[attr.substr(1)][1] = sub_str[0]
-			character.emit_signal("attr_updated", attr.substr(1), false)
+			var old_val = character.attributes[attr][1]
+			var new_var = sub_str[0]
+			character.attributes[attr][1] = new_var
+			print("old, new = ", old_val, ", ", new_var)
+			if character.attributes[attr][0].is_valid_float() and new_var.is_valid_float() and old_val.is_valid_float():
+				character.attributes[attr][0] = str(character.attributes[attr][0].to_float() + new_var.to_float() - old_val.to_float())
+			else:
+				character.attributes[attr][0] = new_var
+			character.emit_signal("attr_updated", attr, false)
 			return
 	elif attr[0] == "@" and target != null: #target
+		attr = attr.substr(1)
 		if target.attributes.has(attr.substr(1)):
 			var n = await resolve_inner(text_in, i, "]", character, target)
 			print(text_in[0])
-			var sub_str = [text_in[0].substr(i, n-i+2)]
+			var sub_str = [text_in[0].substr(i, n-i+1)]
 			n -= remove_marks(sub_str)
 			print("assignment value: ", sub_str, " | or | ", sub_str[0])
 			if sub_str[0].find("<null>") != -1 or sub_str[0].find("<expression error>") != -1: #error in assignment value - do nothing
 				print("error in assignment value")
 				return
-			target.attributes[attr.substr(1)][1] = sub_str[0]
-			target.emit_signal("attr_updated", attr.substr(1), false)
+			var old_val = target.attributes[attr][1]
+			var new_var = sub_str[0]
+			target.attributes[attr][1] = new_var
+			print("old, new = ", old_val, ", ", new_var)
+			if target.attributes[attr][0].is_valid_float() and new_var.is_valid_float() and old_val.is_valid_float():
+				target.attributes[attr][0] = str(target.attributes[attr][0].to_float() + new_var.to_float() - old_val.to_float())
+			else:
+				target.attributes[attr][0] = new_var
+			target.emit_signal("attr_updated", attr, false)
 			return
 	#error cannot access attribute - resolve and skip
 	var n = await resolve_inner(text_in, i, "]", character, target)
 	text_in[0].substr(i, n-i+1)
 	
-	
+#assigns values to attributes
+#syntax = $hp_name = [hit points] | @hp = [5]
+func assign_attributes(text_in: String, character: Character, target: Character):
+	print("assingment")
+	for result in assignment_regex.search_all(text_in):
+		var result_str = result.get_string()
+		if result_str[0] == "$": #character
+			if character == null:
+				continue
+			var attr = attr_regex.search(result_str).get_string()
+			print("assingment attr: ", attr)
+			if character.attributes.has(attr):
+				var old_val = character.attributes[attr][1]
+				var new_var = value_regex.search(result_str).get_string()
+				character.attributes[attr][1] = new_var
+				print("old, new = ", old_val, ", ", new_var)
+				if new_var.is_valid_float() and old_val.is_valid_float():
+					character.attributes[attr][0] += str(new_var.to_float() - old_val.to_float())
+				else:
+					character.attributes[attr][0] = new_var
+				character.emit_signal("attr_updated", attr, false)
+		else: #target
+			if target == null:
+				continue
+			var attr = attr_regex.search(result_str).get_string()
+			if target.attributes.has(attr):
+				var old_val = target.attributes[attr][1]
+				var new_var = value_regex.search(result_str).get_string()
+				target.attributes[attr][1] = new_var
+				if new_var.is_valid_float() and old_val.is_valid_float():
+					target.attributes[attr][0] += str(new_var.to_float() - old_val.to_float())
+				else:
+					target.attributes[attr][0] = new_var
+				target.emit_signal("attr_updated", attr, false)
 	
 #text_in = array with single string - pass by reference
 func roll(text_in, i: int, character: Character = null, target: Character = null):

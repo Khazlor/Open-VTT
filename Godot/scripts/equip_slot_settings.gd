@@ -59,7 +59,8 @@ func _on_left_add_button_pressed():
 	new_slot.slot_side = 0
 	left_slots.add_child(new_slot)
 	char_sheet.character.emit_signal("equip_slots_changed", new_slot.equip_slot_dict, 0, true)
-	char_sheet.character.emit_signal("synch_equip_slot", 0, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(0, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
 
 
 func _on_middle_add_button_pressed():
@@ -69,7 +70,8 @@ func _on_middle_add_button_pressed():
 	new_slot.slot_side = 1
 	middle_slots.add_child(new_slot)
 	char_sheet.character.emit_signal("equip_slots_changed", new_slot.equip_slot_dict, 1, true)
-	char_sheet.character.emit_signal("synch_equip_slot", 1, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(1, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
 
 
 func _on_right_add_button_pressed():
@@ -79,4 +81,5 @@ func _on_right_add_button_pressed():
 	new_slot.slot_side = 2
 	right_slots.add_child(new_slot)
 	char_sheet.character.emit_signal("equip_slots_changed", new_slot.equip_slot_dict, 2, true)
-	char_sheet.character.emit_signal("synch_equip_slot", 2, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(2, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)

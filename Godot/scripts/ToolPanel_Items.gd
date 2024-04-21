@@ -61,5 +61,5 @@ func custom_remove_item(item: TreeItem):
 
 
 func _on_tree_tree_exiting():
-	if multiplayer.is_server():
+	if not Globals.client: #not client
 		tree.save_items()

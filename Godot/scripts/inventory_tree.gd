@@ -84,7 +84,7 @@ func create_root():
 
 func reload_inv():
 	print("reload inv")
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		print("reload inv on server")
 	else:
 		print("reload inv on client")
@@ -188,7 +188,7 @@ func update_total_weight(change_item_weights = false):
 	
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map
-	Globals.drag_drop_canvas_layer.layer = 128
+	Globals.drag_drop_canvas_layer.layer = 2
 	
 	set_drop_mode_flags(DROP_MODE_INBETWEEN | DROP_MODE_ON_ITEM)
 	var selected = get_selected()

@@ -231,7 +231,7 @@ func _unhandled_input(event):
 				if child.is_class("Node2D"): #inherits from Node2D
 					if Globals.select_recursive:
 						if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
-							if not multiplayer.is_server() and not child.get_meta("player_layer"):
+							if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
 								continue
 							if child.visible:
 								lines_children.append_array(child.get_children())
@@ -347,6 +347,7 @@ func _unhandled_input(event):
 					#just pressed - create objects
 					if pressed:
 						current_panel = Panel.new()
+						current_panel.light_mask = Globals.draw_layer.light_mask
 						current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						current_panel.set_begin(begin)
@@ -387,10 +388,12 @@ func _unhandled_input(event):
 					#just pressed - create objects
 					if pressed:
 						current_rect = ColorRect.new()
+						current_rect.light_mask = Globals.draw_layer.light_mask
 						current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_rect.color = Color(0,0,0,0)
 						current_rect.set_meta("polygon", true)
 						current_line = Line2D.new()
+						current_line.light_mask = Globals.draw_layer.light_mask
 						current_line.default_color = Globals.colorLines
 						current_line.width = Globals.lineWidth
 						current_rect.set_meta("type", "line")
@@ -420,6 +423,7 @@ func _unhandled_input(event):
 					#just pressed - create objects
 					if pressed:
 						current_ellipse = CustomEllipse.new()
+						current_ellipse.light_mask = Globals.draw_layer.light_mask
 						current_ellipse.mouse_filter = Control.MOUSE_FILTER_PASS
 						current_ellipse.set_meta("polygon", true)
 						begin = mouse_pos
@@ -472,6 +476,7 @@ func _unhandled_input(event):
 						#didn't click on existing
 						if found == 0:
 							current_label = Label.new()
+							current_label.light_mask = Globals.draw_layer.light_mask
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_label.set_position(mouse_pos)
 							if Globals.fontName != "default":
@@ -523,6 +528,10 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_color_override("font_color", Globals.fontColor)
+							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
+							current_label.add_theme_constant_override("outline_size", 5)
 							current_line.add_child(current_rect)
 							current_rect.set_owner(layers_root)
 							current_rect.add_child(current_label)
@@ -546,6 +555,7 @@ func _unhandled_input(event):
 							current_circle.material = unshaded_material #ignore lighting
 							current_circle.mouse_filter = Control.MOUSE_FILTER_PASS
 							current_circle.set_position(mouse_pos)
+							current_circle.back_color.a = 0.3
 							current_circle.center = begin
 							Globals.draw_layer.add_child(current_circle)
 							current_circle.set_owner(layers_root)
@@ -556,6 +566,10 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_color_override("font_color", Globals.fontColor)
+							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
+							current_label.add_theme_constant_override("outline_size", 5)
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
 							current_measure.append(current_rect)
@@ -583,6 +597,7 @@ func _unhandled_input(event):
 							current_arc.set_position(mouse_pos)
 							current_arc.center = begin
 							current_arc.angle_size = Globals.measureAngle
+							current_arc.back_color.a = 0.3
 							Globals.draw_layer.add_child(current_arc)
 							current_arc.set_owner(layers_root)
 							current_measure.append(current_arc)
@@ -592,6 +607,10 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_color_override("font_color", Globals.fontColor)
+							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
+							current_label.add_theme_constant_override("outline_size", 5)
 							Globals.draw_layer.add_child(current_rect)
 							current_rect.set_owner(layers_root)
 							current_measure.append(current_rect)
@@ -913,7 +932,7 @@ func _unhandled_input(event):
 				selected.clear()
 				mouse_over_clear()
 				return
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				get_tree().change_scene_to_file("res://scenes/Maps.tscn")
 			else:
 				multiplayer.multiplayer_peer = null #terminate multiplayer
@@ -940,13 +959,21 @@ func _unhandled_input(event):
 					new_object.character = Globals.clipboard_characters[c]
 					Globals.map.add_token(new_object)
 					c -= 1	
+				new_object.light_mask = Globals.draw_layer.light_mask
 				Globals.draw_layer.add_child(new_object)
 				if new_object.has_meta("light"): #light is a sibling of object - needs to be stored separately
 					var light = Globals.clipboard_lights[l].duplicate(5)
 					l -= 1
+					light.light_mask = Globals.draw_layer.light_mask
+					light.range_item_cull_mask = Globals.draw_layer.light_mask
+					light.shadow_item_cull_mask = Globals.draw_layer.light_mask
 					new_object.add_sibling(light)
 					var remote = get_object_light_remote(new_object)
 					remote.remote_path = remote.get_path_to(light)
+				if new_object.has_meta("shadow"): #shadow - set light layer
+					var shadow = get_object_shadow(new_object)
+					shadow.light_mask = Globals.draw_layer.light_mask
+					shadow.occluder_light_mask = Globals.draw_layer.light_mask
 				create_object_on_remote_peers(new_object)
 		#control groups
 		elif Input.is_action_just_pressed("Control-Group_0"):
@@ -1087,7 +1114,7 @@ func get_clicked(mouse_position: Vector2):
 		var treeitem_array = layer_tree.get_descendants(layer_tree.get_selected())
 		for treeitem in treeitem_array:
 			var layer = treeitem.get_meta("draw_layer")
-			if not multiplayer.is_server() and not layer.get_meta("player_layer"):
+			if not Globals.lobby.check_is_server() and not layer.get_meta("player_layer"):
 				continue
 			if layer.visible:
 				lines_children = treeitem.get_meta("draw_layer").get_children()
@@ -1748,6 +1775,9 @@ func create_or_enable_light(object, light_dict = null):
 		}
 	#create light
 	var light = PointLight2D.new()
+	light.light_mask = object.light_mask
+	light.range_item_cull_mask = object.light_mask
+	light.shadow_item_cull_mask = object.light_mask
 	light.position = light_dict["position"]
 	var texture = GradientTexture2D.new()
 	texture.gradient = Gradient.new()
@@ -1812,6 +1842,8 @@ func create_or_enable_shadow(object):
 	else: #create shadow
 		var shadow = LightOccluder2D.new()
 		shadow.occluder = OccluderPolygon2D.new()
+		shadow.light_mask = object.light_mask
+		shadow.occluder_light_mask = object.light_mask
 		if object is CustomEllipse:
 			print("custom ellipse detected")
 			shadow.occluder.polygon = object.pointArray
@@ -1891,22 +1923,28 @@ func create_targeting(targeting_data):
 		if targeting_data[0][0] == "circle": #circle shape
 			var radius = targeting_data[0][1]
 			targeting_shape = CustomCircle.new()
+			targeting_shape.back_color.a = 0.3
 			targeting_shape.radius = radius
 		elif targeting_data[0][0] == "rect": #rectangle shape
 			var x = targeting_data[0][1]/2 #offsets from center
 			var y = targeting_data[0][2]/2
 			targeting_shape = Polygon2D.new()
+			targeting_shape.color = Globals.colorBack
+			targeting_shape.color.a = 0.3
 			targeting_shape.polygon = [Vector2(x,y), Vector2(-x,y), Vector2(-x,-y), Vector2(x,-y)] #set polygon points
 		elif targeting_data[0][0] == "cone": #cone shape
 			var start_width = targeting_data[0][1]
 			var end_width = targeting_data[0][2]
 			var len = targeting_data[0][3]
 			targeting_shape = Polygon2D.new()
+			targeting_shape.color = Globals.colorBack
+			targeting_shape.color.a = 0.3
 			targeting_shape.polygon = [Vector2(0,-start_width/2), Vector2(len, -end_width/2), Vector2(len, end_width/2), Vector2(0, start_width/2)] #set polygon points
 		elif targeting_data[0][0] == "cone_angle": #cone_angle shape
 			var angle = targeting_data[0][1]
 			var len = targeting_data[0][2]
 			targeting_shape = CustomArc.new()
+			targeting_shape.back_color.a = Globals.colorBack
 			targeting_shape.angle_size = angle
 			targeting_shape.radius = len
 			
@@ -1921,7 +1959,7 @@ func create_targeting(targeting_data):
 					targeting_shape.position = targeting_origin
 			Globals.draw_comp.add_child(targeting_shape)
 			
-		#point
+		#point / self
 		if targeting_data[1][0] == "self": #position on selected
 			if targeting_origin != null:
 				if targeting_shape == null:
@@ -1942,6 +1980,7 @@ func create_targeting(targeting_data):
 				targeting_point_radius = targeting_data[1][1]
 				if targeting_origin != null:
 					targeting_range_circle = CustomCircle.new()
+					targeting_range_circle.back_color.a = 0.3
 					targeting_range_circle.center = targeting_origin
 					targeting_range_circle.radius = targeting_point_radius
 					targeting_range_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -2001,7 +2040,7 @@ func end_targeting():
 		if child.is_class("Node2D"): #inherits from Node2D
 			if Globals.select_recursive:
 				if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
-					if not multiplayer.is_server() and not child.get_meta("player_layer"):
+					if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
 						continue
 					if child.visible:
 						lines_children.append_array(child.get_children())
@@ -2126,7 +2165,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				texture.resource_path = object_data_arr[0][5][0]
 				var file_name = object_data_arr[0][5][0].get_file()
 				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
-				if not multiplayer.is_server():
+				if not Globals.lobby.check_is_server():
 					Globals.lobby.tcp_client.send_file_request(file_name)
 				#TODO server
 		elif object_data_arr[0][5].size() == 3: #flat
@@ -2191,7 +2230,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		token_polygon.scale = object_data_arr[0][3]
 		token_polygon.rotation = object_data_arr[0][4]
 		if object_data_arr[0][0] == "token-s":
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				var tree_item = Globals.char_tree.get_char_at_path(str_to_var(object_data_arr[0][6]))
 				if tree_item == null: #character no longer in tree
 					node.character.get_char_data_from_buffer(object_data_arr[0][5]) #get node backup
@@ -2272,6 +2311,9 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			light.range_layer_max = 0
 			light.range_layer_min = -512
 			light.shadow_enabled = true
+			light.light_mask = parent.light_mask
+			light.range_item_cull_mask = parent.light_mask
+			light.shadow_item_cull_mask = parent.light_mask
 			light.set_meta("type", "light")
 			node.add_sibling(light)
 			light.name = object_data_arr[1][6]
@@ -2291,6 +2333,8 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			occluder.occluder = OccluderPolygon2D.new()
 			occluder.occluder.polygon = object_data_arr[1][1]
 			occluder.occluder.cull_mode = object_data_arr[1][2]
+			occluder.light_mask = parent.light_mask
+			occluder.occluder_light_mask = parent.light_mask
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
 			node.set_meta("shadow", true)
@@ -2301,6 +2345,8 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				occluder.occluder = OccluderPolygon2D.new()
 				occluder.occluder.polygon = object_data_arr[2][1]
 				occluder.occluder.cull_mode = object_data_arr[2][2]
+				occluder.light_mask = parent.light_mask
+				occluder.occluder_light_mask = parent.light_mask
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
@@ -2343,7 +2389,7 @@ func serialize_object_for_rpc(node):
 		if token.character.save_as_token:
 			object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer()])
 		else:
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), Globals.char_tree.get_char_path(token.character.tree_item)])
 			else:
 				object_data_arr.append(["token-s", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), token.character.singleton_dict_key])

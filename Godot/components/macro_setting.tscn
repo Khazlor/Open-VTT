@@ -260,6 +260,7 @@ size = Vector2i(400, 400)
 always_on_top = true
 ok_button_text = "Open"
 file_mode = 0
+access = 2
 show_hidden_files = true
 
 [connection signal="text_submitted" from="VBoxContainer/HBoxContainer/MacroName" to="." method="_on_macro_name_text_submitted"]

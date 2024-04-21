@@ -8,6 +8,7 @@ var maplist
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	multiplayer.multiplayer_peer = null #end multiplayer if multiplayer was in progress
+	Globals.client = false
 	#set base path for all files
 	if OS.is_debug_build():
 		Globals.base_dir_path = "res:/" #project folder in debug - not working in export

@@ -79,24 +79,25 @@ func process_data(data: PackedByteArray, peer):
 	print("server received data: ", data_arr[0])
 	if data_arr[0] == "req":
 		#send requested data
-		var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
-		if FileAccess.file_exists(file_path):
+		var file_path = "/images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
+		var full_file_path = Globals.base_dir_path + file_path
+		if FileAccess.file_exists(full_file_path):
 			var s_data: PackedByteArray = []
-			s_data.resize(512)
+			s_data.resize(1024)
 			s_data.encode_var(0, file_path)
 			var len = s_data.decode_var_size(0)
 			if len < 4:
 				print("path too long")
 				return
 			s_data.resize(len)
-			var file_data = FileAccess.get_file_as_bytes(file_path)
+			var file_data = FileAccess.get_file_as_bytes(full_file_path)
 			if not file_data.is_empty(): #file was created in rcp but data was not yet uploaded
 				s_data.append_array(file_data)
 				send_data(s_data, peer)
 			else:
-				print("file is empty: ", file_path)
+				print("file is empty: ", full_file_path)
 		else:
-			print("request - file does not exist: ", file_path)
+			print("request - file does not exist: ", full_file_path)
 	elif data_arr[0] == "put":
 		print("put")
 		#recieve sent data - create image in folder

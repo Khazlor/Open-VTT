@@ -28,7 +28,7 @@ func _process(delta):
 	
 
 func _on_tree_item_activated():
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		tree.edit_selected(true)
 
 
@@ -49,14 +49,14 @@ func _on_tree_button_clicked(item, column, id, mouse_button_index, remote = fals
 			synch_button_press_on_remote.rpc(get_path_to(item.get_meta("draw_layer")), column, id, mouse_button_index)
 		if layer.get_meta("visibility") == 0:
 			layer.set_meta("visibility", 1)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_visible)
 			else:
 				set_tree_item_visibility(layer)
 			set_layer_visibility(layer)
 		else:
 			layer.set_meta("visibility", 0)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_hidden)
 			else:
 				set_tree_item_visibility(layer)
@@ -66,14 +66,14 @@ func _on_tree_button_clicked(item, column, id, mouse_button_index, remote = fals
 			synch_button_press_on_remote.rpc(get_path_to(item.get_meta("draw_layer")), column, id, mouse_button_index)
 		if layer.get_meta("DM") == 0:
 			layer.set_meta("DM", 1)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_DM)
 			else:
 				set_tree_item_visibility(layer)
 			set_layer_visibility(layer)
 		else:
 			layer.set_meta("DM", 0)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_DM_not)
 			else:
 				set_tree_item_visibility(layer)
@@ -83,13 +83,13 @@ func _on_tree_button_clicked(item, column, id, mouse_button_index, remote = fals
 			synch_button_press_on_remote.rpc(get_path_to(item.get_meta("draw_layer")), column, id, mouse_button_index)
 		if layer.get_meta("player_layer") == 0:
 			layer.set_meta("player_layer", 1)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_players)
 			else:
 				set_tree_item_visibility(layer)
 		else:
 			layer.set_meta("player_layer", 0)
-			if multiplayer.is_server():
+			if Globals.lobby.check_is_server():
 				item.set_button(column, id, button_players_not)
 			else:
 				set_tree_item_visibility(layer)
@@ -141,7 +141,7 @@ func set_tree_item_visibility(layer):
 	
 
 func set_layer_visibility(layer):
-	if not layer.get_meta("visibility") or (not multiplayer.is_server() and layer.get_meta("DM")):
+	if not layer.get_meta("visibility") or (not Globals.lobby.check_is_server() and layer.get_meta("DM")):
 		layer.visible = false
 	else:
 		layer.visible = true

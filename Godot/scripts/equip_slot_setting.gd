@@ -39,7 +39,8 @@ func _process(delta):
 func _on_slot_name_text_submitted(new_text):
 	equip_slot_dict["name"] = new_text
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, self.get_index(), -1, equip_slot_dict, false, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, self.get_index(), -1, equip_slot_dict, false, false)
 
 
 func _on_add_button_pressed():
@@ -49,7 +50,8 @@ func _on_add_button_pressed():
 	char_sheet.character.equip_slots[slot_side].insert(self.get_index()+1, new_equip_slot_settings.equip_slot_dict)
 	add_sibling(new_equip_slot_settings)
 	char_sheet.character.emit_signal("equip_slots_changed", new_equip_slot_settings.equip_slot_dict, slot_side, true)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, self.get_index()+1, -1, new_equip_slot_settings.equip_slot_dict, true, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, self.get_index()+1, -1, new_equip_slot_settings.equip_slot_dict, true, false)
 
 
 func _on_move_up_button_pressed():
@@ -63,7 +65,8 @@ func _on_move_up_button_pressed():
 		char_sheet.character.equip_slots[slot_side][i] = char_sheet.character.equip_slots[slot_side][i - 1]
 		char_sheet.character.equip_slots[slot_side][i - 1] = equip_slot_dict
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, i, self.get_index(), equip_slot_dict, false, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, i, self.get_index(), equip_slot_dict, false, false)
 
 
 func _on_move_down_button_pressed():
@@ -77,7 +80,8 @@ func _on_move_down_button_pressed():
 		char_sheet.character.equip_slots[slot_side][i] = char_sheet.character.equip_slots[slot_side][i + 1]
 		char_sheet.character.equip_slots[slot_side][i + 1] = equip_slot_dict
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, i, self.get_index(), equip_slot_dict, false, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, i, self.get_index(), equip_slot_dict, false, false)
 
 
 func _on_remove_button_pressed():
@@ -85,7 +89,8 @@ func _on_remove_button_pressed():
 	char_sheet.character.equip_slots[slot_side].remove_at(i)
 	self.queue_free()
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, i, -1, equip_slot_dict, false, true)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, i, -1, equip_slot_dict, false, true)
 
 
 func _on_image_texture_button_pressed():
@@ -97,7 +102,8 @@ func _on_token_image_file_dialog_file_selected(path):
 	equip_slot_dict["image"] = path
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = Globals.load_texture(path)
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, self.get_index(), -1, equip_slot_dict, false, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, self.get_index(), -1, equip_slot_dict, false, false)
 
 func _on_categories_line_edit_text_submitted(new_text):
 	print(new_text)
@@ -110,7 +116,8 @@ func _on_categories_line_edit_text_submitted(new_text):
 		new_categories.append(string)
 	equip_slot_dict["categories"] = new_categories
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
-	char_sheet.character.emit_signal("synch_equip_slot", slot_side, self.get_index(), -1, equip_slot_dict, false, false)
+	if char_sheet.character.token != null:
+		char_sheet.character.token.on_synch_equip_slot(slot_side, self.get_index(), -1, equip_slot_dict, false, false)
 
 func _on_slot_name_focus_exited():
 	if $VBoxContainer/HBoxContainer/SlotName.text != equip_slot_dict["name"]:

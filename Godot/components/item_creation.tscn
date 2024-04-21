@@ -164,10 +164,12 @@ icon = ExtResource("3_a1bu1")
 
 [node name="ImageFileDialog" type="FileDialog" parent="."]
 title = "Open a File"
+initial_position = 2
 size = Vector2i(400, 400)
 always_on_top = true
 ok_button_text = "Open"
 file_mode = 0
+access = 2
 show_hidden_files = true
 
 [connection signal="text_changed" from="ScrollContainer/VBoxContainer/Category/HBoxContainer/CategoryTextEdit" to="." method="_on_category_text_edit_text_changed"]

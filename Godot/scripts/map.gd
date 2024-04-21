@@ -22,7 +22,7 @@ func _ready():
 	#load
 	
 	Globals.draw_layer = layers
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		Globals.new_map.load_map(Globals.new_map.map_name)
 		#else load in player_lobby
 	else:
@@ -35,7 +35,7 @@ func _ready():
 	tree.change_z_indexes()
 			
 	#tutorial
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		if Globals.campaign.tutorial:
 			$Draw/TutorialWindow.popup()
 			Globals.campaign.tutorial = false
@@ -108,11 +108,11 @@ func _on_child_exiting_tree(node):
 		#var saved_layers = PackedScene.new()
 		#saved_layers.pack($Draw/Layers);
 		#Globals.map.save($Draw/Layers)
-		if multiplayer.is_server():
+		if Globals.lobby.check_is_server():
 			Globals.map.save_map($Draw/Layers)
 
 func _on_tree_exiting():
-	if multiplayer.is_server():
+	if Globals.lobby.check_is_server():
 		Globals.lobby.remove_map.rpc()
 
 func _on_maps_button_pressed():

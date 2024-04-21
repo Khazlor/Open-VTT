@@ -11,6 +11,7 @@ var enet_peer = null #for multiplayer
 var lobby: Node2D = null
 var ip = ""
 var port = 7000
+var client = false
 
 var campaign: Campaign_res
 var map: Map_res
@@ -85,5 +86,4 @@ func on_server_disconnected(): #handles closing of server on client side
 			return
 		i += 0.5
 		await get_tree().create_timer(0.5).timeout
-	multiplayer.multiplayer_peer = null
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

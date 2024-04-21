@@ -16,6 +16,7 @@ var radius = 0:
 		self.calc_size()
 		self.queue_redraw()
 var polygon: PackedVector2Array
+var back_color = Globals.colorBack
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -28,7 +29,7 @@ func _process(delta):
 func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/how-to-discretize-an-ellipse-or-circle-to-a-polygon-using-c-graphics/
 	position = Vector2(center.x - radius, center.y - radius)
 	
-	draw_colored_polygon(polygon, Globals.colorBack)
+	draw_colored_polygon(polygon, back_color)
 	draw_polyline(polygon, Globals.colorLines, Globals.lineWidth, false)
 	
 func calc_size():

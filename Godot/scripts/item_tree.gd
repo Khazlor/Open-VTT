@@ -19,7 +19,7 @@ var global_item: TreeItem
 func _ready():
 	hide_root = true
 	connect("moved", _move_item)
-	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():  #multiplayer - client
+	if multiplayer.has_multiplayer_peer() and not Globals.lobby.check_is_server():  #multiplayer - client
 		return
 	var item = create_item() #root
 	item.set_selectable(0, false)
@@ -55,7 +55,7 @@ func is_ancestor(ancestor: TreeItem, descendant: TreeItem):
 
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map
-	Globals.drag_drop_canvas_layer.layer = 128
+	Globals.drag_drop_canvas_layer.layer = 2
 	
 	set_drop_mode_flags(DROP_MODE_INBETWEEN | DROP_MODE_ON_ITEM)
 	var selected = get_selected()
