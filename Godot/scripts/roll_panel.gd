@@ -85,9 +85,9 @@ func create_roll_panel(text_in: String, DM = Globals.lobby.check_is_server(), se
 	var roll_panel_item_local = roll_panel_item_template.instantiate()
 	var label = roll_panel_item_local.get_node("VBoxContainer/Text")
 	if DM:
-		label.text = "DM rolled:"
+		label.text = "DM:"
 	else:
-		label.text = "player rolled:"
+		label.text = "player:"
 	label.tooltip_text = text_in
 	
 	var result_node_local = roll_panel_item_local.get_node("VBoxContainer/Result")

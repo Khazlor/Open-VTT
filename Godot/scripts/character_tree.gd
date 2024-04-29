@@ -133,10 +133,14 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 		
 	var to_character = to_item.get_meta("character")
 	var character = item.get_meta("character")
+	if character == null: #dragging main "folders"
+		return
 	match(shift):	
 		BEFORE:
 			#move in folder
 			var path = character.get_path_to_save()
+			if to_character == null: #drag on main folder - cannot drag before
+				return
 			var to_path = to_character.get_path_to_save(false) + character.name
 			if path == to_path:
 				return
@@ -159,8 +163,16 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 			
 		ON:
 			#move in folder
+			
 			var path = character.get_path_to_save()
-			var to_path = to_character.get_path_to_save() + "/" + character.name
+			var to_path
+			if to_character != null: #drag on created character
+				to_path = to_character.get_path_to_save() + "/" + character.name
+			else:  #drag on main folder
+				if to_item.get_text(0) == "Globals":
+					to_path = Globals.base_dir_path + "/saves/Characters/" + character.name
+				else:
+					to_path = Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters/" + character.name
 			if path == to_path:
 				return
 			#resolve file conflict
@@ -175,7 +187,13 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 			print("move from: " + path + " to: " + to_path)
 			
 			DirAccess.rename_absolute(path, to_path)
-			character.global = to_character.global
+			if to_character != null:
+				character.global = to_character.global
+			else:
+				if to_item.get_text(0) == "Globals":
+					character.global = true
+				else:
+					character.global = false
 			
 			#move in tree
 			if to_item.get_child_count() == 0:
@@ -189,6 +207,8 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 		AFTER:
 			#move in folder
 			var path = character.get_path_to_save()
+			if to_character == null: #drag on main folder - cannot drag before
+				return
 			var to_path = to_character.get_path_to_save(false) + character.name
 			if path == to_path:
 				return

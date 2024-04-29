@@ -37,6 +37,7 @@ func _ready():
 	character.connect("attr_updated", update_bars)
 	character.connect("attr_bubbles_changed", change_attr_bubbles)
 	if not preview:
+		print("not preview")
 		fov.shadow_item_cull_mask = get_parent().light_mask
 		character.connect("get_token_request", on_get_token_request)
 		#synch through signals triggers multiple times when multiple tokens have the same character - use character.token instead
@@ -49,7 +50,8 @@ func _ready():
 		character.token = self
 		character.load_equipped_items_from_equipment()
 		character.load_attr_modifiers_from_equipment()
-
+	else:
+		print("preview")
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
@@ -87,6 +89,7 @@ func change_bars_on_remote_peers(bars):
 	character.emit_signal("bars_changed", true)
 	#change_bars(true)
 	
+#remakes bars when major change occurs
 func change_bars(remote = false):
 	print("change bars")
 	if remote == false: #if change was local call change on other peers
@@ -132,7 +135,10 @@ func change_bars(remote = false):
 		le.connect("text_submitted", bar_bubble_submit)
 		le.connect("focus_entered", on_le_focus_entered)
 		le.add_theme_stylebox_override("normal", flatstyle)
-		le.self_modulate = bar.self_modulate
+		var new_style = StyleBoxFlat.new()
+		new_style.bg_color = bar.self_modulate
+		le.add_theme_stylebox_override("normal", new_style)
+		#le.self_modulate = bar.self_modulate
 		bar_bubbles.add_child(le)
 	await get_tree().create_timer(0.01).timeout
 	UI_set_position()
@@ -143,6 +149,7 @@ func update_bars_on_remote_peers(attr, value):
 	character.emit_signal("attr_updated", attr, true)
 	#update_bars(attr, true)
 	
+#on change of bar value
 func update_bars(attr: StringName, remote = false):
 	print("update bars on - ", multiplayer.get_unique_id())
 	if remote == false: #if change was local call change on other peers
@@ -152,6 +159,7 @@ func update_bars(attr: StringName, remote = false):
 		if bar_data["attr2"] == attr:
 			var bar = bars.get_child(i)
 			bar.max_value = character.attributes[attr][1].to_float()
+			bar.value = character.attributes[bar_data["attr1"]][1].to_float()
 			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
 			bar.get_child(0).set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 			UI_set_position()

@@ -36,11 +36,12 @@ func _on_tree_item_activated():
 func _on_tree_button_clicked(item, column, id, mouse_button_index):
 	if id == 0:#add new
 		var item_creation = item_creation_dialog.instantiate()
+		item_creation.item_dict = item.get_meta("item_dict").duplicate(true)
 		add_child(item_creation)
 		item_creation.popup()
 		await item_creation.close_requested
 		var new_item = tree.add_new_item(item_creation.item_dict["name"], item)
-		new_item.set_meta("item_dict", item_creation.item_dict) #probably not needed
+		new_item.set_meta("item_dict", item_creation.item_dict)
 		remove_child(item_creation)
 		item_creation.queue_free()
 	if id == 1:#remove

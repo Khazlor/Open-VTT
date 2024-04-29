@@ -3,4 +3,4 @@ Godot_v4.*
 .godot/
 Godot/saves/
 Godot/images/
-Godot/temp.file
+Godot/temp*

@@ -134,9 +134,11 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		var token = node.token_polygon
 		if token.character.save_as_token:
 			object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), node.name])
-		else:
+		elif token.character.tree_item != null:
 			object_data_arr.append(["token-s", token.position, token.size, token.scale, token.rotation, Globals.char_tree.get_char_path(token.character.tree_item), node.name, token.character.store_char_data_to_buffer()])
 			token.character.save()
+		else: #char no longer in tree - save as token
+			object_data_arr.append(["token", token.position, token.size, token.scale, token.rotation, token.character.store_char_data_to_buffer(), node.name])
 		node = token
 	elif type == "container":
 		var inventory = node.get_meta("inventory")

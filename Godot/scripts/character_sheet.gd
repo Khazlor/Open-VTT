@@ -378,13 +378,14 @@ func _on_add_attr_button_pressed():
 
 func on_attr_modifier_applied(attribute: StringName, tooltip):
 	for attr in attribute_list.get_children():
-		var name_le = attr.get_child(0)
-		if name_le != null:
-			if name_le.get_meta("attr") == attribute:
-				attr.get_child(2).text = character.attributes[attribute][1]
-				print("set_tooltip: ", tooltip)
-				attr.get_child(2).tooltip_text = tooltip
-				return
+		if attr.get_child_count() == 3:
+			var name_le = attr.get_child(0)
+			if name_le != null:
+				if name_le.get_meta("attr") == attribute:
+					attr.get_child(2).text = character.attributes[attribute][1]
+					print("set_tooltip: ", tooltip)
+					attr.get_child(2).tooltip_text = tooltip
+					return
 
 
 func _on_player_check_button_toggled(toggled_on):
