@@ -194,12 +194,13 @@ if missing - target will be single target
 position_params are mandatory and have following options:
 [ul]
 self - position of selected object or token
-target - click anywhere
-target [distance] - click anywhere within distance of selected object or token
+point - click anywhere
+point [distance] - click anywhere within distance of selected object or token
 [/ul]
 
 example:
-@hp = [/r @hp - 6d6 //] || circle 50 target 120
+@hp = [/r @hp - 6d6 //] || circle 50 point 120
+ - everything in circle with 50px radius within 120px from caster
 "
 autowrap_mode = 2
 

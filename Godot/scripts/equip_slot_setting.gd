@@ -100,7 +100,7 @@ func _on_image_texture_button_pressed():
 func _on_token_image_file_dialog_file_selected(path):
 	path = await Globals.lobby.handle_file_transfer(path)
 	equip_slot_dict["image"] = path
-	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = Globals.load_texture(path)
+	#$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = Globals.load_texture(path)
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)
 	if char_sheet.character.token != null:
 		char_sheet.character.token.on_synch_equip_slot(slot_side, self.get_index(), -1, equip_slot_dict, false, false)

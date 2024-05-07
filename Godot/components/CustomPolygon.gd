@@ -47,7 +47,7 @@ func update_token(shape: bool):
 		texture = Globals.load_texture(character.token_texture)
 	elif character.token_texture != "": #check file on server
 		texture = Texture2D.new()
-		texture.resource_path = character.token_texture
+		texture.set_meta("image_path", character.token_texture)
 		var file_name = character.token_texture.get_file()
 		Globals.lobby.add_to_objects_waiting_for_file(file_name, get_parent())
 		if not Globals.lobby.check_is_server():

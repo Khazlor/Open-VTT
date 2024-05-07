@@ -83,3 +83,4 @@ func _on_right_add_button_pressed():
 	char_sheet.character.emit_signal("equip_slots_changed", new_slot.equip_slot_dict, 2, true)
 	if char_sheet.character.token != null:
 		char_sheet.character.token.on_synch_equip_slot(2, new_slot.get_index(), -1, new_slot.equip_slot_dict, true, false)
+		

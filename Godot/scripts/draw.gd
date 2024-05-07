@@ -1526,7 +1526,7 @@ func on_files_dropped(files):
 			var tex_file = Globals.load_texture(file)
 			tex_size = tex_file.get_size()
 			tex = Texture2D.new()
-		tex.resource_path = file_path
+		tex.set_meta("image_path", file_path)
 		panel.mouse_filter = Control.MOUSE_FILTER_PASS
 		var begin = get_global_mouse_position()
 		panel.set_begin(begin)
@@ -1957,6 +1957,7 @@ func create_targeting(targeting_data):
 					targeting_shape.center = targeting_origin
 				else:
 					targeting_shape.position = targeting_origin
+			targeting_shape.z_index = 4096
 			Globals.draw_comp.add_child(targeting_shape)
 			
 		#point / self
@@ -1979,12 +1980,15 @@ func create_targeting(targeting_data):
 			if targeting_data[1].size() > 1:
 				targeting_point_radius = targeting_data[1][1]
 				if targeting_origin != null:
+					print("create big range circle")
 					targeting_range_circle = CustomCircle.new()
 					targeting_range_circle.back_color.a = 0.3
 					targeting_range_circle.center = targeting_origin
 					targeting_range_circle.radius = targeting_point_radius
 					targeting_range_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					targeting_range_circle.z_index = 4096
 					Globals.draw_comp.add_child(targeting_range_circle)
+					targeting_range_circle.queue_redraw()
 				else: #no origin ignore range
 					targeting_point_radius = -1
 					
@@ -2158,16 +2162,15 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			style = StyleBoxTexture.new()
 			var texture = Globals.load_texture(object_data_arr[0][5][0])
 			if texture != null:
-				texture.resource_path = object_data_arr[0][5][0]
+				texture.set_meta("image_path", object_data_arr[0][5][0])
 				style.texture = texture
 			else: #file not on client - check server
 				texture = Texture2D.new()
-				texture.resource_path = object_data_arr[0][5][0]
+				texture.set_meta("image_path", object_data_arr[0][5][0])
 				var file_name = object_data_arr[0][5][0].get_file()
 				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
 				if not Globals.lobby.check_is_server():
 					Globals.lobby.tcp_client.send_file_request(file_name)
-				#TODO server
 		elif object_data_arr[0][5].size() == 3: #flat
 			style = StyleBoxFlat.new()
 			style.bg_color = object_data_arr[0][5][0]
@@ -2364,7 +2367,7 @@ func serialize_object_for_rpc(node):
 		if style is StyleBoxFlat:
 			style_arr = [style.bg_color, style.border_color, style.border_width_left]
 		elif style is StyleBoxTexture:
-			style_arr = [style.texture.resource_path]
+			style_arr = [style.texture.get_meta("image_path")]
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "line":
 		var line

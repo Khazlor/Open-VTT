@@ -98,4 +98,5 @@ func button_pressed(selected_tokens = [], macro_key = ""):
 	for token in selected_tokens:
 		print("token")
 		if token.character.macros.has(macro_key):
+			print("token is executing macro: ", token, " - ", macro_key)
 			Globals.roll_panel.execute_macro(token.character.macros[macro_key]["text"], token.character)

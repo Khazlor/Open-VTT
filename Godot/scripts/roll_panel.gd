@@ -580,7 +580,7 @@ func replace_text(text_in, text: String, i: int, len: int):
 #text_in = array with single string - pass by reference
 #assigns value between [] to attribute, returns skip bool - if
 func assignment(text_in, i: int, attr: String, character: Character = null, target: Character = null):
-	print("assign")
+	print("assign ", attr, " ")
 	if attr[0] == "$" and character != null: #character
 		attr = attr.substr(1)
 		if character.attributes.has(attr):
@@ -603,7 +603,7 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 			return
 	elif attr[0] == "@" and target != null: #target
 		attr = attr.substr(1)
-		if target.attributes.has(attr.substr(1)):
+		if target.attributes.has(attr):
 			var n = await resolve_inner(text_in, i, "]", character, target)
 			print(text_in[0])
 			var sub_str = [text_in[0].substr(i, n-i+1)]

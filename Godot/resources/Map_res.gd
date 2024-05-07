@@ -110,7 +110,10 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		if style is StyleBoxFlat:
 			style_arr = [style.bg_color, style.border_color, style.border_width_left]
 		elif style is StyleBoxTexture:
-			style_arr = [style.texture.resource_path]
+			if style.texture != null:
+				style_arr = [style.texture.get_meta("image_path")]
+			else:
+				style_arr = [Globals.colorBack, Globals.colorLines, Globals.lineWidth]
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "line":
 		var line
@@ -226,10 +229,12 @@ func load_data_for_self_and_children(file: FileAccess):
 	if object_data_arr[0][0] == "rect": #object is rectangle - panel
 		var style
 		if object_data_arr[0][5].size() == 1: #texture:
+			print("texture rect loading")
 			style = StyleBoxTexture.new()
 			var texture = Globals.load_texture(object_data_arr[0][5][0])
+			print("texture: texture")
 			if texture != null:
-				texture.resource_path = object_data_arr[0][5][0]
+				texture.set_meta("image_path", object_data_arr[0][5][0])
 				style.texture = texture
 		elif object_data_arr[0][5].size() == 3: #flat
 			style = StyleBoxFlat.new()

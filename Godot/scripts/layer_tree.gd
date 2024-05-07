@@ -40,7 +40,7 @@ func create_root():
 	draw_root = $"../../../Draw/Layers"
 	item.set_meta("draw_layer", draw_root) 
 	if Globals.lobby.check_is_server():
-		item.add_button(0, button_add, 3)
+		item.add_button(0, button_add, 3, false, "add first layer to layer tree")
 	else:
 		hide_root = true
 	
@@ -95,20 +95,20 @@ func add_new_item(item_name: String, parent: TreeItem = null, existing_node: Nod
 		item.visible = false
 	if Globals.lobby.check_is_server():
 		if draw_layer.get_meta("visibility"):
-			item.add_button(0, button_visible)
+			item.add_button(0, button_visible, -1, false, "sets visibility of layer and sublayers for all")
 		else:
-			item.add_button(0, button_hidden)
+			item.add_button(0, button_hidden, -1, false, "sets visibility of layer and sublayers for all")
 		if draw_layer.get_meta("DM"):
-			item.add_button(0, button_DM)
+			item.add_button(0, button_DM, -1, false, "if enabled - only DM will see this layer and sublayers")
 		else:
-			item.add_button(0, button_DM_not)
+			item.add_button(0, button_DM_not, -1, false, "if enabled - only DM will see this layer and sublayers")
 		if draw_layer.get_meta("player_layer"):
-			item.add_button(0, button_players)
+			item.add_button(0, button_players, -1, false, "sets accessibility of layer for players - does not affect visibility")
 		else:
-			item.add_button(0, button_players_not)
-		item.add_button(0, button_add)
-		item.add_button(0, button_remove)
-		item.add_button(0, button_light)
+			item.add_button(0, button_players_not, -1, false, "sets accessibility of layer for players - does not affect visibility")
+		item.add_button(0, button_add, -1, false, "add new layer")
+		item.add_button(0, button_remove, -1, false, "remove layer and it's sublayers")
+		item.add_button(0, button_light, -1, false, "sets light layer - only lights and occluders of the same light layer can iteract\n - multiple light layers can be selected at once\n - setting can be applied to all sublayers")
 		
 #	var draw_layer = Node2D.new()
 #	draw_layer.z_as_relative = false

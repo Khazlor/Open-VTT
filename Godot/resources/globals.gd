@@ -60,6 +60,7 @@ func load_texture(file_path):
 		return null
 	var image = Image.load_from_file(file_path)
 	var texture = ImageTexture.create_from_image(image)
+	texture.set_meta("image_path", file_path)
 	return texture
 
 func on_server_disconnected(): #handles closing of server on client side
