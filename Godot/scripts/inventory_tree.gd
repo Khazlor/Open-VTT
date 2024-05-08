@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for inventory tree in character sheet and container inventory
+
 extends Tree
 
 var categories = {}
@@ -185,7 +189,9 @@ func update_total_weight(change_item_weights = false):
 			category_weight += item.get_range(5)
 		category.set_range(5, category_weight)
 		total_weight += category_weight
-	
+
+#drag and drop implementation
+
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map
 	Globals.drag_drop_canvas_layer.layer = 2

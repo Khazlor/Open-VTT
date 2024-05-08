@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controlling main game scene to which map scenes are loaded - handles multiplayer map loading
+
 extends Node2D
 
 var map_comp = preload("res://scenes/map.tscn")

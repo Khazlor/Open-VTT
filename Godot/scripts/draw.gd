@@ -1,6 +1,6 @@
 #Author: Vladimír Horák
 #Desc:
-#Script implementing all of map drawing and selecting functionality
+#Script implementing all of map drawing and selecting functionality, handles most of user input
 
 extends Node2D
 
@@ -98,10 +98,10 @@ func _ready():
 	connect("line_settings_changed", on_line_settings_changed)
 	connect("font_settings_changed", on_font_settings_changed)
 	
-
+#handles all user input that wasn't handled by buttons, textedits etc.
 func _unhandled_input(event):
 #	print_tree_pretty() #DEBUG TODO remove
-	if event is InputEventMouse:
+	if event is InputEventMouse: #handle mouse envents
 		if Globals.draw_layer == null: #check if layer is selected
 			return
 		mouse_pos = get_global_mouse_position()
@@ -899,7 +899,7 @@ func _unhandled_input(event):
 							else:
 								select_box.size.y = select_box.size.x
 								
-	elif event is InputEventKey:
+	elif event is InputEventKey: #handle keyboard events
 		print("key pressed")
 		if Input.is_action_just_pressed("Delete") or Input.is_action_just_pressed("ui_cut"): #delete or cut selection
 			if Input.is_action_just_pressed("ui_cut"):
@@ -1072,7 +1072,7 @@ func _unhandled_input(event):
 		elif Input.is_action_just_pressed("help"):
 			$TutorialWindow.popup()
 
-
+#clear mouse over variables
 func mouse_over_clear():
 	mouse_over_selected = false
 	mouse_over_tl = false
@@ -1084,6 +1084,7 @@ func mouse_over_clear():
 	selected_scaling = false
 	selected_rotating = false
 
+#copies selection to clipboard
 func copy_to_clipboard():
 	for object in Globals.clipboard_objects: # free old clipboard
 		object.queue_free()
@@ -1105,7 +1106,7 @@ func copy_to_clipboard():
 			Globals.clipboard_lights.append(light)
 		Globals.clipboard_objects.append(object.duplicate(5))
 
-
+#gets top object in current layer at given position
 func get_clicked(mouse_position: Vector2):
 	var lines_children = Globals.draw_layer.get_children()
 	lines_children.reverse()
@@ -1744,6 +1745,7 @@ func _on_object_change_signal(index, value):
 						shadow.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
 					synch_occluder_cull_mode.rpc(get_path_to(shadow), shadow.occluder.cull_mode)
 				
+#gets object light - light is sibling
 func get_object_light(object):
 	for child in object.get_children():
 		if child is RemoteTransform2D and child.has_meta("light"):
@@ -1751,6 +1753,7 @@ func get_object_light(object):
 	print("no light found")
 	return null
 	
+#gets remote for controlling light position
 func get_object_light_remote(object):
 	for child in object.get_children():
 		if child is RemoteTransform2D and child.has_meta("light"):
@@ -1911,6 +1914,7 @@ func create_select_box(position):
 	select_box.connect("mouse_exited", _on_select_mouse_exited)
 	$Select.add_child(select_box)
 
+#creates proper shapes for targeting based on entered macro
 func create_targeting(targeting_data):
 	print("targeting data: ", targeting_data)
 	targeting = true
@@ -1995,6 +1999,7 @@ func create_targeting(targeting_data):
 	return null
 		
 
+#updates targeting on mouse move
 func update_targeting():
 	if targeting_shape != null: #has shape set shape transforms
 		if not targeting_self: # point - update position
@@ -2017,6 +2022,7 @@ func update_targeting():
 			targeting_shape.rotation = angle
 			
 
+#clicked - targeting end - get targeted tokens
 func end_targeting():
 	var selected_targets = []
 	if targeting_shape == null: #point no shape - get clicked
@@ -2077,7 +2083,7 @@ func get_object_center(object):
 	var center = object.position + Vector2(distance * cos(angle), distance * sin(angle))
 	return center
 
-
+#modify selected objects
 func on_line_settings_changed(setting):
 	print(setting)
 	for object in selected:
@@ -2119,6 +2125,7 @@ func on_line_settings_changed(setting):
 					line.default_color = Globals.colorLines
 				create_object_on_remote_peers(object)
 				
+#modify selected text objects
 func on_font_settings_changed(setting):
 	print(setting)
 	for object in selected:
@@ -2529,6 +2536,7 @@ func synch_object_inventory_remove(object_path, item, item_pos = 0):
 			object.emit_signal("inv_changed")
 			break
 
+#timer for drag synch - saves network trafic
 func update_other_peers_timer_start():
 	update_other_peers = false
 	await get_tree().create_timer(update_timer_interval).timeout

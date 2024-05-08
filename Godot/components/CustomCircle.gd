@@ -26,7 +26,13 @@ func _ready():
 func _process(delta):
 	pass
 	
-func _draw(): #elipse aproximation algorithm from https://www.geeksforgeeks.org/how-to-discretize-an-ellipse-or-circle-to-a-polygon-using-c-graphics/
+#elipse aproximation algorithm inspired by algorithm from
+#https://www.geeksforgeeks.org/how-to-discretize-an-ellipse-or-circle-to-a-polygon-using-c-graphics/
+#and rewritten for GDScript
+#Author and Publisher: geeksforgeeks.org
+#Last revision: 17 Jan, 2020
+#Title: How to discretize an Ellipse or Circle to a Polygon using C++ Graphics?
+func _draw():
 	position = Vector2(center.x - radius, center.y - radius)
 	
 	draw_colored_polygon(polygon, back_color)

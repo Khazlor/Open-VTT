@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual item attribute modifier setting used in character creation
+
 extends PanelContainer
 
 var item_attr_mod_dict = {

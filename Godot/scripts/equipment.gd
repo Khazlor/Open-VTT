@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for equipment section of inventory in character sheet
+
 extends PanelContainer
 
 var equipment_slot_comp = preload("res://components/equipment_slot.tscn")
@@ -18,6 +22,7 @@ func _ready():
 func _process(delta):
 	pass
 
+#gets slot index in character slot array
 func get_slot_params(slot):
 	for i in char_sheet.character.equip_slots.size():
 		for j in char_sheet.character.equip_slots[i].size():
@@ -39,6 +44,7 @@ func on_equip_slot_synched():
 	#recreate slots
 	load_slots()
 
+#switch between inventory and slot settings
 func _on_edit_button_pressed():
 	if char_sheet.inventory_sheet.visible: #visible inventory - show settings
 		char_sheet.inventory_sheet.visible = false
@@ -65,6 +71,7 @@ func load_slots():
 		new_slot.equipment_sheet = self
 		right_slots.add_child(new_slot)
 
+#creates or updates equipment slot
 func update_slot(equip_slot_dict, side: int, new: bool):
 	print("new slot")
 	if new:

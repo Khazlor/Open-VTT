@@ -154,6 +154,8 @@ func is_child_of(child_treeitem, parent_treeitem):
 			return true
 	return false
 
+#drag and drop sections
+
 func _get_drag_data(_item_position):
 	if not Globals.lobby.check_is_server():
 		return

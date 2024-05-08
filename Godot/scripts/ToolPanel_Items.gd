@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for item list in ToolPanel on right side of screen
+
 extends MarginContainer
 
 
@@ -17,8 +21,8 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
-	
 
+#double click on items opens it's editing
 func _on_tree_item_activated():
 	var item_creation = item_creation_dialog.instantiate()
 	var tree_item = tree.get_selected()
@@ -30,9 +34,8 @@ func _on_tree_item_activated():
 	tree_item.set_text(0, item_creation.item_dict["name"])
 	remove_child(item_creation)
 	item_creation.queue_free()
-	
 
-
+#clicked on add or remove buttons
 func _on_tree_button_clicked(item, column, id, mouse_button_index):
 	if id == 0:#add new
 		var item_creation = item_creation_dialog.instantiate()

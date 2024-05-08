@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual setting of character attr_bubbles in character sheet
+
 extends PanelContainer
 
 @onready var character_sheet = $"../../../../../../../../"

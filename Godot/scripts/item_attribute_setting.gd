@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual item attribute setting usen in item creation
+
 extends PanelContainer
 
 var attr_name = ""

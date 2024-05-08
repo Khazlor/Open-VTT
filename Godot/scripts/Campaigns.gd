@@ -80,26 +80,26 @@ func _on_campaigncard_right_click(campaign: Campaign_res, campaigncard):
 	if popup.position.y + popup.size.y > get_viewport().size.y:
 		popup.position.y = get_viewport().size.y - popup.size.y
 	
-
+#apply changes in settings - right click on card
 func _on_apply_button_pressed():
-	#setting map_res
+	#setting campaign_res
 	var newname = popup.get_node("VBoxContainer/CampaignName").text
 	if campaign.campaign_name != newname:
-		var oldname = campaign.map_name
+		var oldname = campaign.campaign_name
 		campaign.campaign_name = newname
 		var i = 0
 		while DirAccess.dir_exists_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name):
 			i += 1
 			campaign.campaign_name = newname + "_" + str(i)
-		if DirAccess.rename_absolute(Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name, Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name) != Error.OK:
+		if DirAccess.rename_absolute(Globals.base_dir_path + "/saves/Campaigns/" + oldname, Globals.base_dir_path + "/saves/Campaigns/" + campaign.campaign_name) != Error.OK:
 			campaign.campaign_name = oldname
-	campaign.campaign_desc = popup.get_node("VBoxContainer/MapDesc").text
+	campaign.campaign_desc = popup.get_node("VBoxContainer/CampaignDesc").text
 	
-	#setting map_card
+	#setting campaign_card
 	campaigncard.get_node("PanelContainer/Name").text = campaign.campaign_name
 	campaigncard.get_node("PanelContainer/MarginContainer/VBoxContainer/Desc").text = campaign.campaign_desc
 	campaigncard.get_node("PanelContainer/preview").texture = Globals.load_texture(campaign.image)
-	
+	campaign.save_campaign()
 	popup.hide()
 
 
@@ -126,3 +126,4 @@ func _on_delete_button_pressed():
 	campaigncard.queue_free()
 	campaign = null
 	popup.hide()
+	

@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for macro setting
+
 extends PanelContainer
 
 @onready var character_sheet = $"../../../../../../../"
@@ -54,7 +58,7 @@ func _ready():
 func _process(delta):
 	pass
 
-
+#resolve name conflicts
 func get_valid_macro_name(name: String):
 	var new_name = name
 	var i = 1
@@ -63,6 +67,7 @@ func get_valid_macro_name(name: String):
 		i += 1
 	return new_name
 
+#change macro name
 func _on_macro_name_text_submitted(new_text):
 	var name = get_valid_macro_name(new_text)
 	var old_name = macro_dict["name"]
@@ -79,7 +84,7 @@ func _on_macro_name_text_submitted(new_text):
 		character_sheet.character.token.on_synch_macro(name, macro_dict, old_name)
 	#character_sheet.character.emit_signal("synch_macro", name, macro_dict, old_name)
 	
-	
+#duplicate macro
 func _on_add_button_pressed():
 	var new_macro_settings = self.duplicate(5)
 	new_macro_settings.macro_dict = macro_dict.duplicate(true)
@@ -94,7 +99,7 @@ func _on_add_button_pressed():
 		character_sheet.character.token.on_synch_macro(name, macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", name, macro_dict)
 
-
+#moves macro up
 func _on_move_up_button_pressed():
 	var i = self.get_index()
 	if i == 0: # first - do nothing - might change later TODO
@@ -111,6 +116,7 @@ func _on_move_up_button_pressed():
 		character_sheet.character.token.on_synch_macro(macro_dict["name"], macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", macro_dict["name"], macro_dict)
 
+#moves macro down
 func _on_move_down_button_pressed():
 	var i = self.get_index()
 	if i == character_sheet.character.macros.size() - 1: # last - do nothing - might change later TODO
@@ -127,7 +133,7 @@ func _on_move_down_button_pressed():
 		character_sheet.character.token.on_synch_macro(macro_dict["name"], macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", macro_dict["name"], macro_dict)
 
-
+#removes macro
 func _on_remove_button_pressed():
 	character_sheet.character.macros.erase(macro_dict["name"])
 	if macro_dict["in_bar"]:
@@ -141,7 +147,7 @@ func _on_remove_button_pressed():
 func _on_icon_texture_button_pressed():
 	dialog.popup()
 
-
+#set macro icon
 func _on_token_image_file_dialog_file_selected(path):
 	path = await Globals.lobby.handle_file_transfer(path)
 	macro_dict["icon"] = path
@@ -152,6 +158,7 @@ func _on_token_image_file_dialog_file_selected(path):
 		character_sheet.character.token.on_synch_macro(macro_dict["name"], macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", macro_dict["name"], macro_dict)
 
+#macro command
 func _on_text_edit_text_changed():
 	if init_loading:
 		return
@@ -160,7 +167,7 @@ func _on_text_edit_text_changed():
 		character_sheet.character.token.on_synch_macro(macro_dict["name"], macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", macro_dict["name"], macro_dict)
 
-
+#macro in bar setting
 func _on_check_box_toggled(button_pressed):
 	if init_loading:
 		return
@@ -175,7 +182,7 @@ func _on_check_box_toggled(button_pressed):
 		character_sheet.character.token.on_synch_macro(macro_dict["name"], macro_dict)
 	#character_sheet.character.emit_signal("synch_macro", macro_dict["name"], macro_dict)
 
-
+#pop up / hide macro settings
 func _on_edit_button_pressed():
 	$VBoxContainer/MarginContainer.visible = not $VBoxContainer/MarginContainer.visible
 
@@ -184,6 +191,7 @@ func _on_roll_button_pressed():
 	print("macro call")
 	Globals.roll_panel.execute_macro(macro_dict["text"], character_sheet.character)
 
+#action bar macro button settings:
 
 func _on_button_text_line_edit_text_changed(new_text):
 	if init_loading:

@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for inventory section of character sheet - most functionality in inventory_tree
+
 extends Control
 
 @onready var tree = $PanelContainer/Tree

@@ -109,7 +109,7 @@ func _on_apply_button_pressed():
 	mapcard.get_node("PanelContainer/MarginContainer/VBoxContainer/Desc").text = map.map_desc
 	mapcard.get_node("PanelContainer/MarginContainer/VBoxContainer/Size").text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
 	mapcard.get_node("PanelContainer/preview").texture = Globals.load_texture(map.image)
-	
+
 	popup.hide()
 
 

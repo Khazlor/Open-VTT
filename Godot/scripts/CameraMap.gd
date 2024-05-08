@@ -19,6 +19,7 @@ func _ready():
 func _process(delta):
 	pass
 
+#handles user input
 func _unhandled_input(event):
 	#movement
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):

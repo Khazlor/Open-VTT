@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for item creation window used to create and modify items
+
 extends Window
 
 var item_dict = {

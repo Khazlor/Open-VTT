@@ -52,7 +52,7 @@ func _ready():
 func _process(delta):
 	pass
 
-
+#save and close character sheet
 func _on_close_requested():
 	if not character.save_as_token:
 		character.save()
@@ -77,7 +77,7 @@ func _on_close_requested():
 ##		mode = Window.MODE_WINDOWED
 ##		self.queue_free()
 
-
+#pops char sheet to separate window
 func _on_popup_button_pressed():
 	$PopupButton.visible = false #hide button
 	#recreate window with embedding disabled
@@ -127,6 +127,7 @@ func on_attr_updated(attr_name, remote = false):
 		te.text = attr_val[0]
 	node.get_child(2).text = attr_val[1]
 
+#finds Vbox of attribute in attribute tab
 func find_attr_node(attr_name):
 	var i = 0
 	for node in attribute_list.get_children():
@@ -243,6 +244,7 @@ func load_character():
 		var attr = attr_bubble_setting.instantiate()
 		attr.attr_dict = attr_data
 		attr_bubbles.add_child(attr)
+
 # ================================= section of token editor =====================================
 
 

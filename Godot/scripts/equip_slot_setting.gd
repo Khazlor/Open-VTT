@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual setting of equipment slot
+
 extends PanelContainer
 
 var char_sheet

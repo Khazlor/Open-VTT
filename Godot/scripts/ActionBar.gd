@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for character Macro Action Bar
+
 extends FlowContainer
 
 var characters = []
@@ -12,6 +16,7 @@ func _ready():
 func _process(delta):
 	pass
 
+#disconnect character signals on clear 
 func disconnect_character_signals():
 	for character in characters:
 		if character != null:
@@ -19,6 +24,7 @@ func disconnect_character_signals():
 			print("disconnected character ", character)
 	characters.clear()
 
+#fills action bar with macros of all selected tokens
 func fill_action_bar(selected_tokens = [], reconnect = true):
 	print("fill action bar: ", macros_in_bar)
 	clear()
@@ -93,6 +99,7 @@ func clear():
 		self.remove_child(child)
 		child.queue_free()
 		
+#macro in action bar pressed
 func button_pressed(selected_tokens = [], macro_key = ""):
 	print("pressed")
 	for token in selected_tokens:

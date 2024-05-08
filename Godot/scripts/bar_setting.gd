@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual setting of character bars in character sheet
+
 extends PanelContainer
 
 @onready var character_sheet = $"../../../../../../../../"
@@ -24,7 +28,7 @@ func _ready():
 func _process(delta):
 	pass
 
-
+#duplicates this setting
 func _on_add_button_pressed():
 	var new_bar_settings = self.duplicate(5)
 	new_bar_settings.bar_dict = bar_dict.duplicate(true)
@@ -64,22 +68,22 @@ func _on_remove_button_pressed():
 	self.queue_free()
 	character_sheet.character.emit_signal("bars_changed")
 
-
+#bar color
 func _on_color_picker_button_color_changed(color):
 	bar_dict["color"] = color
 	character_sheet.character.emit_signal("bars_changed")
 
-
+#bar height
 func _on_size_spin_box_value_changed(value):
 	bar_dict["size"] = value
 	character_sheet.character.emit_signal("bars_changed")
 
-
+#bar value
 func _on_atrribute_line_edit_text_submitted(new_text):
 	bar_dict["attr1"] = new_text
 	character_sheet.character.emit_signal("bars_changed")
 	
-
+#bar max_value
 func _on_attribute_2_line_edit_text_submitted(new_text):
 	bar_dict["attr2"] = new_text
 	character_sheet.character.emit_signal("bars_changed")

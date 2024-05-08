@@ -1,6 +1,6 @@
 #Author: Vladimír Horák
 #Desc:
-#Script enabling dragging of characters from character_tree to map and creating tokens
+#Script component enabling dragging of characters from character_tree and items from inventory to map and creating tokens and containers
 
 extends Control
 
@@ -16,9 +16,12 @@ func _ready():
 func _process(delta):
 	pass
 
+#fix when component is not moved back after drag and drop finishes
 func _unhandled_input(event):
 	if Input.is_action_just_pressed("mouseleft"):
 		Globals.drag_drop_canvas_layer.layer = -1
+
+#drag and drop section
 
 func _can_drop_data(position, data):
 	return data is TreeItem

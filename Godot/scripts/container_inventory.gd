@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for Window with character and container inventory - pressing I opens for all selected
+
 extends Window
 
 var selected = [] #list of selected objects with character or inventory

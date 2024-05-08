@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for items representing tokens in turn_order
+
 extends PanelContainer
 
 var token
@@ -17,7 +21,7 @@ func _process(delta):
 	pass
 
 
-
+#click on item - select token
 func _on_button_pressed():
 	if Globals.turn_order.selected != null:
 		Globals.turn_order.selected.unselect()

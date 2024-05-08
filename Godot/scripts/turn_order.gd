@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for controling turn_order component - tracking order of tokens in combat turn
+
 extends Window
 
 var selected: PanelContainer = null
@@ -82,7 +86,7 @@ func lose_focus():
 	self.unfocusable = false
 	
 
-#window is focused - lose focus on right and middle clicks
+#window is focused - lose focus on right and middle clicks (normally only on left click outside)
 func _on_window_input(event):
 	if event is InputEventMouseButton:
 		if event.is_action_pressed("mouseright") or Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):

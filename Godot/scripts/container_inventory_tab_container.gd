@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for implementing drag and drop functionality on container_inventory tab container
+
 extends TabContainer
 
 

@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for drag and drop debug component
+
 extends Node
 
 

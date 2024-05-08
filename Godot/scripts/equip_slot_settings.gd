@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for list of all equipment slot settings
+
 extends PanelContainer
 
 var slot_setting_comp = preload("res://components/equip_slot_setting.tscn")

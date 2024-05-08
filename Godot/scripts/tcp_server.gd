@@ -1,3 +1,8 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for TCP server - used for large file transfers (images)
+#running in separate thread on server
+
 extends Node
 
 var tcp_server: TCPServer
@@ -21,7 +26,7 @@ func _ready():
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#check if for connecting and disconnecting peers
+#check for connecting and disconnecting peers
 func _process(delta):
 	if tcp_server.is_connection_available():
 		var client = tcp_server.take_connection()
@@ -37,6 +42,7 @@ func _process(delta):
 func start_async_server():
 	thread.start(_thread_function)
 
+#check for incomming data
 func _thread_function():
 	while run_thread:
 		for peer in peer_pool:
@@ -71,7 +77,7 @@ func _thread_function():
 	##var file_name = data_arr[2]
 	#return data_arr
 	
-		
+#process incoming data - upload / request
 func process_data(data: PackedByteArray, peer):
 	var print_data = data.slice(0, 100)
 	print("recv data: ", print_data)

@@ -26,12 +26,12 @@ func _ready():
 func _process(delta):
 	pass
 	
-
+#rename
 func _on_tree_item_activated():
 	if Globals.lobby.check_is_server():
 		tree.edit_selected(true)
 
-
+#select layer
 func _on_tree_item_selected():
 	Globals.draw_layer = tree.get_selected().get_meta("draw_layer")
 	if Globals.map.fov_enable:
@@ -42,6 +42,7 @@ func _on_tree_item_selected():
 func synch_button_press_on_remote(layer_path, column, id, mouse_button_index):
 	_on_tree_button_clicked(get_node(layer_path).get_meta("tree_item"), column, id, mouse_button_index, true)
 
+#some treeitem button pressed
 func _on_tree_button_clicked(item, column, id, mouse_button_index, remote = false):
 	var layer = item.get_meta("draw_layer")
 	if id == 0:#visibility
@@ -116,7 +117,7 @@ func _on_tree_button_clicked(item, column, id, mouse_button_index, remote = fals
 				lightlist.select(i, false)
 		lightlistPopup.position = get_global_mouse_position()
 
-
+#sets visibility of layer in tree for players
 func set_tree_item_visibility(layer):
 	print("set_tree_item_visibility")
 	var item = layer.get_meta("tree_item")
@@ -139,7 +140,7 @@ func set_tree_item_visibility(layer):
 			tree.set_selected(item, 0)
 			Globals.draw_layer = item.get_meta("draw_layer")
 	
-
+#sets visibility of layer on map
 func set_layer_visibility(layer):
 	if not layer.get_meta("visibility") or (not Globals.lobby.check_is_server() and layer.get_meta("DM")):
 		layer.visible = false

@@ -44,7 +44,7 @@ func _ready():
 #	add_new_item("Zombie", item)
 
 
-
+#creates new character in tree (duplicates selected)
 func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 	#if tree was empty, hide root
 	if hide_root == false:
@@ -98,6 +98,8 @@ func is_ancestor(ancestor: TreeItem, descendant: TreeItem):
 		if descendant == ancestor:
 			return true
 	return false
+
+#drag and drop functions
 
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map

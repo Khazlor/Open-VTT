@@ -1,6 +1,6 @@
 #Author: Vladimír Horák
 #Desc:
-#Script for controlling tree structure with list of precreated items
+#Script for controlling tree structure with list of pre-created items
 
 extends Tree
 
@@ -52,6 +52,8 @@ func is_ancestor(ancestor: TreeItem, descendant: TreeItem):
 		if descendant == ancestor:
 			return true
 	return false
+
+#drag and drop to and from item tree
 
 func _get_drag_data(_item_position):
 	#place drag and drop layer on top - in case of dragging to map

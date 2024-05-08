@@ -1,3 +1,8 @@
+#Author: Vladimír Horák
+#Desc:
+#Script with custom TCP client run on player peers
+#used for large file transfers (images) - should be faster than using RPC
+
 extends Node
 
 var peer = StreamPeerTCP.new()
@@ -14,6 +19,7 @@ func _ready():
 	emit_signal("connected")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
+#check for incomming data
 func _process(delta):
 	if peer.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 		if peer.get_available_bytes() > 0:
@@ -34,6 +40,7 @@ func _process(delta):
 	elif not connecting_func_running: #start connecting function
 		connecting_func_running = true
 		
+#connect to TCP file server
 func connecting_func():
 	while true: #try until connection success
 		var error = peer.connect_to_host(Globals.ip, 8080)
@@ -50,7 +57,7 @@ func connecting_func():
 		await get_tree().create_timer(0.5).timeout
 	connecting_func_running = false
 
-
+#send image to server
 func send_image(file_path):
 	if not FileAccess.file_exists(file_path):
 		print("send image - file does not exist")
@@ -68,6 +75,7 @@ func send_image(file_path):
 	data.append_array(FileAccess.get_file_as_bytes(file_path))
 	send_data(data)
 
+#request file from server
 func send_file_request(file_name: String):
 	var data: PackedByteArray = []
 	data.resize(512)

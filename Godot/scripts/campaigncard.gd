@@ -20,6 +20,7 @@ func _ready():
 func _process(delta):
 	pass
 
+#enables left and right click functionality
 func _on_gui_input(event):
 	if event.is_action_pressed("mouseleft"):
 		Globals.campaign = campaign

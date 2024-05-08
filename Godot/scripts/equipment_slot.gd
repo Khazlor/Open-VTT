@@ -1,3 +1,7 @@
+#Author: Vladimír Horák
+#Desc:
+#Script for individual equipment slots of equipment section of character inventory
+
 extends PanelContainer
 
 var equipment_sheet
@@ -23,6 +27,7 @@ func _ready():
 func _process(delta):
 	pass
 	
+#drag and drop implementation
 
 func _get_drag_data(_item_position):
 	if equip_slot_dict["item"] != null:
@@ -81,7 +86,7 @@ func _drop_data(at_position, data):
 	
 	Globals.drag_drop_canvas_layer.layer = -1
 	
-
+#load slot - needs to have filled equip_slot_dict
 func load_slot():
 	print("loading slot", equip_slot_dict)
 	var category_str = "" 
