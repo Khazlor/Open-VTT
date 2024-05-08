@@ -431,7 +431,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 		if text_in[0].substr(i, closing_len) == closing_str:
 			last = true #will do one more - then break
 		var char = text_in[0][i]
-		#print(char)
+		print(char)
 #		print(i)
 		if ignore != 0: #resolving either "" or ''
 			if ignore == 1: # inside ""
@@ -470,16 +470,24 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 					i += result.get_end()
 					await assignment(text_in, i + 1, attr, character, target)
 				else: #is not assignment -> replace with value
-					replace_attr(text_in, attr, attr_i, character, target)
-					i = attr_i-1
+					var n = replace_attr(text_in, attr, attr_i, character, target)
+					if not last:
+						i = attr_i-1
+					else:
+						print(i, " ", attr_i, " ", n)
+						i = n
+					print("attr end i ", i, " ", text_in[0][i])
 		elif is_macro:
 			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?": #add char
 				attr += char
 			else: #replace macro with macro value + return to start
 				print("macro end : ", attr)
 				is_macro = false
-				replace_macro(text_in, attr, attr_i, character, target)
-				i = attr_i-1
+				var n = replace_macro(text_in, attr, attr_i, character, target)
+				if not last:
+					i = attr_i-1
+				else:
+					i = n
 		elif char == "$" or char == "@": #attribute
 			print("attr")
 			is_attr = true
@@ -509,8 +517,8 @@ func replace_attr(text_in, attr: String, i: int, character: Character = null, ta
 	if attr[0] == "$" and character != null: #character
 		if character.attributes.has(attr.substr(1)):
 			print("attr found")
-			replace_text(text_in, character.attributes[attr.substr(1)][1], i, attr.length())
-			return
+			var len = replace_text(text_in, character.attributes[attr.substr(1)][1], i, attr.length())
+			return i + len
 		else: #might be equipped item attribute
 			var split = attr.substr(1).split(".", false)
 			if split.size() > 2: #equip.slot_name.attr
@@ -526,13 +534,13 @@ func replace_attr(text_in, attr: String, i: int, character: Character = null, ta
 							if slot["item"]["attributes"].has(split[2]): #item has attribute
 								print("attr")
 								var item_attr = slot["item"]["attributes"][split[2]]
-								replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
-								return
+								var len = replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
+								return len
 						
 	elif attr[0] == "@" and target != null: #target
 		if target.attributes.has(attr.substr(1)):
-			replace_text(text_in, target.attributes[attr.substr(1)][1], i, attr.length())
-			return
+			var len = replace_text(text_in, target.attributes[attr.substr(1)][1], i, attr.length())
+			return len
 		else: #might be equipped item attribute
 			var split = attr.substr(1).split(".", false)
 			if split.size() > 2: #equip.slot_name.attr
@@ -542,11 +550,12 @@ func replace_attr(text_in, attr: String, i: int, character: Character = null, ta
 						if slot["item"] != null: #slot has item
 							if slot["item"]["attributes"].has(split[2]): #item has attribute
 								var item_attr = slot["item"]["attributes"][split[2]]
-								replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
-								return
+								var len = replace_text(text_in, slot["item"]["attributes"][split[2]]["value"], i, attr.length())
+								return len
 	#error
 	print("attr not found")
-	replace_text(text_in, "<null>", i, attr.length())
+	var len = replace_text(text_in, "<null>", i, attr.length())
+	return len
 
 func find_slot(character, slot_name):
 	for slot_side_arr in character.equip_slots:
@@ -560,15 +569,16 @@ func replace_macro(text_in, macro: String, i: int, character: Character = null, 
 	if macro[0] == "#" and character != null: #character macro
 		if character.macros.has(macro.substr(1)):
 			print("macro found")
-			replace_text(text_in, character.macros[macro.substr(1)]["text"], i, macro.length())
-			return
+			var len = replace_text(text_in, character.macros[macro.substr(1)]["text"], i, macro.length())
+			return len
 	elif macro[0] == "%" and target != null: #target macro
 		if target.macros.has(macro.substr(1)):
-			replace_text(text_in, target.macros[macro.substr(1)]["text"], i, macro.length())
-			return
+			var len = replace_text(text_in, target.macros[macro.substr(1)]["text"], i, macro.length())
+			return len
 	#error
 	print("macro not found")
-	replace_text(text_in, "<null>", i, macro.length())
+	var len = replace_text(text_in, "<null>", i, macro.length())
+	return len
 
 #text_in = array with single string - pass by reference
 func replace_text(text_in, text: String, i: int, len: int):
@@ -576,6 +586,7 @@ func replace_text(text_in, text: String, i: int, len: int):
 	text_in[0] = text_in[0].erase(i, len)
 	text_in[0] = text_in[0].insert(i, text)
 	print("replaced: ", text_in[0])
+	return text.length()
 
 #text_in = array with single string - pass by reference
 #assigns value between [] to attribute, returns skip bool - if
@@ -585,8 +596,13 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 		attr = attr.substr(1)
 		if character.attributes.has(attr):
 			var n = await resolve_inner(text_in, i, "]", character, target)
+			print(text_in[0])
+			print(i, " ", n+1, " ", n-i+1)
+			print("begin, end: ", text_in[0][i], " ", text_in[0][n+1])
 			var sub_str = [text_in[0].substr(i, n-i+1)]
 			n -= remove_marks(sub_str)
+			print(text_in[0])
+			print(i, " ", n+1, " ", n-i+1)
 			print("assignment value: ", sub_str, " | or | ", sub_str[0])
 			if sub_str[0].find("<null>") != -1 or sub_str[0].find("<expression error>") != -1: #error in assignment value - do nothing
 				print("error in assignment value")
