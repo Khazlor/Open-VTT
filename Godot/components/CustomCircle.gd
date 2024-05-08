@@ -26,12 +26,7 @@ func _ready():
 func _process(delta):
 	pass
 	
-#elipse aproximation algorithm inspired by algorithm from
-#https://www.geeksforgeeks.org/how-to-discretize-an-ellipse-or-circle-to-a-polygon-using-c-graphics/
-#and rewritten for GDScript
-#Author and Publisher: geeksforgeeks.org
-#Last revision: 17 Jan, 2020
-#Title: How to discretize an Ellipse or Circle to a Polygon using C++ Graphics?
+
 func _draw():
 	position = Vector2(center.x - radius, center.y - radius)
 	
@@ -41,10 +36,10 @@ func _draw():
 func calc_size():
 	custom_minimum_size = Vector2(2*radius, 2*radius)
 	pivot_offset = Vector2(radius, radius)
-	var angle = 0
-	var angle_shift_rad = deg_to_rad(4)
+	var angle = 0 #start angle
+	var angle_change_rad = deg_to_rad(4) #change in angle between points - every 4 degrees
 	polygon.clear()
-	polygon.append(Vector2(2*radius, radius))
-	for i in range(90):
-		angle += angle_shift_rad
+	polygon.append(Vector2(2*radius, radius)) #starting point - right side
+	for i in range(90): # make 90 points (360 every 4 degrees)
+		angle += angle_change_rad
 		polygon.append(Vector2(radius * cos(angle) + radius, radius * sin(angle) + radius))

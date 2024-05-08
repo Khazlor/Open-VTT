@@ -17,7 +17,7 @@ var line_color = null
 var back_color
 var line_width
 
-#do not modify
+#do not modify - change by using angle_shift
 var angle_shift_rad = deg_to_rad(5)
 
 # Called when the node enters the scene tree for the first time.
@@ -31,21 +31,14 @@ func _ready():
 func _process(delta):
 	pass
 	
-#elipse aproximation algorithm inspired by algorithm from
-#https://www.geeksforgeeks.org/how-to-discretize-an-ellipse-or-circle-to-a-polygon-using-c-graphics/
-#and rewritten for GDScript
-#Author and Publisher: geeksforgeeks.org
-#Last revision: 17 Jan, 2020
-#Title: How to discretize an Ellipse or Circle to a Polygon using C++ Graphics?
 func _draw():
-	var ab = self.size/2
-	var seg = 360/angle_shift
+	var center = self.size/2
 	var angle = 0
 	polygon.clear()
-	polygon.append(Vector2(ab.x + ab.x, ab.y))
-	for i in range(int(seg)):
+	polygon.append(Vector2(self.size.x, center.y)) #starting point- right side middle
+	for i in range(int(360/angle_shift)):
 		angle += angle_shift_rad
-		polygon.append(Vector2(ab.x + ab.x * cos(angle), ab.y + ab.y * sin(angle)))
+		polygon.append(center + Vector2(center.x * cos(angle), center.y * sin(angle)))#cast point by angle from center
 	draw_colored_polygon(polygon, back_color)
 	draw_polyline(polygon, line_color, line_width, false)
 		
