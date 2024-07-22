@@ -26,7 +26,7 @@ var token_comp = preload("res://components/token.tscn") #token component
 @export var fov_opacity = 0.3
 @export var fov_color = Color.BLACK
 #preview
-@export var image = "res://images/Placeholder-1479066.png"
+@export var image: String = Globals.base_dir_path + "/images/Placeholder-1479066.png"
 #saved layers
 #@export var saved_layers: PackedScene = null
 var tokens = []
@@ -71,6 +71,19 @@ func save_map(layers: Node2D):
 	#save map meta data
 	map_save.store_var(map_desc)
 	map_save.store_var(background_color)
+	
+	if layers != null:
+		image = Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name + ".jpg"
+		var img = Globals.lobby.get_viewport().get_texture().get_image()
+		var min = min(img.get_height(),img.get_width())
+		if min == img.get_height():
+			img.blit_rect(img, Rect2i((img.get_width()-min)/2, 0, min, min), Vector2i(0,0))
+		else:
+			img.blit_rect(img, Rect2i(0, (img.get_height()-min)/2, min, min), Vector2i(0,0))
+		img.crop(min, min)
+		img.resize(256, 256, Image.INTERPOLATE_BILINEAR)
+		img.save_jpg(image)
+		
 	map_save.store_var(image)
 	
 	map_save.store_var(grid_enable)

@@ -12,7 +12,7 @@ var attribute_modifiers = {} #dictionary of all attribute modifiers (deflection 
 @export var singleton = false #all tokens have linked attributes
 @export var save_as_token = false #save character only as part of token on map
 @export var player_character = true
-@export var char_sheet_text = ""
+@export var char_sheet_path = ""
 
 @export var token_shape: StringName = &"Square"
 @export var token_size: Vector2 = Vector2(70,70)
@@ -55,7 +55,6 @@ signal reload_equip_slot(slot_dict)
 signal unequip_item_from_slot(slot)
 signal attr_modifier_applied(attr: StringName, tooltip: String)
 signal inv_changed()
-signal char_sheet_text_changed(char_sheet)
 
 signal synch_item_added(item)
 signal synch_item_removed(item)
@@ -111,7 +110,7 @@ func store_char_data(save: FileAccess):
 	save.store_var(singleton)
 	save.store_var(save_as_token)
 	save.store_var(player_character)
-	save.store_var(char_sheet_text)
+	save.store_var(char_sheet_path)
 	save.store_var(token_shape)
 	save.store_var(token_size)
 	save.store_var(token_scale)
@@ -171,7 +170,7 @@ func get_char_data(save: FileAccess):
 	singleton = save.get_var()
 	save_as_token = save.get_var()
 	player_character = save.get_var()
-	char_sheet_text = save.get_var()
+	char_sheet_path = save.get_var()
 	token_shape = save.get_var()
 	token_size = save.get_var()
 	token_scale = save.get_var()

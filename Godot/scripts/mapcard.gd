@@ -8,10 +8,10 @@ signal mapcard_right_click(map, mapcard)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$PanelContainer/Name.text = map.map_name
-	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = map.map_desc
-	$PanelContainer/MarginContainer/VBoxContainer/Size.text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
-	$PanelContainer/preview.texture = Globals.load_texture(map.image)
+	$PanelContainer/VBoxContainer/Name.text = map.map_name
+	$PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/Desc.text = map.map_desc
+	$PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/Size.text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
+	$PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/preview.texture = Globals.load_texture(map.image)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

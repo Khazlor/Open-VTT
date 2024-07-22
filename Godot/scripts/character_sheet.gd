@@ -9,9 +9,14 @@ var SelectedEdit
 var character: Character
 var token_sheet = true #character sheet opened from token
 
+var char_sheet_image = null
+
 var bar_setting = preload("res://components/bar_setting.tscn")
 var attr_bubble_setting = preload("res://components/attr_bubble_setting.tscn")
 var macro_setting = preload("res://components/macro_setting.tscn")
+var char_sheet_editor = preload("res://UI/CharSheetEditor.tscn")
+
+@onready var loadcharsheetdiag = $LoadCharSheetDialog
 
 @onready var inventory_sheet = $TabContainer/Inventory/Inventory
 @onready var equipment_slot_settings = $TabContainer/Inventory/EquipSlotSettings
@@ -22,7 +27,8 @@ var macro_setting = preload("res://components/macro_setting.tscn")
 @onready var shape = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer/OptionButton
 @onready var bars = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/BarsVBoxContainer
 @onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
-@onready var ch_sh_text_edit = $"TabContainer/Character Sheet/ChShTextEdit"
+
+@onready var char_sheet_canvas = $TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas
 
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
@@ -42,8 +48,9 @@ func _ready():
 	character.connect("attr_created", on_attr_created)
 	character.connect("attr_removed", on_attr_removed)
 	character.connect("attr_updated", on_attr_updated)
-	character.connect("char_sheet_text_changed", on_char_sheet_text_changed)
 	character.apply_modifiers() #sets tooltips of modified attributes
+	
+	loadcharsheetdiag.root_subfolder = Globals.base_dir_path + "/saves/character_sheets/"
 	
 	if not token_sheet:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.disabled = false
@@ -51,6 +58,188 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+
+
+func load_char_sheet(path):
+	if not Globals.lobby.check_is_server():
+		$TabContainer/CharacterSheet/VBoxContainer/HBoxContainer.visible = false
+	for child in char_sheet_canvas.get_children():
+		child.queue_free()
+	print("path: ", path)
+	if path == "":
+		return
+	var current_char_sheet_name = path.get_file()
+	print("dir: ", current_char_sheet_name)
+	var file = FileAccess.open(path + "/" + current_char_sheet_name + ".char_sheet", FileAccess.READ)
+	if file == null:
+		print("file is null")
+		return
+	#var json_string = file.get_as_text()
+	#char_sheet_arr = JSON.parse_string(json_string)
+	#char_sheet_arr = file.get_var()
+	var char_sheet_arr = str_to_var(file.get_as_text())
+	print(char_sheet_arr)
+	char_sheet_canvas.custom_minimum_size = char_sheet_arr[0]
+	char_sheet_canvas.get_theme_stylebox("panel").bg_color = char_sheet_arr[1]
+	for dict in char_sheet_arr[2]:
+		var type = dict["type"]
+		if type == "label":
+			load_label_from_dict(dict)
+		elif type == "input":
+			load_input_from_dict(dict)
+		elif type == "polygon":
+			load_polygon_from_dict(dict)
+		elif type == "image":
+			load_image_from_dict(dict)
+
+func load_label_from_dict(dict):
+	var label = Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.position = dict["pos"]
+	label.size = dict["size"]
+	label.clip_text = true
+	char_sheet_canvas.add_child(label)
+	label.add_theme_color_override("font_color", dict["fcolor"])
+	label.text = dict["text"]
+	var style = StyleBoxFlat.new()
+	style.bg_color = dict["BGcolor"]
+	style.border_color = dict["lcolor"]
+	style.set_border_width_all(dict["width"])
+	label.add_theme_stylebox_override("normal", style)
+	label.add_theme_font_size_override("font_size", dict["fsize"])
+	label.vertical_alignment = dict["valign"]
+	label.horizontal_alignment = dict["halign"]
+	label.set_meta("dict", dict)
+	return label
+	
+func load_input_from_dict(dict):
+	var input = CharSheetInput.new()
+	input.character = character
+	input.clip_contents = true
+	input.position = dict["pos"]
+	input.size = dict["size"]
+	input.add_theme_color_override("font_color", dict["fcolor"])
+	input.add_theme_color_override("caret_color", dict["fcolor"])
+	var attr = dict["attr"]
+	if character.attributes.has(attr):
+		input.text = character.attributes[attr][1]
+		input.tooltip_text = attr + ": " + input.text
+	else:
+		character.attributes[attr] = ["", ""]
+		if character.token != null:
+			character.token.on_attr_created(attr, ["", ""])
+		character.emit_signal("attr_created", attr, ["", ""])
+	input.connect("focus_entered", input._on_input_selected)
+	input.connect("focus_exited", input._on_input_deselected)
+	input.connect("text_changed", input._on_input_changed)
+	character.connect("attr_modifier_applied", input._input_on_attr_changed)
+	
+	char_sheet_canvas.add_child(input)
+	var style = StyleBoxFlat.new()
+	style.bg_color = dict["BGcolor"]
+	style.border_color = dict["lcolor"]
+	style.set_border_width_all(dict["width"])
+	input.add_theme_stylebox_override("normal", style)
+	input.add_theme_font_size_override("font_size", dict["fsize"])
+	input.set_meta("dict", dict)
+	return input
+	
+
+func _on_input_selected(input: TextEdit):
+	var column = input.get_caret_column()
+	var line = input.get_caret_line()
+	input.text = character.attributes[input.get_meta("dict")["attr"]][0]
+	input.set_caret_column(column)
+	input.set_caret_line(line)
+	
+func _on_input_deselected(input):
+	input.text = character.attributes[input.get_meta("dict")["attr"]][1]
+	
+func _on_input_changed(input):
+	var attr = input.get_meta("dict")["attr"]
+	character.attributes[attr][0] = input.text
+	character.apply_modifiers_to_attr(attr)
+	character.emit_signal("attr_updated", attr, false)
+	
+func load_polygon_from_dict(dict):
+	var polygon = CustomPolygon.new()
+	polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	char_sheet_canvas.add_child(polygon)
+	polygon.position = dict["pos"]
+	polygon.size = dict["size"]
+	polygon.points = dict["points"]
+	polygon.colorLines = dict["lcolor"]
+	polygon.lineWidth = dict["width"]
+	polygon.colorBG = dict["BGcolor"]
+	polygon.queue_redraw()
+	polygon.set_meta("dict", dict)
+	return polygon
+	
+func load_image_from_dict(dict):
+	var image = TextureRect.new()
+	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	char_sheet_canvas.add_child(image)
+	image.position = dict["pos"]
+	image.size = dict["size"]
+	image.set_meta("dict", dict)
+	#TODO load image
+	var texture = null
+	if dict["char"] == true:
+		var attr = dict["attr"]
+		if not character.attributes.has(attr):
+			character.attributes[attr] = ["", ""]
+			if character.token != null:
+				character.token.on_attr_created(attr, ["", ""])
+			character.emit_signal("attr_created", attr, ["", ""])
+		texture = Globals.load_texture(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + character.attributes[attr][0])
+		var button = Button.new()
+		button.position = image.position
+		button.size = image.size
+		button.flat = true
+		button.connect("pressed", _on_char_sheet_image_button_pressed.bind(image))
+		char_sheet_canvas.add_child(button)
+	if texture == null:
+		texture = load(character.char_sheet_path + "/" + dict["image"]) 
+	if texture == null:
+		texture = load(Globals.base_dir_path + "/images/Placeholder-1479066.png")
+	image.texture = texture
+	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode = TextureRect.STRETCH_SCALE
+	
+	return image
+
+func _on_char_sheet_image_button_pressed(image):
+	char_sheet_image = image
+	$CharSheetImageFileDialog.popup()
+	
+func _on_char_sheet_image_file_dialog_file_selected(path):
+	var file_path = await Globals.lobby.handle_file_transfer(path)
+	var file_name = file_path.get_file()
+	var attr = char_sheet_image.get_meta("dict")["attr"]
+	character.attributes[attr][0] = file_name
+	character.apply_modifiers_to_attr(attr)
+	character.emit_signal("attr_updated", attr, false)
+	print("dropped file name on server: ", file_name)
+	var tex: Texture2D
+	if FileAccess.file_exists(file_path):
+		print("file already exists")
+		#file exists - load and assign:
+		tex = Globals.load_texture(file_path)
+		if tex == null:
+			print("import failed")
+			return
+		else:
+			print("import done")
+	else:
+		print("files dropped - file does not exist")
+		Globals.lobby.add_to_objects_waiting_for_file(file_path, char_sheet_image)
+		Globals.lobby.tcp_client.send_file_request(file_name)
+	if tex == null:
+		var tex_file = Globals.load_texture(path)
+		tex = Texture2D.new()
+	tex.set_meta("image_path", file_path)
+	char_sheet_image.texture = tex
+	
 
 #save and close character sheet
 func _on_close_requested():
@@ -193,7 +382,7 @@ func load_character():
 	#name
 	title = character.name + " - Character sheet"
 	#character sheet
-	ch_sh_text_edit.text = character.char_sheet_text
+	load_char_sheet(character.char_sheet_path)
 	#attributes
 	for attribute in character.attributes:
 		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
@@ -397,19 +586,23 @@ func _on_player_check_button_toggled(toggled_on):
 	character.player_character = toggled_on
 
 
-func _on_ch_sh_text_edit_text_changed():
-	character.char_sheet_text = ch_sh_text_edit.text
-	character.emit_signal("char_sheet_text_changed", self)
-	if character.token != null:
-		character.token.synch_char_sheet_text_on_other_peers.rpc(character.char_sheet_text)
-
-func on_char_sheet_text_changed(char_sheet):
-	if is_same(char_sheet, self):
-		return
-	ch_sh_text_edit.text = character.char_sheet_text
-
-
 func _on_singleton_check_button_toggled(toggled_on):
 	if character.token != null:
 		character.token.synch_token_settings_on_other_peers.rpc(["singleton", toggled_on])
 	character.singleton = toggled_on
+
+
+func _on_choose_char_sheet_pressed():
+	loadcharsheetdiag.popup()
+
+
+func _on_load_char_sheet_dialog_confirmed():
+	character.char_sheet_path = Globals.base_dir_path + "/saves/character_sheets/" + loadcharsheetdiag.current_dir
+	load_char_sheet(character.char_sheet_path)
+
+
+func _on_edit_char_sheet_pressed():
+	var editor = char_sheet_editor.instantiate()
+	self.add_child(editor)
+	editor.popup()
+	

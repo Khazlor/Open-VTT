@@ -22,6 +22,8 @@ func _ready():
 		DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps")
 	var files = DirAccess.get_files_at(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps")
 	for file in files:
+		if file.get_extension() != "":
+			continue
 		map = Map_res.new()
 		map.load_map(file, false)
 		

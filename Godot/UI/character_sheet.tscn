@@ -1,9 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://chldgnhe1p4fg"]
+[gd_scene load_steps=11 format=3 uid="uid://chldgnhe1p4fg"]
 
 [ext_resource type="Script" path="res://scripts/character_sheet.gd" id="1_bacpi"]
+[ext_resource type="Texture2D" uid="uid://cqlyj4abmtc1i" path="res://icons/FileAccess.svg" id="2_axc3y"]
 [ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_jwo46"]
 [ext_resource type="Texture2D" uid="uid://bsrjpdacbqs26" path="res://icons/MakeFloating.svg" id="3_03ubt"]
 [ext_resource type="PackedScene" uid="uid://0gfii8buhxxb" path="res://components/token.tscn" id="3_dp58x"]
+[ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="3_igpe4"]
 [ext_resource type="Texture2D" uid="uid://cnbnkt1fgj6ry" path="res://icon.svg" id="4_odk7d"]
 [ext_resource type="PackedScene" uid="uid://cb2w5ybormmnv" path="res://components/equipment.tscn" id="5_hfapw"]
 [ext_resource type="PackedScene" uid="uid://c037v4p420u8d" path="res://components/inventory.tscn" id="6_yts28"]
@@ -22,21 +24,40 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_tab = 2
 use_hidden_tabs_for_min_size = true
 
-[node name="Character Sheet" type="MarginContainer" parent="TabContainer"]
-visible = false
+[node name="CharacterSheet" type="MarginContainer" parent="TabContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="ChShTextEdit" type="TextEdit" parent="TabContainer/Character Sheet"]
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/CharacterSheet"]
 layout_mode = 2
-placeholder_text = "Placeholder for Character Sheet, while we work on proper customizable implementation. Write your character information here, or in Attributes tab for use in macros. "
-wrap_mode = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/CharacterSheet/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="ChooseCharSheet" type="Button" parent="TabContainer/CharacterSheet/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Choose character sheet to use"
+icon = ExtResource("2_axc3y")
+
+[node name="EditCharSheet" type="Button" parent="TabContainer/CharacterSheet/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Open character sheet editor"
+icon = ExtResource("3_igpe4")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/CharacterSheet/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CharSheetCanvas" type="Panel" parent="TabContainer/CharacterSheet/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
 
 [node name="Attributes" type="HBoxContainer" parent="TabContainer"]
 visible = false
@@ -106,6 +127,7 @@ icon = ExtResource("2_jwo46")
 layout_mode = 2
 
 [node name="Token" type="HSplitContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -428,15 +450,33 @@ icon_alignment = 1
 
 [node name="TokenImageFileDialog" type="FileDialog" parent="."]
 title = "Open a File"
+initial_position = 2
 size = Vector2i(400, 400)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
 show_hidden_files = true
 
+[node name="CharSheetImageFileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(400, 400)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+show_hidden_files = true
+
+[node name="LoadCharSheetDialog" type="FileDialog" parent="."]
+title = "Open a Directory"
+initial_position = 2
+size = Vector2i(400, 500)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
-[connection signal="text_changed" from="TabContainer/Character Sheet/ChShTextEdit" to="." method="_on_ch_sh_text_edit_text_changed"]
+[connection signal="pressed" from="TabContainer/CharacterSheet/VBoxContainer/HBoxContainer/ChooseCharSheet" to="." method="_on_choose_char_sheet_pressed"]
+[connection signal="pressed" from="TabContainer/CharacterSheet/VBoxContainer/HBoxContainer/EditCharSheet" to="." method="_on_edit_char_sheet_pressed"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/Add_Attribute_Button" to="." method="_on_add_attribute_button_pressed"]
 [connection signal="pressed" from="TabContainer/Attributes/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer/AddMacroButton" to="." method="_on_add_macro_button_pressed"]
 [connection signal="toggled" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/PlayerCheckButton" to="." method="_on_player_check_button_toggled"]
@@ -457,3 +497,5 @@ show_hidden_files = true
 [connection signal="pressed" from="TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer/AddAttrButton" to="." method="_on_add_attr_button_pressed"]
 [connection signal="pressed" from="PopupButton" to="." method="_on_popup_button_pressed"]
 [connection signal="file_selected" from="TokenImageFileDialog" to="." method="_on_token_image_file_dialog_file_selected"]
+[connection signal="file_selected" from="CharSheetImageFileDialog" to="." method="_on_char_sheet_image_file_dialog_file_selected"]
+[connection signal="confirmed" from="LoadCharSheetDialog" to="." method="_on_load_char_sheet_dialog_confirmed"]

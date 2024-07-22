@@ -10,7 +10,7 @@ var campaign_desc = "Description"
 var DM_name = "DM Name"
 var players = []
 var map_list = []
-var image = "res://images/Placeholder-1479066.png"
+var image = Globals.base_dir_path + "/images/Placeholder-1479066.png"
 var tutorial = true
 
 

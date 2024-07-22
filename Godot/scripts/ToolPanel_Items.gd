@@ -39,7 +39,8 @@ func _on_tree_item_activated():
 func _on_tree_button_clicked(item, column, id, mouse_button_index):
 	if id == 0:#add new
 		var item_creation = item_creation_dialog.instantiate()
-		item_creation.item_dict = item.get_meta("item_dict").duplicate(true)
+		if item.get_meta("item_dict") != null:
+			item_creation.item_dict = item.get_meta("item_dict").duplicate(true)
 		add_child(item_creation)
 		item_creation.popup()
 		await item_creation.close_requested
