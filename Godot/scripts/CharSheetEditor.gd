@@ -4,10 +4,16 @@ enum Tools{SELECT, LABEL, INPUT, POLYGON, IMAGE}
 
 var tool = Tools.SELECT
 
+var zoom = 1 :
+	set(value):
+		zoom = value
+		apply_zoom()
+
 @onready var scroll = $HSplitContainer/CanvasScrollContainer
 @onready var canvas = $HSplitContainer/CanvasScrollContainer/Canvas
 @onready var node = $HSplitContainer/CanvasScrollContainer/Canvas/Node
 @onready var select_box = $HSplitContainer/CanvasScrollContainer/Canvas/Node/SelectBox
+@onready var canvas_scroll: ScrollContainer = $HSplitContainer/CanvasScrollContainer
 
 @onready var opt_canvas = $HSplitContainer/VBoxContainer/ScrollContainer/Settings/Canvas
 @onready var opt_label = $HSplitContainer/VBoxContainer/ScrollContainer/Settings/LabelOptions
@@ -64,6 +70,7 @@ var input_dict = {
 	"width": 2,
 	"BGcolor": Color.TRANSPARENT,
 	"fcolor": Color.BLACK,
+	"left_margin": 5
 }
 var polygon_dict = {
 	"type": "polygon",
@@ -87,11 +94,34 @@ var image_dict = {
 func _ready():
 	#TODO load
 	load_canvas_opt()
+	node.remove_child(select_box)
+	node.add_child(select_box, false, Node.INTERNAL_MODE_FRONT)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+
+
+func get_font_size(font: Font, size, text):
+	print("get_font_size")
+	var n = 1
+	var m = 1
+	for i in range(int(size.y), 1, -1):
+		print(i, " ", font.get_height(i), " ", size.y)
+		if font.get_height(i) <= size.y:
+			n = i
+			break
+	for i in range(int(size.y), 1, -1):
+		if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, i).x <= size.x:
+			m = i
+			break
+	return min(m,n)
+
+
+func apply_zoom():
+	canvas.custom_minimum_size = Vector2(char_sheet_arr[0].x * zoom, char_sheet_arr[0].y * zoom)
+	node.scale = Vector2(zoom, zoom)
 
 # =============================== saving and loading =====================================
 
@@ -141,6 +171,7 @@ func _on_confirmation_dialog_confirmed(path = null):
 	file.store_string(var_to_str(char_sheet_arr))
 	current_sheet_folder = path
 	saved = true
+	file.close()
 
 
 func _on_load_file_dialog_dir_selected(dir):
@@ -153,10 +184,10 @@ func _on_load_file_dialog_dir_selected(dir):
 		print("file is null")
 		return
 	char_sheet_arr = str_to_var(file.get_as_text())
+	file.close()
 	print(char_sheet_arr)
-	for object in canvas.get_children():
-		if not object is Node2D:
-			object.queue_free()
+	for object in node.get_children():
+		object.queue_free()
 	selected_objects = []
 	select_box.size = Vector2(0,0)
 	canvas.custom_minimum_size = char_sheet_arr[0]
@@ -173,26 +204,32 @@ func _on_load_file_dialog_dir_selected(dir):
 			load_image_from_dict(dict)
 	current_sheet_folder = path
 	saved = true
+	zoom = 1
 			
 	
 func load_label_from_dict(dict):
 	var label = Label.new()
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.position = dict["pos"]
-	label.size = dict["size"]
+	label.set_deferred("size", dict["size"])
 	label.clip_text = true
-	canvas.add_child(label)
+	node.add_child(label)
 	label.add_theme_color_override("font_color", dict["fcolor"])
 	label.text = dict["text"]
+	print(label.text)
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]
 	style.set_border_width_all(dict["width"])
 	label.add_theme_stylebox_override("normal", style)
+	if dict["fsize"] == -1:
+		dict["fsize"] = get_font_size(label.get_theme_font("font"), dict["size"], label.text)
 	label.add_theme_font_size_override("font_size", dict["fsize"])
 	label.vertical_alignment = dict["valign"]
 	label.horizontal_alignment = dict["halign"]
 	label.set_meta("dict", dict)
+	label.z_as_relative = false
+	label.z_index = 1
 	return label
 	
 func load_input_from_dict(dict):
@@ -202,20 +239,27 @@ func load_input_from_dict(dict):
 	input.size = dict["size"]
 	input.add_theme_color_override("font_color", dict["fcolor"])
 	input.text = "@" + dict["attr"]
-	canvas.add_child(input)
+	node.add_child(input)
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]
 	style.set_border_width_all(dict["width"])
+	if dict.has("left_margin"):
+		style.content_margin_left = dict["left_margin"]
+	else:
+		style.content_margin_left = 5
+		dict["left_margin"] = 5
 	input.add_theme_stylebox_override("normal", style)
 	input.add_theme_font_size_override("font_size", dict["fsize"])
 	input.set_meta("dict", dict)
+	input.get_h_scroll_bar().visible = false
+	input.get_v_scroll_bar().visible = false
 	return input
 	
 func load_polygon_from_dict(dict):
 	var polygon = CustomPolygon.new()
 	polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	canvas.add_child(polygon)
+	node.add_child(polygon)
 	polygon.position = dict["pos"]
 	polygon.size = dict["size"]
 	polygon.points = dict["points"]
@@ -224,12 +268,14 @@ func load_polygon_from_dict(dict):
 	polygon.colorBG = dict["BGcolor"]
 	polygon.queue_redraw()
 	polygon.set_meta("dict", dict)
+	polygon.z_as_relative = false
+	polygon.z_index = -1
 	return polygon
 	
 func load_image_from_dict(dict):
 	var image = TextureRect.new()
 	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	canvas.add_child(image)
+	node.add_child(image)
 	image.position = dict["pos"]
 	image.size = dict["size"]
 	image.set_meta("dict", dict)
@@ -242,6 +288,24 @@ func load_image_from_dict(dict):
 	image.stretch_mode = TextureRect.STRETCH_SCALE
 	return image
 # ================================== drawing ============================================
+
+func _input(event):
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		canvas_scroll.scroll_horizontal -= event.relative.x
+		canvas_scroll.scroll_vertical -= event.relative.y
+		get_viewport().set_input_as_handled()
+	
+	if event is InputEventMouseButton:
+		if Input.is_action_pressed("ctrl"):
+		#zoom
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				zoom += 0.1
+				get_viewport().set_input_as_handled()
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				zoom -= 0.1
+				if zoom < 0.1:
+					zoom = 0.1
+				get_viewport().set_input_as_handled()
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
@@ -268,7 +332,7 @@ func _unhandled_input(event):
 				created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				var dict = label_dict.duplicate(true)
 				created_object.clip_text = true
-				canvas.add_child(created_object)
+				node.add_child(created_object)
 				created_object.add_theme_color_override("font_color", dict["fcolor"])
 				created_object.text = dict["text"]
 				var style = StyleBoxFlat.new()
@@ -292,13 +356,14 @@ func _unhandled_input(event):
 				created_object = TextEdit.new()
 				created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				var dict = input_dict.duplicate(true)
-				canvas.add_child(created_object)
+				node.add_child(created_object)
 				created_object.add_theme_color_override("font_color", dict["fcolor"])
 				created_object.text = "@" + dict["attr"]
 				var style = StyleBoxFlat.new()
 				style.bg_color = dict["BGcolor"]
 				style.border_color = dict["lcolor"]
 				style.set_border_width_all(dict["width"])
+				style.content_margin_left = dict["left_margin"]
 				created_object.add_theme_stylebox_override("normal", style)
 				created_object.add_theme_font_size_override("font_size", dict["fsize"])
 				creating = true
@@ -307,6 +372,8 @@ func _unhandled_input(event):
 				set_pos_and_size(created_object, dict)
 				print("created input")
 				created_object.set_meta("dict", dict)
+				created_object.get_h_scroll_bar().visible = false
+				created_object.get_v_scroll_bar().visible = false
 				char_sheet_arr[2].append(dict)
 				
 			if tool == Tools.POLYGON:
@@ -315,7 +382,7 @@ func _unhandled_input(event):
 					dict["points"] = []
 					created_object = CustomPolygon.new()
 					created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
-					canvas.add_child(created_object)
+					node.add_child(created_object)
 					creating = true
 					begin = mouse_pos
 					created_object.position = mouse_pos
@@ -344,7 +411,7 @@ func _unhandled_input(event):
 				created_object.stretch_mode = TextureRect.STRETCH_SCALE
 				created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				var dict = image_dict.duplicate(true)
-				canvas.add_child(created_object)
+				node.add_child(created_object)
 				creating = true
 				begin = mouse_pos
 				end = mouse_pos
@@ -380,21 +447,23 @@ func _unhandled_input(event):
 	if event is InputEventMouseMotion:
 		if creating:
 			if tool == Tools.SELECT:
-				var mouse_pos = node.get_local_mouse_position()
+				var mouse_pos = get_canvas_mouse_pos()
 				end = mouse_pos
 				set_pos_and_size(select_box, null)
 			elif tool != Tools.POLYGON:
-				var mouse_pos = canvas.get_local_mouse_position()
+				var mouse_pos = get_canvas_mouse_pos()
 				end = mouse_pos
 				set_pos_and_size(created_object, created_object.get_meta("dict"))
 		elif dragging:
-			select_box.position += event.relative
+			var offset = event.relative / Vector2(zoom, zoom)
+			select_box.position += offset
 			for object in selected_objects:
-				object.position += event.relative
+				object.position += offset
 			var dict = selected_objects[-1].get_meta("dict")
 			dict["pos"] = selected_objects[-1].position
 			reload_opt(dict)
 			load_selectbox_opt()
+			
 	if event is InputEventKey:
 		if Input.is_action_just_pressed("Delete"):
 			for object in selected_objects:
@@ -427,7 +496,7 @@ func _unhandled_input(event):
 			show_selected_options()
 		if Input.is_action_just_pressed("ui_paste"):
 			selected_objects.clear()
-			var mouse_pos = canvas.get_local_mouse_position()
+			var mouse_pos = get_canvas_mouse_pos()
 			for dict in clipboard_arr:
 				var new_dict = dict.duplicate(true)
 				char_sheet_arr[2].append(new_dict)
@@ -540,7 +609,7 @@ func select_selection():
 		selected_objects.clear()
 	else:
 		print("shift held ", selected_objects)
-	for object in canvas.get_children():
+	for object in node.get_children():
 		if object is Control:
 			print(object.name)
 			if object.position.x >= select_pos_local.x and \
@@ -552,9 +621,9 @@ func select_selection():
 				selected_objects.append(object)
 				found = true
 	if not found: #nothing selected - get clicked
-		for object in canvas.get_children():
+		for object in node.get_children():
 			if object is Control:
-				var mouse_pos = canvas.get_local_mouse_position()
+				var mouse_pos = get_canvas_mouse_pos()
 				print(object.name)
 				if object.position.x <= mouse_pos.x and \
 				object.position.y <= mouse_pos.y and \
@@ -588,10 +657,7 @@ func recalculate_select_box():
 	select_box.size = Vector2(max_x-min_x, max_y-min_y)
 
 func get_canvas_mouse_pos():
-	if tool == Tools.SELECT:
-		return node.get_local_mouse_position()
-	else:
-		return canvas.get_local_mouse_position()
+	return node.get_local_mouse_position()
 		
 func set_polygon_pos_and_size(object):
 	if object.points.is_empty():
@@ -734,14 +800,14 @@ func load_input_opt(dict):
 	opt_input.get_node("Container/PosY/SpinBox").value = dict["pos"].y
 	opt_input.get_node("Container/SizeX/SpinBox").value = dict["size"].x
 	opt_input.get_node("Container/SizeY/SpinBox").value = dict["size"].y
-	opt_label.get_node("Container/Color/ColorPickerBtn").color = dict["lcolor"]
-	opt_label.get_node("Container/BorderWidth/SpinBox").value = dict["width"]
-	opt_label.get_node("Container/Color2/ColorPickerBtn").color = dict["BGcolor"]
+	opt_input.get_node("Container/Color/ColorPickerBtn").color = dict["lcolor"]
+	opt_input.get_node("Container/BorderWidth/SpinBox").value = dict["width"]
+	opt_input.get_node("Container/Color2/ColorPickerBtn").color = dict["BGcolor"]
 	opt_input.get_node("Container/Attribute/LineEdit").text = dict["attr"]
 	opt_input.get_node("Container/Size/SpinBox").value = dict["fsize"]
 	opt_input.get_node("Container/Color3/ColorPickerBtn").color = dict["fcolor"]
 	if selected_objects.size() == 1:
-		opt_label.get_node("Container/Attribute/LineEdit").grab_focus()
+		opt_input.get_node("Container/Attribute/LineEdit").grab_focus()
 	loading = false
 	
 func load_polygon_opt(dict):

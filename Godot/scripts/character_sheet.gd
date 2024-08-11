@@ -6,6 +6,11 @@ extends Window
 
 var SelectedEdit
 
+var zoom = 1 :
+	set(value):
+		zoom = value
+		apply_zoom()
+
 var character: Character
 var token_sheet = true #character sheet opened from token
 
@@ -29,6 +34,8 @@ var char_sheet_editor = preload("res://UI/CharSheetEditor.tscn")
 @onready var attr_bubbles = $TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/AttrVBoxContainer
 
 @onready var char_sheet_canvas = $TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas
+@onready var char_sheet_node = $TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas/Node
+@onready var canvas_scroll = $TabContainer/CharacterSheet/VBoxContainer/ScrollContainer
 
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
@@ -59,11 +66,33 @@ func _ready():
 func _process(delta):
 	pass
 
+#zoom and drag
+func _input(event):
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		canvas_scroll.scroll_horizontal -= event.relative.x
+		canvas_scroll.scroll_vertical -= event.relative.y
+		get_viewport().set_input_as_handled()
+	
+	if event is InputEventMouseButton:
+		if Input.is_action_pressed("ctrl"):
+		#zoom
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				zoom += 0.1
+				get_viewport().set_input_as_handled()
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				zoom -= 0.1
+				if zoom < 0.1:
+					zoom = 0.1
+				get_viewport().set_input_as_handled()
+
+func apply_zoom():
+	char_sheet_canvas.custom_minimum_size = char_sheet_canvas.get_meta("cust_size") * Vector2(zoom, zoom)
+	char_sheet_node.scale = Vector2(zoom, zoom)
 
 func load_char_sheet(path):
 	if not Globals.lobby.check_is_server():
 		$TabContainer/CharacterSheet/VBoxContainer/HBoxContainer.visible = false
-	for child in char_sheet_canvas.get_children():
+	for child in char_sheet_node.get_children():
 		child.queue_free()
 	print("path: ", path)
 	if path == "":
@@ -78,8 +107,10 @@ func load_char_sheet(path):
 	#char_sheet_arr = JSON.parse_string(json_string)
 	#char_sheet_arr = file.get_var()
 	var char_sheet_arr = str_to_var(file.get_as_text())
+	file.close()
 	print(char_sheet_arr)
 	char_sheet_canvas.custom_minimum_size = char_sheet_arr[0]
+	char_sheet_canvas.set_meta("cust_size", char_sheet_arr[0])
 	char_sheet_canvas.get_theme_stylebox("panel").bg_color = char_sheet_arr[1]
 	for dict in char_sheet_arr[2]:
 		var type = dict["type"]
@@ -91,6 +122,7 @@ func load_char_sheet(path):
 			load_polygon_from_dict(dict)
 		elif type == "image":
 			load_image_from_dict(dict)
+	apply_zoom()
 
 func load_label_from_dict(dict):
 	var label = Label.new()
@@ -98,7 +130,7 @@ func load_label_from_dict(dict):
 	label.position = dict["pos"]
 	label.size = dict["size"]
 	label.clip_text = true
-	char_sheet_canvas.add_child(label)
+	char_sheet_node.add_child(label)
 	label.add_theme_color_override("font_color", dict["fcolor"])
 	label.text = dict["text"]
 	var style = StyleBoxFlat.new()
@@ -110,6 +142,7 @@ func load_label_from_dict(dict):
 	label.vertical_alignment = dict["valign"]
 	label.horizontal_alignment = dict["halign"]
 	label.set_meta("dict", dict)
+	label.z_index = 1
 	return label
 	
 func load_input_from_dict(dict):
@@ -132,15 +165,19 @@ func load_input_from_dict(dict):
 	input.connect("focus_entered", input._on_input_selected)
 	input.connect("focus_exited", input._on_input_deselected)
 	input.connect("text_changed", input._on_input_changed)
+	input.z_index = 1
 	character.connect("attr_modifier_applied", input._input_on_attr_changed)
 	
-	char_sheet_canvas.add_child(input)
+	char_sheet_node.add_child(input)
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]
 	style.set_border_width_all(dict["width"])
+	style.content_margin_left = dict["left_margin"]
 	input.add_theme_stylebox_override("normal", style)
 	input.add_theme_font_size_override("font_size", dict["fsize"])
+	input.get_h_scroll_bar().visible = false
+	input.get_v_scroll_bar().visible = false
 	input.set_meta("dict", dict)
 	return input
 	
@@ -164,7 +201,7 @@ func _on_input_changed(input):
 func load_polygon_from_dict(dict):
 	var polygon = CustomPolygon.new()
 	polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	char_sheet_canvas.add_child(polygon)
+	char_sheet_node.add_child(polygon)
 	polygon.position = dict["pos"]
 	polygon.size = dict["size"]
 	polygon.points = dict["points"]
@@ -178,7 +215,7 @@ func load_polygon_from_dict(dict):
 func load_image_from_dict(dict):
 	var image = TextureRect.new()
 	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	char_sheet_canvas.add_child(image)
+	char_sheet_node.add_child(image)
 	image.position = dict["pos"]
 	image.size = dict["size"]
 	image.set_meta("dict", dict)
@@ -197,7 +234,7 @@ func load_image_from_dict(dict):
 		button.size = image.size
 		button.flat = true
 		button.connect("pressed", _on_char_sheet_image_button_pressed.bind(image))
-		char_sheet_canvas.add_child(button)
+		char_sheet_node.add_child(button)
 	if texture == null:
 		texture = load(character.char_sheet_path + "/" + dict["image"]) 
 	if texture == null:

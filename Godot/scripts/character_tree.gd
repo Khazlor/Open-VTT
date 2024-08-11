@@ -137,6 +137,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 	var character = item.get_meta("character")
 	if character == null: #dragging main "folders"
 		return
+	var old_global = character.global
 	match(shift):	
 		BEFORE:
 			#move in folder
@@ -231,6 +232,8 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 			#move in tree
 			var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
+	if character.global != old_global:
+		character.save()
 		
 func rename_character(item: TreeItem, new_name: String):
 	var character = item.get_meta("character")

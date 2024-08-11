@@ -163,6 +163,7 @@ func client_set_map(server_map_file_buffer, file_buffer_size):
 	map = map_comp.instantiate()
 	Globals.draw_layer = map.get_node("Draw/Layers")
 	Globals.new_map.load_map("", true, file)
+	file.close()
 	if has_node("Map"):
 		remove_child(get_node("map"))
 	add_child(map)
@@ -204,6 +205,8 @@ func check_file_on_server(file_name, file_hash, id):
 			i += 1
 	#else not found - create file:
 	var new_file = FileAccess.open(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_file_name, FileAccess.WRITE)
+	if new_file == null:
+		print("error opening file: ", FileAccess.get_open_error())
 	new_file.close()
 	if peer_id != null:
 		check_file_on_server_response.rpc_id(peer_id, false, new_file_name, id)
@@ -247,6 +250,8 @@ func handle_file_transfer(file_path: String, set_image = true):
 			elif tcp_server != null: #server
 				DirAccess.copy_absolute(file_path, new_file_path)
 				tcp_server.emit_signal("recv_file", result[1])
+			else: #local
+				DirAccess.copy_absolute(file_path, new_file_path)
 		if set_image: #set image locally
 			if not FileAccess.file_exists(new_file_path):
 				print("file does not exist - copy file")

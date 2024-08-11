@@ -58,6 +58,16 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
+metadata/cust_size = Vector2(1000, 800)
+
+[node name="Node" type="Node2D" parent="TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas"]
+
+[node name="TestLabel" type="Label" parent="TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas/Node"]
+visible = false
+offset_right = 189.0
+offset_bottom = 28.0
+theme_override_font_sizes/font_size = 20
+text = "ADASFASFASFJKBAF"
 
 [node name="Attributes" type="HBoxContainer" parent="TabContainer"]
 visible = false

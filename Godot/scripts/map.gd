@@ -13,6 +13,10 @@ func _enter_tree():
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	#make image folder
+	if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name):
+		DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
+	
 	#light
 	get_viewport().set_canvas_cull_mask_bit(2, false)
 	var layers = $Draw/Layers

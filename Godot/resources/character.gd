@@ -226,6 +226,7 @@ func get_path_to_save(include_name: bool = true):
 	
 func delete():
 	var path = get_path_to_save(true)
+	print(path)
 	OS.move_to_trash(ProjectSettings.globalize_path(path)) #TODO might not work after project export: https://docs.godotengine.org/en/stable/classes/class_os.html#class-os-method-move-to-trash
 	
 func load_attr_modifiers_from_equipment():

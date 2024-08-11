@@ -40,6 +40,11 @@ import/reimport_missing_imported_files=false
 import/blender/enabled=false
 import/fbx/enabled=false
 
+[gui]
+
+theme/custom_font="res://fonts/OpenSans-SemiBold.ttf"
+theme/default_font_multichannel_signed_distance_field=true
+
 [input]
 
 mouseleft={

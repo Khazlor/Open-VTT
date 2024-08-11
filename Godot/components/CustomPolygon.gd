@@ -20,5 +20,8 @@ func _process(delta):
 	
 func _draw(): #draw polygon and polyline
 	draw_polygon(points, [colorBG])
-	draw_polyline(points, colorLines, lineWidth, false)
+	if points.size() > 2:
+		draw_polyline(points + PackedVector2Array([points[0]]), colorLines, lineWidth, false)
+	else:
+		draw_polyline(points, colorLines, lineWidth, false)
 	

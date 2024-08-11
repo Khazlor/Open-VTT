@@ -116,6 +116,7 @@ func process_data(data: PackedByteArray, peer):
 		print("file data: ", file_data.slice(0, 50))
 		print("data len: ", file_data.size())
 		file.store_buffer(file_data)
+		file.close()
 		print("file len: ", file.get_length())
 		#response with new name - done in rpc
 		#peer.put_data(name)

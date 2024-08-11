@@ -50,6 +50,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Canvas" type="Panel" parent="HSplitContainer/CanvasScrollContainer"]
+z_index = -2
+z_as_relative = false
 custom_minimum_size = Vector2(800, 1000)
 layout_mode = 2
 size_flags_horizontal = 6
@@ -58,10 +60,12 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0u6px")
 
 [node name="Node" type="Node2D" parent="HSplitContainer/CanvasScrollContainer/Canvas"]
-position = Vector2(-454, -40)
+z_as_relative = false
+scale = Vector2(2, 2)
 
 [node name="SelectBox" type="Panel" parent="HSplitContainer/CanvasScrollContainer/Canvas/Node"]
-z_index = 1
+z_index = 2
+z_as_relative = false
 size_flags_horizontal = 0
 size_flags_vertical = 0
 mouse_filter = 2
