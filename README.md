@@ -10,9 +10,11 @@ If you have any requests or ideas, feel free to contact me on our [Discord Serve
 
 ## Features
 
-The project support basic features of other VTTs like campain and map management, rolling dice, map and grid options, characters with tokens and character sheets, item library, dynamic lighting, etc. All for free with no paywalls or subsriptions.
+The project support basic features of other VTTs like campain and map management, rolling dice, map and grid options, characters with tokens and character sheets, item library, dynamic lighting, etc. All for free with no paywalls or subsriptions. Some of the more interisting features are listed below.
 
-See following list of features for more and [todo list](#todo) for features which are planned.
+See following for more and [todo list](#todo) for features which are planned.
+
+Feel free to make a fork and modify this project to your needs. Godot is very begginer friendly, if you will have any questions, ask me on discord.
 
 No ruleset is prepared by default, but Virtual Tabletop strives to allow users to customize and create their own rulesets and potentially share it with other people. Currently there are no plans on official support for any ruleset to avoid copyright issues. You can share or find community rulesets on our [Discord Server](https://discord.gg/W3JvgEwU)
 
