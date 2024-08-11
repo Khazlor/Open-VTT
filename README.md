@@ -10,7 +10,7 @@ If you have any requests or ideas, feel free to contact me on our [Discord Serve
 
 ## Features
 
-The project support basic features of other VTTs like campain and map management, rolling dice, map and grid options, characters with tokens and character sheets, item library, dynamic lighting, etc. All for free with no paywalls or subsriptions. Some of the more interisting features are listed below.
+The project support basic features of other VTTs like campain and map management, rolling dice, map and grid options, characters with tokens and character sheets, item library, dynamic lighting, etc. All for free with no paywalls or subsriptions. Some of the more interesting features are listed below.
 
 See following for more and [todo list](#todo) for features which are planned.
 
