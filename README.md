@@ -2,7 +2,7 @@
 Open source Virtual Tabletop for Dungeons and Dragons and other TTRPG game systems. Based on Godot game engine. Basis for finished [bachelor's thesis](https://www.vut.cz/en/students/final-thesis/detail/156289).
 
 The project is still actively under development but is fully functional for the purposes of playing TTRPGs.
-Goal is to implement modern video game features into a more traditional VTT formula to extend the toolbox of players and DM. Current focus for development is QOL improvements such as `Undo/Redo` system.
+Goal is to implement modern video game features into a more traditional VTT formula to extend the toolbox of players and DM. Current focus for development is QOL improvements.
 
 The project was tested on Windows machines, currently testing Linux and Android devices, including crossplay.
 
@@ -88,7 +88,6 @@ For easier selection of player characters or groups of monsters, there is the op
 ## TODO
 
 - Refactor + Documentation - now that I am not bound by my bachelor's theses, other people can contribute as well = need for code clarity and documentation
-- Undo/Redo System
 - Spells/Abilities - library + character sheet tabs
 - Character Traits/Perks
 - TileMap system - DEMO done - need to create tools to work with
