@@ -51,6 +51,8 @@ var clipboard_objects = []
 var clipboard_characters = []
 var clipboard_lights = []
 
+var undo_size = 25
+
 var tokenShapeDict = {"Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(0,1)]), "Pointed Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,0.8), Vector2(0.5,1), Vector2(0,0.8)])}
 
 

@@ -34,11 +34,6 @@ func _ready():
 	$VBoxContainer/Priority/PrioritySpinBox.value = item_attr_mod_dict["priority"]
 	
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_duplicate_button_pressed():
 	var new_item_attr_setting = self.duplicate(5)
 	add_sibling(new_item_attr_setting)

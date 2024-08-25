@@ -3,15 +3,6 @@
 #Script implementing custom tooltip for rolled results
 
 extends RichTextLabel
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 #custom tooltip for rolls - using RichTextLabel to allow BBCode formatting
 func _make_custom_tooltip(for_text):

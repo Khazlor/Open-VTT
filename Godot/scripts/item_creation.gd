@@ -48,11 +48,6 @@ func _ready():
 		attr_mod_list.add_child(item_attr_mod)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_category_text_edit_text_changed():
 	item_dict["category"] = $ScrollContainer/VBoxContainer/Category/HBoxContainer/CategoryTextEdit.text
 

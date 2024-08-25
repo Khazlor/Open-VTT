@@ -11,11 +11,6 @@ var macros_in_bar = {}
 func _ready():
 	Globals.action_bar = self
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #disconnect character signals on clear 
 func disconnect_character_signals():
 	for character in characters:
@@ -102,6 +97,7 @@ func clear():
 #macro in action bar pressed
 func button_pressed(selected_tokens = [], macro_key = ""):
 	print("pressed")
+	Globals.roll_panel.undo_entry_exists = false #main entry in undo stack needed before saving operation parts to undo stack - create on assignment
 	for token in selected_tokens:
 		print("token")
 		if token.character.macros.has(macro_key):

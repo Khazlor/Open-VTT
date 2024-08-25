@@ -72,11 +72,6 @@ func _ready():
 	load_inventory()
 	
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func create_root():
 	hide_root = false
 	var root = create_item()

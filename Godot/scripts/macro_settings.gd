@@ -54,10 +54,6 @@ func _ready():
 	init_loading = false
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #resolve name conflicts
 func get_valid_macro_name(name: String):
 	var new_name = name
@@ -189,6 +185,7 @@ func _on_edit_button_pressed():
 
 func _on_roll_button_pressed():
 	print("macro call")
+	Globals.roll_panel.undo_entry_exists = false #main entry in undo stack needed before saving operation parts to undo stack - create on assignment
 	Globals.roll_panel.execute_macro(macro_dict["text"], character_sheet.character)
 
 #action bar macro button settings:

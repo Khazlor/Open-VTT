@@ -62,14 +62,6 @@ signal synch_macro(macro_name, macro_dict, old_macro_name, remove)
 signal synch_equip_slot(side, ind, move_ind, slot_dict, new, remove)
 signal equip_slot_synched()
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
-	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func get_token():
 	emit_get_token_request_after_delay()
 	token = await get_token_response
@@ -280,7 +272,7 @@ func apply_modifiers():
 	for attribute in attribute_modifiers:
 		apply_modifiers_to_attr(attribute)
 
-func apply_modifiers_to_attr(attribute, remote = false):
+func apply_modifiers_to_attr(attribute):
 	print("apply modifiers - ", attribute)
 	if not attribute_modifiers.has(attribute):
 		print("no modifier")

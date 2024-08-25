@@ -34,12 +34,6 @@ func _ready():
 			str = str + ", " + category
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer2/CategoriesLineEdit.text = str
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_slot_name_text_submitted(new_text):
 	equip_slot_dict["name"] = new_text
 	char_sheet.character.emit_signal("equip_slots_changed", equip_slot_dict, slot_side, false)

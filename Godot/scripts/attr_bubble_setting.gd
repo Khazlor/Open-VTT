@@ -30,11 +30,6 @@ func _ready():
 		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = image
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_attr_name_text_submitted(new_text):
 	attr_dict["name"] = new_text
 	character_sheet.character.emit_signal("attr_bubbles_changed")

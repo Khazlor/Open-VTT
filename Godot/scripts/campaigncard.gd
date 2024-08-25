@@ -16,10 +16,6 @@ func _ready():
 	$PanelContainer/MarginContainer/VBoxContainer/Desc.text = campaign.campaign_desc
 	$PanelContainer/preview.texture = Globals.load_texture(campaign.image)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #enables left and right click functionality
 func _on_gui_input(event):
 	if event.is_action_pressed("mouseleft"):

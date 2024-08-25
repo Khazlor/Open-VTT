@@ -52,9 +52,6 @@ func _ready():
 		character.load_attr_modifiers_from_equipment()
 	else:
 		print("preview")
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 func on_get_token_request():
 	character.emit_signal("get_token_response", self)
@@ -255,6 +252,7 @@ func change_attr_bubbles(remote = false):
 func bar_bubble_submit(new_text):
 	print("submitted text: ", new_text)
 	if character.attributes.has(edited_attr):
+		var old_attr_val = character.attributes[edited_attr].duplicate(true)
 		var s = character.attributes[edited_attr][1]
 		if new_text[0] == '+': #add to attribute
 			if new_text[1] == '+': #ignore max
@@ -294,6 +292,7 @@ func bar_bubble_submit(new_text):
 			var diff = s.to_float() - character.attributes[edited_attr][1].to_float()
 			print("diff: ", diff)
 			character.attributes[edited_attr][0] = str(character.attributes[edited_attr][0].to_float() - diff)
+		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, [[character, [[edited_attr, character.attributes[edited_attr].duplicate(true), old_attr_val]]]]])
 		character.emit_signal("attr_updated", edited_attr, false)
 			
 			

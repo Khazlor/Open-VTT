@@ -28,10 +28,6 @@ func _ready():
 			tree.container = object
 			tabs.add_child(new_inventory)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 
 func _on_close_requested():
 	self.hide()

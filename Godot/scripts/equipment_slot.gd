@@ -23,12 +23,7 @@ func _ready():
 	equipment_sheet.char_sheet.character.connect("reload_equip_slot", on_reload_equip_slot)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-	
 #drag and drop implementation
-
 func _get_drag_data(_item_position):
 	if equip_slot_dict["item"] != null:
 		#place drag and drop layer on top - in case of dragging to map

@@ -98,11 +98,6 @@ func _ready():
 	node.add_child(select_box, false, Node.INTERNAL_MODE_FRONT)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func get_font_size(font: Font, size, text):
 	print("get_font_size")
 	var n = 1
@@ -590,20 +585,12 @@ func set_pos_and_size(object, dict):
 			object.position = end
 			object.size = begin-end
 	if dict != null:
-		var new_dict = object.get_meta("dict")
-		print("dict change: ")
-		print(dict["size"])
 		dict["pos"] = object.position
 		dict["size"] = object.size
-		print(dict["size"])
 	
 	
 func select_selection():
 	var select_pos_local = get_select_box_local_pos()
-	var max_x = select_pos_local.x
-	var max_y = select_pos_local.y
-	var min_x = select_pos_local.x + select_box.size.x
-	var min_y = select_pos_local.y + select_box.size.y
 	var found = false
 	if not Input.is_action_pressed("shift"):
 		selected_objects.clear()

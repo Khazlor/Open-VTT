@@ -18,9 +18,6 @@ var texture
 func _ready():
 	update_token(true)
 	character.token_changed.connect(update_token)
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 func _draw(): #draw polygon and polyline
 	var texture_uvs: PackedVector2Array = PackedVector2Array([])

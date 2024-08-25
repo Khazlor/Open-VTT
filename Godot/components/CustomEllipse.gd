@@ -26,10 +26,6 @@ func _ready():
 		line_color = Globals.colorLines
 		back_color = Globals.colorBack
 		line_width = Globals.lineWidth
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 func _draw():
 	var center = self.size/2

@@ -39,6 +39,8 @@ var inner_regex
 @onready var query_diag_opt = $QueryDialog/VBoxContainer/OptionButton
 @onready var query_diag_te = $QueryDialog/VBoxContainer/TextEdit
 
+var undo_entry_exists = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Globals.roll_panel = self
@@ -61,10 +63,6 @@ func _ready():
 	inner_regex.compile("(\\/r|@|\\$|\\?{)") # regex to see if inner resolve is needed
 	
 	scroll_bar.connect("changed", on_scroll_bar_changed)
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 #handles scroll to bottom on expand
 func on_scroll_bar_changed():
@@ -78,6 +76,7 @@ func _on_text_edit_gui_input(event):
 			return
 		textEdit.connect("text_changed", remove_break) #deletes linebreak added by submitting - will occur after this function
 		#execute command
+		undo_entry_exists = false #main entry in undo stack needed before saving operation parts to undo stack - create on assignment
 		await execute_macro(textEdit.text)
 	
 		
@@ -595,6 +594,7 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 	if attr[0] == "$" and character != null: #character
 		attr = attr.substr(1)
 		if character.attributes.has(attr):
+			var old_attr_val = character.attributes[attr].duplicate(true) # for undo
 			var n = await resolve_inner(text_in, i, "]", character, target)
 			print(text_in[0])
 			print(i, " ", n+1, " ", n-i+1)
@@ -615,11 +615,16 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 				character.attributes[attr][0] = str(character.attributes[attr][0].to_float() + new_var.to_float() - old_val.to_float())
 			else:
 				character.attributes[attr][0] = new_var
+			if not undo_entry_exists: #create main entry on undo stack
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, []])
+				undo_entry_exists = true
+			Globals.lobby.add_operation_part_to_undo_stack([character, [[attr, character.attributes[attr].duplicate(true), old_attr_val]]])
 			character.emit_signal("attr_updated", attr, false)
 			return
 	elif attr[0] == "@" and target != null: #target
 		attr = attr.substr(1)
 		if target.attributes.has(attr):
+			var old_attr_val = target.attributes[attr].duplicate(true) # for undo
 			var n = await resolve_inner(text_in, i, "]", character, target)
 			print(text_in[0])
 			var sub_str = [text_in[0].substr(i, n-i+1)]
@@ -636,6 +641,10 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 				target.attributes[attr][0] = str(target.attributes[attr][0].to_float() + new_var.to_float() - old_val.to_float())
 			else:
 				target.attributes[attr][0] = new_var
+			if not undo_entry_exists: #create main entry on undo stack
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, []])
+				undo_entry_exists = true
+			Globals.lobby.add_operation_part_to_undo_stack([target, [[attr, target.attributes[attr].duplicate(true), old_attr_val]]])
 			target.emit_signal("attr_updated", attr, false)
 			return
 	#error cannot access attribute - resolve and skip

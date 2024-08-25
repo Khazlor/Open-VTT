@@ -55,11 +55,6 @@ func _ready(token_fov = true):
 	$ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity/OpacityHSlider.value = Globals.new_map.fov_opacity
 	$ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color/FovColorPickerButton.color = Globals.new_map.fov_color
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 @rpc("authority", "call_remote", "reliable")
 func set_map_setting_on_other_peers(property, value):
 	Globals.new_map.set(property, value) #set property

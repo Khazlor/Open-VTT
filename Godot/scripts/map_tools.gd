@@ -10,11 +10,6 @@ func _ready():
 	$VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox.get_line_edit().focus_mode = FOCUS_CLICK
 	
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_draw_item_selected(index):
 	if index == 0:
 		Globals.tool = "rect"

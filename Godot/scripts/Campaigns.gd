@@ -32,11 +32,6 @@ func _ready():
 #		$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/CampaignGrid.add_child(campaigncard)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_resized():
 	var screensize = get_viewport().size
 	$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/CampaignGrid.columns = screensize.x/400

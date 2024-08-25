@@ -36,11 +36,6 @@ func _ready():
 #		$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.add_child(mapcard)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_resized():
 	var screensize = get_viewport().size
 	$PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/MapGrid.columns = screensize.x/400

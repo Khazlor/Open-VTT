@@ -19,10 +19,6 @@ func _ready():
 	$VBoxContainer/Description/DescriptionTextEdit.text = item_attr_dict["description"]
 	$VBoxContainer/Show/CheckBox.button_pressed = item_attr_dict["show"]
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #change attribute name
 func _on_apply_name_button_pressed():
 	var name = $VBoxContainer/Name/NameTextEdit.text

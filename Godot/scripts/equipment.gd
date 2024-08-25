@@ -18,9 +18,6 @@ func _ready():
 	char_sheet.character.connect("equip_slots_changed", update_slot)
 	char_sheet.character.connect("equip_slot_synched", on_equip_slot_synched)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 #gets slot index in character slot array
 func get_slot_params(slot):

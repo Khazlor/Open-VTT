@@ -11,11 +11,6 @@ var token_comp = preload("res://components/token.tscn") #token component
 func _ready():
 	Globals.drag_drop_canvas_layer = get_parent()
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #fix when component is not moved back after drag and drop finishes
 func _unhandled_input(event):
 	if Input.is_action_just_pressed("mouseleft"):
@@ -47,7 +42,7 @@ func _drop_data(position, data):
 		Globals.map.add_token(token)
 		token.light_mask = Globals.draw_layer.light_mask
 		token.fov.shadow_item_cull_mask = Globals.draw_layer.light_mask
-		Globals.draw_comp.create_object_on_remote_peers(token)
+		Globals.draw_comp.create_object_on_remote_peers(token, true)
 	if data.has_meta("item_dict"): #dropping item - add to inventory or create container
 		print("item drop")
 		var item_dict = data.get_meta("item_dict")
@@ -97,7 +92,7 @@ func _drop_data(position, data):
 		container.set_meta("type", "container")
 		container.add_user_signal("inv_changed")
 		Globals.draw_layer.add_child(container)
-		Globals.draw_comp.create_object_on_remote_peers(container)
+		Globals.draw_comp.create_object_on_remote_peers(container, true)
 
 #set drag_drop_layer to back on drag end - does not trigger when dragging from other windows
 func _notification(what: int) -> void:

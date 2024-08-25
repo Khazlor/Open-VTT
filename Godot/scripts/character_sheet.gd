@@ -62,9 +62,6 @@ func _ready():
 	if not token_sheet:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.disabled = false
 	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 #zoom and drag
 func _input(event):

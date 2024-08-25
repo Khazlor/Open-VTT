@@ -22,10 +22,6 @@ var back_color = Globals.colorBack
 func _ready():
 	calc_size()
 	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-	
 
 func _draw():
 	position = Vector2(center.x - radius, center.y - radius)

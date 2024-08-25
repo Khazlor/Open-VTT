@@ -14,14 +14,6 @@ var dialog_item
 
 @onready var tree = $Tree
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #double click on items opens it's editing
 func _on_tree_item_activated():
 	var item_creation = item_creation_dialog.instantiate()

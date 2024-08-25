@@ -11,10 +11,6 @@ func _ready():
 	tab_bar.mouse_filter = Control.MOUSE_FILTER_PASS #stops blocking drag and drop
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-	
 func _can_drop_data(at_position, data):
 	print("tab_can_drop_data = ", data.has_meta("item_dict"))
 	return data.has_meta("item_dict")

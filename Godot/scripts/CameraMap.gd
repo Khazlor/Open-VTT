@@ -14,11 +14,6 @@ var dragSen: float = 1.0
 func _ready():
 	pass # Replace with function body.
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #handles user input
 func _unhandled_input(event):
 	#movement

@@ -14,11 +14,6 @@ func _ready():
 	$PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/preview.texture = Globals.load_texture(map.image)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_gui_input(event):
 	if event.is_action_pressed("mouseleft"):
 		Globals.new_map = map

@@ -16,10 +16,6 @@ func _ready():
 		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
 		#can be changed to user:// to use default user application folder based on OS
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 
 func _on_campaign_browser_btn_pressed():
 	get_tree().change_scene_to_file("res://scenes/Campaigns.tscn")

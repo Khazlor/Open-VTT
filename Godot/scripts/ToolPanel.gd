@@ -18,10 +18,6 @@ var dialog_item
 func _ready():
 	if not Globals.lobby.check_is_server():
 		self.visible = false
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 
 func _on_tree_item_activated():

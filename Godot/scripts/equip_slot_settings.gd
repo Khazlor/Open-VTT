@@ -18,10 +18,6 @@ func _ready():
 	char_sheet.character.connect("equip_slot_synched", on_equip_slot_synched)
 	load_settings()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func on_equip_slot_synched():
 	#clear all settings
 	for slot in left_slots.get_children():

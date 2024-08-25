@@ -180,7 +180,7 @@ func _unhandled_input(event):
 			current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
 			current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 			current_line.position = -current_rect.position
-			create_object_on_remote_peers(current_rect)
+			create_object_on_remote_peers(current_rect, true)
 			current_rect = null
 
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "measure":
@@ -194,20 +194,35 @@ func _unhandled_input(event):
 			#drag finished
 			if selected_dragging:
 				selected_dragging = false
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				var i = 0
 				for object in selected:
-					synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
+					var path = get_path_to(object)
+					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position]], [["position", selected_org_pos[i]]]])
+					synch_object_properties.rpc(path, [["position", object.position]])
+					i += 1
 				return
 			#rotating selection finished
 			if selected_rotating:
 				selected_rotating = false
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				var i = 0
 				for object in selected:
-					synch_object_properties.rpc(get_path_to(object), [["position", object.position], ["rotation", object.rotation]])
+					var path = get_path_to(object)
+					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position], ["rotation", object.rotation]], [["position", selected_org_pos[i]], ["rotation", selected_org_rots[i]]]])
+					synch_object_properties.rpc(path, [["position", object.position], ["rotation", object.rotation]])
+					i += 1
 				return
 			#scaling selection finished
 			if selected_scaling:
 				selected_scaling = false
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				var i = 0
 				for object in selected:
-					synch_object_properties.rpc(get_path_to(object), [["position", object.position], ["scale", object.scale]])
+					var path = get_path_to(object)
+					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position], ["scale", object.scale]], [["position", selected_org_pos[i]], ["scale", selected_org_scales[i]]]])
+					synch_object_properties.rpc(path, [["position", object.position], ["scale", object.scale]])
+					i += 1
 				flip_x = false
 				flip_y = false
 				return
@@ -331,14 +346,14 @@ func _unhandled_input(event):
 			if current_panel.size.x == 0 or current_panel.size.y == 0:
 				current_panel.queue_free()
 			else:
-				create_object_on_remote_peers(current_panel)
+				create_object_on_remote_peers(current_panel, true)
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "circle":
 			if current_ellipse == null:
 				return
 			if current_ellipse.size.x == 0 or current_ellipse.size.y == 0:
 				current_ellipse.queue_free()
 			else:
-				create_object_on_remote_peers(current_ellipse)
+				create_object_on_remote_peers(current_ellipse, true)
 		#else button held -> drawing
 		if draw_enable:
 			if Globals.tool == "rect":
@@ -483,17 +498,17 @@ func _unhandled_input(event):
 								current_label.add_theme_font_override("font", Globals.font)
 							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
 							current_label.add_theme_color_override("font_color", Globals.fontColor)
-							current_label.text = "text"
+							current_label.text = ""
 							current_label.set_meta("type", "text")
 							Globals.draw_layer.add_child(current_label)
 							current_label.set_owner(layers_root)
-							create_object_on_remote_peers(current_label)
+							create_object_on_remote_peers(current_label, true)
 						#didn't click on existing textedit
 						if found != 2:
 							current_textedit = TextEdit.new()
 							current_textedit.position = current_label.position
 							current_textedit.text = current_label.text
-							current_label.text = ""
+							current_label.visible = false
 							current_textedit.size = current_textedit.get_theme_font("normal_font").get_multiline_string_size(current_textedit.text)
 							current_textedit.scroll_fit_content_height = true
 							current_textedit.connect("focus_exited", _text_edit_finished)
@@ -669,6 +684,9 @@ func _unhandled_input(event):
 							selected_org_rots.append(object.rotation)
 						return
 					elif mouse_over_selected: #drag
+						selected_org_pos.clear()
+						for object in selected:
+							selected_org_pos.append(object.position)
 						print("mouse_over_selected")
 						selected_dragging = true
 						return
@@ -902,18 +920,13 @@ func _unhandled_input(event):
 	elif event is InputEventKey: #handle keyboard events
 		print("key pressed")
 		if Input.is_action_just_pressed("Delete") or Input.is_action_just_pressed("ui_cut"): #delete or cut selection
+			if selected.is_empty():
+				return
 			if Input.is_action_just_pressed("ui_cut"):
 				copy_to_clipboard()
+			Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.REMOVE, []])
 			for child in selected: #delete
-				if "character" in child.get_parent(): #character token
-					child = child.get_parent()
-					Globals.new_map.remove_token(child)
-				if child.has_meta("light"):
-					var light = get_object_light(child)
-					if light != null:
-						light.queue_free()
-				synch_object_removal.rpc(get_path_to(child))
-				child.queue_free()
+				remove_object(child, false, false, true)
 			#remove select box
 			if select_box != null:
 				select_box.queue_free()
@@ -953,6 +966,8 @@ func _unhandled_input(event):
 		elif Input.is_action_just_pressed("ui_paste"):
 			var c = Globals.clipboard_characters.size() - 1 #index for character array
 			var l = Globals.clipboard_lights.size() - 1 #index for light array
+			if Globals.clipboard_objects.size() != 0:
+				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.CREATE, []])
 			for i in range(Globals.clipboard_objects.size()-1, -1, -1): #iterate backwards
 				var new_object = Globals.clipboard_objects[i].duplicate(5)
 				if "character" in new_object: #character data not duplicated - needs to be set
@@ -974,7 +989,7 @@ func _unhandled_input(event):
 					var shadow = get_object_shadow(new_object)
 					shadow.light_mask = Globals.draw_layer.light_mask
 					shadow.occluder_light_mask = Globals.draw_layer.light_mask
-				create_object_on_remote_peers(new_object)
+				create_object_on_remote_peers(new_object, false, true)
 		#control groups
 		elif Input.is_action_just_pressed("Control-Group_0"):
 			if Input.is_key_pressed(KEY_CTRL):#create control group
@@ -1071,6 +1086,34 @@ func _unhandled_input(event):
 				select_box.position.x -= Globals.new_map.grid_size
 		elif Input.is_action_just_pressed("help"):
 			$TutorialWindow.popup()
+		elif Input.is_action_just_pressed("ui_undo"):
+			Globals.lobby.undo_operation()
+		elif Input.is_action_just_pressed("ui_redo"):
+			Globals.lobby.redo_operation()
+
+
+func remove_object(object, remote = false, set_undo = false, set_undo_part = false):
+	if set_undo or set_undo_part:
+		var serialized_object = serialize_object_for_rpc(object)
+		var parent_path = get_path_to(object.get_parent())
+		if set_undo:
+			Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.REMOVE, [[object, parent_path, object.name, serialized_object]]])
+		if set_undo_part:
+			Globals.lobby.add_operation_part_to_undo_stack([object, parent_path, object.name, serialized_object])
+	if object.has_meta("type"):
+		if object.get_meta("type") == "token": #character token
+			Globals.new_map.remove_token(object)
+	elif object.get_parent().has_meta("type") and object.get_parent().get_meta("type") == "token":
+		object = object.get_parent
+		Globals.new_map.remove_token(object)
+	if object.has_meta("light"):
+		var light = get_object_light(object)
+		if light != null:
+			light.queue_free()
+	if not remote:
+		synch_object_removal.rpc(get_path_to(object))
+	object.queue_free()
+
 
 #clear mouse over variables
 func mouse_over_clear():
@@ -1539,19 +1582,22 @@ func on_files_dropped(files):
 		panel.set_meta("type", "rect")
 		Globals.draw_layer.add_child(panel)
 		panel.set_owner(layers_root)
-		create_object_on_remote_peers(panel)
+		create_object_on_remote_peers(panel, true)
 		
 		
 func _text_edit_finished():
 	selected.clear()
+	var path = get_path_to(currently_editing_label)
+	Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, [[path, [["text", currently_editing_textedit.text]], [["text", currently_editing_label.text]]]]])
 	currently_editing_label.text = currently_editing_textedit.text
+	currently_editing_label.visible = true
 	#lines.remove_child(currently_editing_textedit)
 	currently_editing_textedit.queue_free()
 	print("free")
-	synch_object_properties.rpc(get_path_to(currently_editing_label), [["text", currently_editing_label.text]])
+	synch_object_properties.rpc(path, [["text", currently_editing_label.text]])
 	if currently_editing_label.text.is_empty():
 		#lines.remove_child(currently_editing_label)
-		synch_object_removal.rpc(get_path_to(currently_editing_label))
+		synch_object_removal.rpc(path)
 		currently_editing_label.queue_free()
 		print("free")
 	
@@ -1623,40 +1669,56 @@ func _on_light_signal(index, value):
 #editing object in tool panel
 func _on_object_change_signal(index, value):
 	#transforms
+	if index < 10:
+		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
 	if index == 0: #position x
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["position", Vector2(value, object.position.y)]], [["position", object.position]]])
 			object.position.x = value
-			synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
+			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 1: #position y
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["position", Vector2(object.position.x, value)]], [["position", object.position]]])
 			object.position.y = value
-			synch_object_properties.rpc(get_path_to(object), [["position", object.position]])
+			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 2: #size x
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["size", Vector2(value, object.size.y)]], [["size", object.size]]])
 			object.size.x = value
 			#if object.name == "TokenPolygon": #token size - need to update polygon points
 				#object.scale_shape_to_size()
 				#object.get_parent().UI_set_position()
-			synch_object_properties.rpc(get_path_to(object), [["size", object.size]])
+			synch_object_properties.rpc(path, [["size", object.size]])
 	elif index == 3: #size y
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["size", Vector2(object.size.x, value)]], [["size", object.size]]])
 			object.size.y = value
 			#if object.name == "TokenPolygon": #token size - need to update polygon points
 				#object.scale_shape_to_size()
 				#object.get_parent().UI_set_position()
-			synch_object_properties.rpc(get_path_to(object), [["size", object.size]])
+			synch_object_properties.rpc(path, [["size", object.size]])
 	elif index == 4: #scale x
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["scale", Vector2(value, object.scale.y)]], [["scale", object.scale]]])
 			object.scale.x = value
-			synch_object_properties.rpc(get_path_to(object), [["scale", object.scale]])
+			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 5: #scale y
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["scale", Vector2(object.scale.x, value)]], [["scale", object.scale]]])
 			object.scale.y = value
-			synch_object_properties.rpc(get_path_to(object), [["scale", object.scale]])
+			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 6: #rotation
 		for object in selected:
+			var path = get_path_to(object)
+			Globals.lobby.add_operation_part_to_undo_stack([path, [["rotation", value]], [["rotation", object.rotation]]])
 			object.rotation = value
-			synch_object_properties.rpc(get_path_to(object), [["rotation", object.rotation]])
+			synch_object_properties.rpc(path, [["rotation", object.rotation]])
 			
 	#light
 	elif index == 10: #light enable
@@ -2144,9 +2206,15 @@ func on_font_settings_changed(setting):
 
 # ============== multiplayer synch of objects on map =================
 
-func create_object_on_remote_peers(object):
+func create_object_on_remote_peers(object, set_undo = false, set_undo_part = false):
 	object.name = object.name
-	create_object.rpc(get_path_to(object.get_parent()), object.name, serialize_object_for_rpc(object))
+	var serialized_object = serialize_object_for_rpc(object)
+	var parent_path = get_path_to(object.get_parent())
+	if set_undo:
+		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.CREATE, [[object, parent_path, object.name, serialized_object]]])
+	if set_undo_part:
+		Globals.lobby.add_operation_part_to_undo_stack([object, parent_path, object.name, serialized_object])
+	create_object.rpc(parent_path, object.name, serialized_object)
 
 #creates object on other peers
 @rpc("any_peer", "call_remote", "reliable", 0)
@@ -2360,6 +2428,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
+	return node
 
 func serialize_object_for_rpc(node):
 	if not node.has_meta("type"):
@@ -2468,13 +2537,7 @@ func synch_object_removal(path_to_object):
 	if node == null:
 		print("synch removal path not found - ", path_to_object)
 		return
-	if node.has_meta("light"):
-		var light = get_object_light(node)
-		if light != null:
-			light.queue_free()
-	if "character" in node:
-		Globals.new_map.remove_token(node)
-	node.queue_free()
+	remove_object(node, true)
 
 @rpc("any_peer", "call_remote", "reliable")
 func synch_object_inventory_add(object_path, item, slot_arr = null):

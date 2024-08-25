@@ -20,14 +20,6 @@ func _enter_tree():
 func _ready():
 	unfocusable = false
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-	
-
-
-
 func _on_prev_button_pressed():
 	if selected != null:
 		items.get_child(selected.get_index() - 1)._on_button_pressed() #call select by press

@@ -16,11 +16,6 @@ func _ready():
 		$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"][1]
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 #click on item - select token
 func _on_button_pressed():
 	if Globals.turn_order.selected != null:

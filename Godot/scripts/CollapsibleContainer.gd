@@ -24,10 +24,6 @@ func _ready():
 	button.connect("pressed", _on_button_pressed)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func _on_button_pressed(): #flip visibility and icon
 	container.visible = not container.visible
 	if container.visible:

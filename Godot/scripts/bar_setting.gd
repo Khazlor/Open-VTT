@@ -23,11 +23,6 @@ func _ready():
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/AtrributeLineEdit.text = bar_dict["attr1"]
 	$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer4/Attribute2LineEdit.text = bar_dict["attr2"]
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 #duplicates this setting
 func _on_add_button_pressed():
 	var new_bar_settings = self.duplicate(5)

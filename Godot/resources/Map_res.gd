@@ -27,40 +27,9 @@ var token_comp = preload("res://components/token.tscn") #token component
 @export var fov_color = Color.BLACK
 #preview
 @export var image: String = Globals.base_dir_path + "/images/Placeholder-1479066.png"
-#saved layers
-#@export var saved_layers: PackedScene = null
+
 var tokens = []
 var singleton_token_chars = {}
-#var token_paths = []
-#var token_indexes = []
-
-#func save(packed_layers: PackedScene):
-	#saved_layers = packed_layers
-	#if saved_layers == null:
-		#print("saved layers is null")
-		#return
-	#save_map()
-#
-##saving using store_var(obj, true) currently broken in godot for objects with attached script with class_name as per:
-##https://github.com/godotengine/godot/issues/68666
-##stored var includes attached script as plain text -> leads to multiple scripts with same class_name -> parse error
-##work around - saving tokens separately -> will no longer be needed if issue is fixed
-#func save_map():
-	#var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
-	#if map_save == null:
-		#print("file open error - aborting")
-		#return
-	##save map data
-	#map_save.store_var(saved_layers, true)
-	#map_save.store_var(map_desc)
-	#map_save.store_var(grid_size)
-	#map_save.store_var(image)
-	##save tokens - separately - more above
-	#map_save.store_var(tokens.size())
-	#for token in tokens:
-		#save_token(map_save, token)
-	#map_save.close()
-	
 
 func save_map(layers: Node2D):
 	var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.WRITE)
@@ -174,8 +143,6 @@ func save_data_for_self_and_children(node, file: FileAccess):
 	if not object_data_arr.is_empty():
 		print("store - ",object_data_arr)
 		file.store_var(object_data_arr)
-		#if is_token:
-			#save_token(file, node)
 		return
 		
 	if type == "layer": #name, visibility, GM, light layers
@@ -312,8 +279,6 @@ func load_data_for_self_and_children(file: FileAccess):
 		node.add_theme_color_override("font_color", object_data_arr[0][7][2])
 	elif object_data_arr[0][0] == "token" or object_data_arr[0][0] == "token-s":
 		print("loading token")
-		#var token = token_comp.instantiate()
-		#node = load_token(file)
 		node = token_comp.instantiate()
 		node.character = Character.new()
 		var token_polygon = node.get_node("TokenPolygon")
@@ -437,115 +402,6 @@ func load_data_for_self_and_children(file: FileAccess):
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
-
-#func load_map(map_name, load_tokens = true):
-	#self.map_name = map_name
-	#if not FileAccess.file_exists(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name):
-		#return #no save to load
-	#
-	#var map_save = FileAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/maps/" + map_name, FileAccess.READ)
-	#if map_save == null:
-		#print("file open error - aborting")
-		#return
-	##load map
-	#saved_layers = map_save.get_var(true)
-	#map_desc = map_save.get_var()
-	#grid_size = map_save.get_var()
-	#image = map_save.get_var()
-	#if load_tokens:
-		##load tokens
-		#tokens.clear()
-		#token_paths.clear()
-		#token_indexes.clear()
-		#var token_count = map_save.get_var()
-		#for i in token_count:
-			#load_token(map_save)
-	#map_save.close()
-	#
-	#return 
-
-
-func save_token(save_file: FileAccess, token: Control):
-	save_file.store_var(token.character.singleton)
-	if token.character.singleton == false: #store character in token
-		token.character.store_char_data(save_file)
-	else: #store character path
-		save_file.store_var(token.character.get_path_to_save())
-	save_file.store_var(token.token_polygon.position)
-	save_file.store_var(token.token_polygon.size)
-	save_file.store_var(token.token_polygon.scale)
-	save_file.store_var(token.token_polygon.rotation)
-	
-func load_token(save_file: FileAccess):
-	var token = token_comp.instantiate()
-	var character = Character.new()
-	character.singleton = save_file.get_var()
-	if character.singleton == false: #load character from token
-		character.get_char_data(save_file)
-	else:
-		var path_to_save = save_file.get_var()
-		
-	var token_polygon = token.get_child(0)
-	token_polygon.position = save_file.get_var()
-	token_polygon.custom_minimum_size = save_file.get_var()
-	token_polygon.size = token_polygon.custom_minimum_size
-	token_polygon.scale = save_file.get_var()
-	token_polygon.rotation = save_file.get_var()
-	tokens.append(token)
-	#set character in token
-	token.character = character
-	token_polygon.character = character
-	
-	#character.connect("attr_updated", character.apply_modifiers_to_attr)
-	#character.connect("item_equipped", character.equip_item)
-	#character.connect("item_unequipped", character.unequip_item)
-	character.load_equipped_items_from_equipment()
-	character.load_attr_modifiers_from_equipment()
-	
-	Globals.draw_layer.add_child(token)
-
-	return token
-
-#func save_token(save_file: FileAccess, token: Control):
-	#save_file.store_var(token.character.singleton)
-	#if token.character.singleton == false: #store character in token
-		#token.character.store_char_data(save_file)
-	#save_file.store_var(token.get_parent().get_path())
-	#save_file.store_var(token.get_index())
-	#save_file.store_var(token.token_polygon.position)
-	#save_file.store_var(token.token_polygon.size)
-	#save_file.store_var(token.token_polygon.scale)
-	#save_file.store_var(token.token_polygon.rotation)
-	#
-#func load_token(save_file: FileAccess):
-	#var token = token_comp.instantiate()
-	#var character = Character.new()
-	#character.singleton = save_file.get_var()
-	#if character.singleton == false: #load character from token
-		#character.get_char_data(save_file)
-	#else:
-		#pass #link token to character TODO
-	#var path: NodePath = save_file.get_var()
-	#var index: int = save_file.get_var()
-	#var token_polygon = token.get_child(0)
-	#token_polygon.position = save_file.get_var()
-	#token_polygon.custom_minimum_size = save_file.get_var()
-	#token_polygon.size = token_polygon.custom_minimum_size
-	#token_polygon.scale = save_file.get_var()
-	#token_polygon.rotation = save_file.get_var()
-	#tokens.append(token)
-	#token_paths.append(path)
-	#token_indexes.append(index)
-	##set character in token
-	#token.character = character
-	#token_polygon.character = character
-	#
-	#character.connect("attr_updated", character.apply_modifiers_to_attr)
-	#character.connect("item_equipped", character.equip_item)
-	#character.connect("item_unequipped", character.unequip_item)
-	#
-	#character.load_equipped_items_from_equipment()
-	#character.load_attr_modifiers_from_equipment()
 
 func add_token(token):
 	tokens.append(token)

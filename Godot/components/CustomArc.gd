@@ -21,13 +21,6 @@ var angle_size = 0
 var polygon: PackedVector2Array
 var back_color = Globals.colorBack
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
-	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 	
 func _draw():
 	var angle = angle_direction-deg_to_rad(angle_size)/2 #start angle in rad

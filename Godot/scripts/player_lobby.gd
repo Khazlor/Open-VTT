@@ -12,6 +12,10 @@ var tcp_client_comp = preload("res://components/tcp_client.tscn")
 var tcp_client
 var request_id = 0 #counter to differenciate between multiple simultaneous file_checks
 
+var undo_stack = []
+var undo_stack_pos = -1
+enum undo_types {CREATE, REMOVE, MODIFY, MODIFY_ATTRIBUTE}
+
 var objects_waiting_for_file = {}
 
 signal file_check_done(upload, file_name, id)
@@ -32,7 +36,7 @@ func _ready():
 			tcp_server = tcp_server_comp.instantiate()
 			tcp_server.connect("recv_file", on_tcp_server_recv_file)
 			add_child(tcp_server)
-			
+
 			map = map_comp.instantiate()
 			if has_node("Map"):
 				remove_child(get_node("map"))
@@ -43,7 +47,7 @@ func _ready():
 			var file_buffer_size = file_buffer.size()
 			file_buffer = file_buffer.compress()
 			client_set_map.rpc(file_buffer, file_buffer_size)
-		
+
 		else: #client
 			Globals.client = true
 			tcp_client = tcp_client_comp.instantiate()
@@ -56,10 +60,6 @@ func _ready():
 			remove_child(get_node("map"))
 		add_child(map)
 		map.name = "Map"
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 #for checking inside a resource
 func check_is_server():
@@ -74,7 +74,7 @@ func on_tcp_server_recv_file(file_name):
 	var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + file_name
 	server_recvd_file.rpc(file_name) #notify all peers that new file was uploaded to server
 	on_tcp_client_recv_file(file_path) #check if any objects on server need file
-	
+
 @rpc("authority", "call_remote", "reliable")
 func server_recvd_file(file_name):
 	print("check waiting objects for file")
@@ -83,7 +83,7 @@ func server_recvd_file(file_name):
 		tcp_client.send_file_request(file_name)
 	else:
 		print("no object waiting for file")
-	
+
 @rpc("authority", "call_remote", "reliable")
 func remove_map():
 	map.queue_free()
@@ -105,7 +105,7 @@ func on_tcp_client_recv_file(file_path):
 					style.texture = texture
 					object.add_theme_stylebox_override("panel", style)
 					print("texture sizes: ", style.texture.get_size(), texture.get_size(), object.get_theme_stylebox("panel").texture.get_size())
-					
+
 				elif type == "token": #set token texture
 					object.character.token_texture = file_path
 					object.token_polygon.update_token(false)
@@ -132,10 +132,10 @@ func server_get_map():
 			#call_rpc_client_set_map(sender_id, file_buffer, file_buffer_size)
 			client_set_campaign.rpc_id(sender_id, Globals.campaign.campaign_name)
 			client_set_map.rpc_id(sender_id, file_buffer, file_buffer_size)
-			
+
 func call_rpc_client_set_map(sender_id, file_buffer, file_buffer_size):
 	client_set_map.rpc_id(sender_id, file_buffer, file_buffer_size)
-		
+
 @rpc("authority", "call_remote", "reliable")
 func client_set_campaign(campaign_name):
 	if Globals.campaign == null:
@@ -168,7 +168,7 @@ func client_set_map(server_map_file_buffer, file_buffer_size):
 		remove_child(get_node("map"))
 	add_child(map)
 	map.name = "Map"
-	
+
 	#tutorial
 	if Globals.campaign == null:
 		Globals.campaign = Campaign_res.new()
@@ -219,7 +219,7 @@ func check_file_on_server_response(exists: bool, file_name, id):
 	if multiplayer.is_server():
 		await get_tree().create_timer(0.1).timeout
 	emit_signal("file_check_done", not exists, file_name, id)
-	
+
 #coroutine checks server for file, handles upload, returns file_path to use locally for file
 func handle_file_transfer(file_path: String, set_image = true):
 	print("handle file transfer")
@@ -261,7 +261,7 @@ func handle_file_transfer(file_path: String, set_image = true):
 		return new_file_path
 	else:
 		print("handle file transfer - file does not exist")
-		
+
 #adds object that does not have (image) file yet to list of objects waiting for file
 func add_to_objects_waiting_for_file(file_name: String, object):
 	print("adding ", object, " to waiting")
@@ -270,3 +270,85 @@ func add_to_objects_waiting_for_file(file_name: String, object):
 	else:
 		objects_waiting_for_file[file_name] = [object]
 	print("objects waiting: ", objects_waiting_for_file)
+
+# ============================ UNDO / REDO ===============================
+
+func add_operation_to_undo_stack(undo_arr):
+	var begin = undo_stack_pos - Globals.undo_size + 1
+	if begin < 0:
+		begin = 0
+	undo_stack = undo_stack.slice(begin, undo_stack_pos + 1)
+	undo_stack.append(undo_arr)
+	undo_stack_pos = undo_stack.size()-1
+	#print("before_slice:", undo_stack)
+	print("undo stack ", undo_stack_pos)
+	print("after_slice:", undo_stack)
+	
+	
+func add_operation_part_to_undo_stack(undo_arr):
+	undo_stack[-1][1].append(undo_arr)
+	
+func undo_operation():
+	print("undo ", undo_stack_pos)
+	print("after_slice:", undo_stack)
+	if undo_stack_pos == -1:
+		print("nothing to undo")
+		return
+	var operation = undo_stack[undo_stack_pos]
+	if operation[0] == undo_types.CREATE:
+		#undo create == remove objects
+		for object_arr in operation[1]:
+			if object_arr[0] != null:
+				Globals.draw_comp.remove_object(object_arr[0])
+	elif operation[0] == undo_types.REMOVE:
+		#undo REMOVE == create objects
+		for object_arr in operation[1]:
+			if object_arr[0] == null:
+				object_arr[0] = Globals.draw_comp.create_object(object_arr[1], object_arr[2], object_arr[3])
+				Globals.draw_comp.create_object_on_remote_peers(object_arr[0])
+	elif operation[0] == undo_types.MODIFY:
+		#undo MODIFY == load original values
+		for object_arr in operation[1]:
+			
+			Globals.draw_comp.synch_object_properties(object_arr[0], object_arr[2])
+			Globals.draw_comp.synch_object_properties.rpc(object_arr[0], object_arr[2])
+	elif operation[0] == undo_types.MODIFY_ATTRIBUTE:
+		#undo MODIFY_ATTRIBUTE == load original values to character attribute
+		for object_arr in operation[1]:
+			if object_arr[0] != null:
+				for attr_arr in object_arr[1]:
+					object_arr[0].attributes[attr_arr[0]] = attr_arr[2]
+					object_arr[0].emit_signal("attr_updated", attr_arr[0], false)
+	undo_stack_pos -= 1
+		
+func redo_operation():
+	print("redo ", undo_stack_pos)
+	print("after_slice:", undo_stack)
+	if undo_stack_pos == undo_stack.size() - 1:
+		print("nothing to redo")
+		return
+	var operation = undo_stack[undo_stack_pos + 1]
+	if operation[0] == undo_types.CREATE:
+		#redo create == create removed objects
+		for object_arr in operation[1]:
+			if object_arr[0] == null:
+				object_arr[0] = Globals.draw_comp.create_object(object_arr[1], object_arr[2], object_arr[3])
+				Globals.draw_comp.create_object_on_remote_peers(object_arr[0])
+	elif operation[0] == undo_types.REMOVE:
+		#redo REMOVE == remove objects
+		for object_arr in operation[1]:
+			if object_arr[0] != null:
+				Globals.draw_comp.remove_object(object_arr[0])
+	elif operation[0] == undo_types.MODIFY:
+		#redo MODIFY == load new values
+		for object_arr in operation[1]:
+			Globals.draw_comp.synch_object_properties(object_arr[0], object_arr[1])
+			Globals.draw_comp.synch_object_properties.rpc(object_arr[0], object_arr[1])
+	elif operation[0] == undo_types.MODIFY_ATTRIBUTE:
+		#undo MODIFY_ATTRIBUTE == load new values to character attribute
+		for object_arr in operation[1]:
+			if object_arr[0] != null:
+				for attr_arr in object_arr[1]:
+					object_arr[0].attributes[attr_arr[0]] = attr_arr[1]
+					object_arr[0].emit_signal("attr_updated", attr_arr[0], false)
+	undo_stack_pos += 1
