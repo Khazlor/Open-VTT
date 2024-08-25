@@ -272,7 +272,7 @@ func apply_modifiers():
 	for attribute in attribute_modifiers:
 		apply_modifiers_to_attr(attribute)
 
-func apply_modifiers_to_attr(attribute):
+func apply_modifiers_to_attr(attribute, _remote = false):
 	print("apply modifiers - ", attribute)
 	if not attribute_modifiers.has(attribute):
 		print("no modifier")

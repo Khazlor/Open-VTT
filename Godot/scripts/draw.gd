@@ -2104,8 +2104,9 @@ func end_targeting():
 		return
 	#has shape - get characters inside shape
 	var rotated_polygon = [] #rotated polygon of shape object
-	for point in targeting_shape.polygon:
-		rotated_polygon.append(point.rotated(targeting_shape.rotation))
+	if not targeting_shape is CustomCircle: #not needed for circle
+		for point in targeting_shape.polygon:
+			rotated_polygon.append(point.rotated(targeting_shape.rotation))
 	
 	var lines_children = Globals.draw_layer.get_children()
 	for child in lines_children:
@@ -2119,9 +2120,14 @@ func end_targeting():
 			continue
 		if "character" in child: #if character token
 			child = child.get_child(0)
-			var center = get_object_center(child) - targeting_shape.position
-			if Geometry2D.is_point_in_polygon(center, rotated_polygon):
-				selected_targets.append(child.character)
+			var center = get_object_center(child)
+			if targeting_shape is CustomCircle:
+				if Geometry2D.is_point_in_circle(center, targeting_shape.center, targeting_shape.radius):
+					selected_targets.append(child.character)
+			else:
+				center -= targeting_shape.position
+				if Geometry2D.is_point_in_polygon(center, rotated_polygon):
+					selected_targets.append(child.character)
 	#reset variables
 	reset_targeting_variables()
 	
