@@ -6,7 +6,7 @@ Goal is to implement modern video game features into a more traditional VTT form
 
 The project was tested on Windows machines, currently testing Linux and Android devices, including crossplay.
 
-If you have any requests or ideas, feel free to contact me on our [Discord Server](https://discord.gg/W3JvgEwU).
+If you have any requests or ideas, feel free to contact me on our [Discord Server](https://discord.gg/GSdB3bCy9S).
 
 ## Features
 
@@ -16,7 +16,7 @@ See following for more and [todo list](#todo) for features that are planned.
 
 Feel free to make a fork and modify this project to your needs. Godot is very beginner friendly; if you have any questions, ask me on Discord.
 
-No ruleset is prepared by default, but Virtual Tabletop strives to allow users to customize and create their own rulesets and potentially share them with other people. Currently, there are no plans on official support for any ruleset to avoid copyright issues. You can share or find community rulesets on our [Discord Server](https://discord.gg/W3JvgEwU)
+No ruleset is prepared by default, but Virtual Tabletop strives to allow users to customize and create their own rulesets and potentially share them with other people. Currently, there are no plans on official support for any ruleset to avoid copyright issues. You can share or find community rulesets on our [Discord Server](https://discord.gg/GSdB3bCy9S)
 
 ### Local Hosting
 
