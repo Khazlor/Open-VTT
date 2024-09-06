@@ -30,6 +30,7 @@ func _ready():
 	#print("path: ",Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
 	#create image folder if it does not exists
 	if map != null:
+		map._on_child_exiting_tree(map.get_child(-1))
 		map.queue_free()
 	if Globals.enet_peer != null: #multiplayer
 		if multiplayer.is_server(): #server

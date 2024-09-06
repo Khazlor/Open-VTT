@@ -67,6 +67,8 @@ func get_token():
 	token = await get_token_response
 	
 func emit_get_token_request_after_delay():
+	if Globals.draw_layer == null:
+		return
 	if Globals.draw_layer.get_tree() != null:
 		token = await Globals.draw_layer.get_tree().create_timer(0.01).timeout
 		emit_signal("get_token_request")
