@@ -27,15 +27,17 @@ func _enter_tree():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#multiplayer.allow_object_decoding = true
+	print("path: ",Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
+	#create image folder if it does not exists
+	if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name):
+		DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
 	if Globals.enet_peer != null: #multiplayer
 		if multiplayer.is_server(): #server
-			#create image folder if it does not exists
-			if not DirAccess.dir_exists_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name):
-				DirAccess.make_dir_recursive_absolute(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name)
 			#start tcp server for file transfer:
-			tcp_server = tcp_server_comp.instantiate()
-			tcp_server.connect("recv_file", on_tcp_server_recv_file)
-			add_child(tcp_server)
+			if tcp_server == null:
+				tcp_server = tcp_server_comp.instantiate()
+				tcp_server.connect("recv_file", on_tcp_server_recv_file)
+				add_child(tcp_server)
 
 			map = map_comp.instantiate()
 			if has_node("Map"):

@@ -12,6 +12,8 @@ func _ready():
 	#set base path for all files
 	if OS.is_debug_build():
 		Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+	elif OS.has_feature("android"):
+		Globals.base_dir_path = "user:/"
 	else:
 		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
 		#can be changed to user:// to use default user application folder based on OS

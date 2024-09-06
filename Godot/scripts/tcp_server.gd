@@ -87,6 +87,7 @@ func process_data(data: PackedByteArray, peer):
 		#send requested data
 		var file_path = "/images/" + Globals.campaign.campaign_name + "/" + data_arr[1]
 		var full_file_path = Globals.base_dir_path + file_path
+		print("received request for: ", full_file_path)
 		if FileAccess.file_exists(full_file_path):
 			var s_data: PackedByteArray = []
 			s_data.resize(1024)
@@ -125,6 +126,7 @@ func process_data(data: PackedByteArray, peer):
 
 
 func send_data(data: PackedByteArray, peer):
+	print("sending data")
 	print("sending size :", data.size())
 	peer.put_u64(data.size())
 	var data_print = data.slice(0, 50)

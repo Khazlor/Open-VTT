@@ -2275,6 +2275,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				texture.set_meta("image_path", object_data_arr[0][5][0])
 				style.texture = texture
 			else: #file not on client - check server
+				print("check for file on server")
 				texture = Texture2D.new()
 				texture.set_meta("image_path", object_data_arr[0][5][0])
 				var file_name = object_data_arr[0][5][0].get_file()

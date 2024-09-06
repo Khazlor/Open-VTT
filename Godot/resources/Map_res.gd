@@ -141,7 +141,7 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		object_data_arr.append(occluder_arr)
 		
 	if not object_data_arr.is_empty():
-		print("store - ",object_data_arr)
+		#print("store - ",object_data_arr)
 		file.store_var(object_data_arr)
 		return
 		
@@ -153,12 +153,12 @@ func save_data_for_self_and_children(node, file: FileAccess):
 		var player_layer = node.get_meta("player_layer")
 		object_data_arr.append(["layer", name, visibility, DM, player_layer, node.light_mask, node.name])
 		file.store_var(object_data_arr)
-		print("store - ",object_data_arr)
+		#print("store - ",object_data_arr)
 		#save layer children
 		for child in node.get_children():
 			save_data_for_self_and_children(child, file)
 		file.store_var(["child_end"])
-		print("store - ","child_end")
+		#print("store - ","child_end")
 
 
 func load_map(map_name, load_map_data = true, map_save = null):
@@ -203,11 +203,12 @@ func load_map(map_name, load_map_data = true, map_save = null):
 
 func load_data_for_self_and_children(file: FileAccess):
 	var object_data_arr = file.get_var()
-	print("load object - ", object_data_arr)
+	#print("load object - ", object_data_arr)
 	var node = null
 	
 	if object_data_arr[0][0] == "rect": #object is rectangle - panel
 		var style
+		node = Panel.new()
 		if object_data_arr[0][5].size() == 1: #texture:
 			print("texture rect loading")
 			style = StyleBoxTexture.new()
@@ -216,12 +217,19 @@ func load_data_for_self_and_children(file: FileAccess):
 			if texture != null:
 				texture.set_meta("image_path", object_data_arr[0][5][0])
 				style.texture = texture
+			else: #file not on client - check server
+				print("check for file on server")
+				texture = Texture2D.new()
+				texture.set_meta("image_path", object_data_arr[0][5][0])
+				var file_name = object_data_arr[0][5][0].get_file()
+				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
+				if not Globals.lobby.check_is_server():
+					Globals.lobby.tcp_client.send_file_request(file_name)
 		elif object_data_arr[0][5].size() == 3: #flat
 			style = StyleBoxFlat.new()
 			style.bg_color = object_data_arr[0][5][0]
 			style.border_color = object_data_arr[0][5][1]
 			style.set_border_width_all(object_data_arr[0][5][2])
-		node = Panel.new()
 		node.position = object_data_arr[0][1]
 		node.size = object_data_arr[0][2]
 		node.scale = object_data_arr[0][3]
