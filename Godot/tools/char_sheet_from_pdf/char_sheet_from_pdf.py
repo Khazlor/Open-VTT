@@ -1,4 +1,5 @@
 #import pdfminer
+import sys
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTRect, LTLine, LTCurve
 #from pdfminer.pdfparser import PDFParser
@@ -8,6 +9,7 @@ from pdfminer.layout import LTTextContainer, LTRect, LTLine, LTCurve
 #from pdfminer.utils import decode_text
 
 from pypdf import PdfReader
+from pypdf import PdfWriter
 from pypdf.constants import AnnotationDictionaryAttributes
 
 from pprint import pprint
@@ -15,9 +17,24 @@ from pprint import pprint
 import os
 
 
-print("enter pdf path")
-#text = "S.pdf"
-text = input("")
+if not len(sys.argv) > 1:
+    print("error - no file entered")
+    exit()
+name_of_file = sys.argv[1]
+output_name = name_of_file.split('.')[0]
+
+if len(sys.argv) > 2:
+    page_rotate_array = sys.argv[2].split(",")
+    output_pdf = PdfWriter()
+    reader = PdfReader(name_of_file)
+    counter = 0
+    for page in reader.pages:
+        if page_rotate_array[counter] != 0:
+            output_pdf.add_page(page.rotate(int(page_rotate_array[counter]) * 90))
+        counter += 1
+    output_pdf.write("temp_rotated.pdf")
+    name_of_file = "temp_rotated.pdf"
+
 
 # ================================ labels and polygons ================================
 
@@ -25,21 +42,14 @@ output = "[Vector2(800, 1000), Color(1, 1, 1, 1), ["
 
 current_y = 0
 
-for page_layout in extract_pages(text):
-    #print(page_layout)
+for page_layout in extract_pages(name_of_file):
     current_y += page_layout.height
     for element in page_layout:
-        #print(element)
         if isinstance(element, LTTextContainer):
             #label
-            #print("text: ", element.get_text())
-
-            #pprint(vars(element))
-
-            #font = ""
-            #fsize = 0
-
             for text_line in element:
+                if not hasattr(text_line, 'x0'):
+                    continue
                 #for character in text_line:
                 #    font = character.fontname
                 #    fsize = character.fontsize
@@ -61,20 +71,7 @@ for page_layout in extract_pages(text):
                 '}, ')
 
         if isinstance(element, LTRect) or isinstance(element, LTCurve) or isinstance(element, LTLine):
-            #label
-            #print("text: ", element.get_text())
-
-            #pprint(vars(element))
-
-            #font = ""
-            #fsize = 0
-
-            #for text_line in element:
-                #for character in text_line:
-                #    font = character.fontname
-                #    fsize = character.fontsize
-                #    print(fsize)
-                #    break
+            #Lines and shapes
             posx = element.x0
             posy = element.y0 + element.height
             points = ""
@@ -82,10 +79,10 @@ for page_layout in extract_pages(text):
                 points += str(point[0] - posx) + ", " + str(posy - point[1]) + ", " 
             BGcolor = [1,1,1,0]
             if element.fill:
-                BGcolor = element.non_stroking_color + [1]
+                BGcolor = list(element.non_stroking_color) + [1]
             Lcolor = [0,0,0,1]
             if element.stroke:
-                Lcolor = element.stroking_color + [1]
+                Lcolor = list(element.stroking_color) + [1]
             
             output += (
             '{\n'+
@@ -107,40 +104,73 @@ for page_layout in extract_pages(text):
 
 
 
-reader = PdfReader(text)
-fields = []
+reader = PdfReader(name_of_file)
 current_y = 0
 for page in reader.pages:
+    page_rotation = page["/Rotate"] #WARNING annotation /Rect is not rotated - needs to be rotated manually
+    if page_rotation == 0 or page_rotation == 180:
+        current_y += page["/CropBox"][3]
+    if page_rotation == 90 or page_rotation == 270:
+        current_y += page["/CropBox"][2]
+    pos = ""
+    size = ""
+    margin = 0
     for annot in page.annotations:
         annot = annot.get_object()
         if annot[AnnotationDictionaryAttributes.Subtype] == "/Widget":
-            fields.append(annot)
-            rect = annot["/Rect"]
-            pos = str(rect[1]) + ", " + str(rect[0] + current_y)
-            size = str(rect[3] - rect[1]) + ", " + str(rect[2] - rect[0])
             #print(annot)
             if "/T" in annot.keys():
+                rect = annot["/Rect"]
+                if page_rotation == 0:
+                    pos = str(rect[0]) + ", " + str(current_y - rect[3])
+                    size = str(rect[2] - rect[0]) + ", " + str(rect[3] - rect[1])
+                    margin = 5
+                    if rect[2] - rect[0]: #if size.x < 30 - no margin
+                        margin = -1
+                if page_rotation == 90:
+                    pos = str(rect[1]) + ", " + str(current_y - (page["/CropBox"][2] - rect[0]))
+                    size = str(rect[3] - rect[1]) + ", " + str(rect[2] - rect[0])
+                    margin = 5
+                    if rect[1] - rect[3]: #if size.x < 30 - no margin
+                        margin = -1
+                if page_rotation == 180:
+                    pos = str(page["/CropBox"][2] - rect[2]) + ", " + str(current_y - (page["/CropBox"][3] - rect[1]))
+                    size = str(rect[2] - rect[0]) + ", " + str(rect[3] - rect[1])
+                    margin = 5
+                    if rect[0] - rect[2]: #if size.x < 30 - no margin
+                        margin = -1
+                if page_rotation == 270:
+                    pos = str(page["/CropBox"][3] - rect[3]) + ", " + str(current_y - rect[2])
+                    size = str(rect[3] - rect[1]) + ", " + str(rect[2] - rect[0])
+                    margin = 5
+                    if rect[3] - rect[1]: #if size.x < 30 - no margin
+                        margin = -1
+                fsize = -1
+                if not "/Ff" in annot:
+                    print("no form flags ", str(annot["/T"]), " - treating as singleline")
+                elif annot["/Ff"] & 4096: #multiline
+                    print("multiline ", str(annot["/T"]))
+                    fsize = 10
+                print(rect, size)
                 output += (
                     '{\n'+
                     '"BGcolor": Color(1, 1, 1, 0),\n'+
                     '"attr": "' + str(annot["/T"]) + '",\n'+
                     '"fcolor": Color(0, 0, 0, 1),\n'+
-                    '"fsize": -1,\n'+
+                    '"fsize": ' + str(fsize) + ',\n'+
                     '"lcolor": Color(0, 0, 0, 1),\n'+
-                    '"left_margin": 5,\n'+
+                    '"left_margin": ' + str(margin) + ',\n'+
                     '"pos": Vector2(' + pos + '),\n'+
                     '"size": Vector2(' + size + '),\n'+
                     '"type": "input",\n'+
                     '"width": 1\n'+
                     '}, ')
-    current_y += page["/CropBox"][2]
 
 #print(output)
 
-
-if not os.path.exists("output"):
-    os.makedirs("output")
-f = open("output/output.char_sheet", "w")
+if not os.path.exists(output_name):
+    os.makedirs(output_name)
+f = open(output_name + "/" + output_name + ".char_sheet", "w")
 f.write(output[:-2] + "]]")
 f.close()
 

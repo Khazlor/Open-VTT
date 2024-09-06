@@ -230,8 +230,11 @@ func _unhandled_input(event):
 				return
 			#selection box finished drawing
 			selected_creating = false
-			selected.clear()
+			if not Input.is_action_pressed("shift"):
+				selected.clear()
+			print("selected at start of select: ", selected)
 			if select_box == null:
+				print("selectbox is null during select!")
 				return
 			var lines_children = Globals.draw_layer.get_children()
 			#max select box size and position based on drawn size
@@ -240,6 +243,7 @@ func _unhandled_input(event):
 			var min_x = select_box.size.x + select_box.position.x
 			var min_y = select_box.size.y + select_box.position.y
 			#snap selection size to children
+			var new_selected = []
 			for child in lines_children:
 				if "character" in child: #if character token
 					child = child.get_child(0)
@@ -255,7 +259,7 @@ func _unhandled_input(event):
 					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
 						if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
 							if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
-								selected.append(child)
+								new_selected.append(child)
 								if child.scale.x > 0:
 									if child.position.x < min_x:
 										min_x = child.position.x
@@ -322,7 +326,7 @@ func _unhandled_input(event):
 					if min.x >= b.x and min.y >= b.y:
 						if max.x <= e.x:
 							if max.y <= e.y:
-								selected.append(child)
+								new_selected.append(child)
 								if max.x > max_x:
 									max_x = max.x
 								if max.y > max_y:
@@ -333,11 +337,21 @@ func _unhandled_input(event):
 									min_y = min.y
 				min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
 			#if nothing in dragged square -> get clicked
-			if selected.is_empty():
+			if new_selected.is_empty():
 				var clicked = get_clicked(mouse_pos)
 				if clicked != null:
 					selected.append(clicked)
-				
+			else:
+				selected.append_array(new_selected)
+			if Input.is_action_pressed("shift"): #extend selectbox by old selection
+				if min_max_x_y.x > select_pos_org.x:
+					min_max_x_y.x = select_pos_org.x
+				if min_max_x_y.y > select_pos_org.y:
+					min_max_x_y.y = select_pos_org.y
+				if min_max_x_y.z < select_pos_org.x + select_size_org.x:
+					min_max_x_y.z = select_pos_org.x + select_size_org.x
+				if min_max_x_y.w < select_pos_org.y + select_size_org.y:
+					min_max_x_y.w = select_pos_org.y + select_size_org.y
 			select_objects()
 		#circle or rect drawing finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "rect":
@@ -531,7 +545,7 @@ func _unhandled_input(event):
 							current_line = Line2D.new()
 							current_line.material = unshaded_material #ignore lighting
 							current_line.default_color = Globals.colorLines
-							current_line.width = min(Globals.lineWidth,3)
+							current_line.width = min(Globals.lineWidth,3) / Globals.camera.zoom.x
 							Globals.draw_layer.add_child(current_line)
 							current_line.set_owner(layers_root)
 							current_measure.append(current_line)
@@ -543,7 +557,7 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
-							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize / Globals.camera.zoom.x)
 							current_label.add_theme_color_override("font_color", Globals.fontColor)
 							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
 							current_label.add_theme_constant_override("outline_size", 5)
@@ -581,7 +595,7 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
-							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize / Globals.camera.zoom.x)
 							current_label.add_theme_color_override("font_color", Globals.fontColor)
 							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
 							current_label.add_theme_constant_override("outline_size", 5)
@@ -622,7 +636,7 @@ func _unhandled_input(event):
 							current_label = Label.new()
 							current_label.material = unshaded_material #ignore lighting
 							current_label.mouse_filter = Control.MOUSE_FILTER_PASS
-							current_label.add_theme_font_size_override("font_size", Globals.fontSize)
+							current_label.add_theme_font_size_override("font_size", Globals.fontSize / Globals.camera.zoom.x)
 							current_label.add_theme_color_override("font_color", Globals.fontColor)
 							current_label.add_theme_color_override("font_outline_color", Globals.fontColor.inverted())
 							current_label.add_theme_constant_override("outline_size", 5)
@@ -695,6 +709,8 @@ func _unhandled_input(event):
 						print("selection creating")
 						#remove old select
 						if select_box != null:
+							select_pos_org = select_box.position
+							select_size_org = select_box.size
 							select_box.queue_free()
 						create_select_box(mouse_pos)
 	#					else:
@@ -1104,7 +1120,7 @@ func remove_object(object, remote = false, set_undo = false, set_undo_part = fal
 		if object.get_meta("type") == "token": #character token
 			Globals.new_map.remove_token(object)
 	elif object.get_parent().has_meta("type") and object.get_parent().get_meta("type") == "token":
-		object = object.get_parent
+		object = object.get_parent()
 		Globals.new_map.remove_token(object)
 	if object.has_meta("light"):
 		var light = get_object_light(object)
@@ -1179,21 +1195,25 @@ func get_clicked(mouse_position: Vector2):
 					if child.position.x >= mouse_position.x and child.position.y >= mouse_position.y:
 						if child.position.x + child.size.x*child.scale.x <= mouse_position.x:
 							if child.position.y + child.size.y*child.scale.y <= mouse_position.y:
+								min_max_x_y = Vector4(child.position.x, child.position.y, child.position.x + child.size.x, child.position.y + child.size.y)
 								return child
 				elif child.scale.x < 0: #flipped x
 					if child.position.x >= mouse_position.x and child.position.y <= mouse_position.y:
 						if child.position.x + child.size.x*child.scale.x <= mouse_position.x:
 							if child.position.y + child.size.y*child.scale.y >= mouse_position.y:
+								min_max_x_y = Vector4(child.position.x, child.position.y, child.position.x + child.size.x, child.position.y + child.size.y)
 								return child
 				elif child.scale.y < 0: #flipped y
 					if child.position.x <= mouse_position.x and child.position.y >= mouse_position.y:
 						if child.position.x + child.size.x*child.scale.x >= mouse_position.x:
 							if child.position.y + child.size.y*child.scale.y <= mouse_position.y:
+								min_max_x_y = Vector4(child.position.x, child.position.y, child.position.x + child.size.x, child.position.y + child.size.y)
 								return child
 				else: #not flipped
 					if child.position.x <= mouse_position.x and child.position.y <= mouse_position.y:
 						if child.position.x + child.size.x*child.scale.x >= mouse_position.x:
 							if child.position.y + child.size.y*child.scale.y >= mouse_position.y:
+								min_max_x_y = Vector4(child.position.x, child.position.y, child.position.x + child.size.x, child.position.y + child.size.y)
 								return child
 			else: #calculate with rotation
 				var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
@@ -1204,6 +1224,11 @@ func get_clicked(mouse_position: Vector2):
 				var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
 				print(top_left, top_right, bottom_right, bottom_left)
 				if Geometry2D.is_point_in_polygon(mouse_position, PackedVector2Array([top_left, top_right, bottom_right, bottom_left])):
+					Vector2(min(min(top_left.x,top_right.x),min(bottom_left.x,bottom_right.x)),min(top_left.y,top_right.y))
+					min_max_x_y = Vector4(min(min(top_left.x,top_right.x),min(bottom_left.x,bottom_right.x)),\
+					min(min(top_left.y,top_right.y),min(bottom_left.y,bottom_right.y)),\
+					max(max(top_left.x,top_right.x),max(bottom_left.x,bottom_right.x)),\
+					max(max(top_left.x,top_right.y),max(bottom_left.y,bottom_right.y)))
 					return child
 	return null
 
@@ -1544,6 +1569,8 @@ func _rotate_handle_mouse_exited():
 
 #drag and drop images
 func on_files_dropped(files):
+	if Globals.draw_layer == null:
+		return
 	print(files)
 	for file in files:
 		var panel = Panel.new()
@@ -2153,7 +2180,9 @@ func get_object_center(object):
 
 #modify selected objects
 func on_line_settings_changed(setting):
+	print("change of setting")
 	print(setting)
+	print(selected)
 	for object in selected:
 		if object.has_meta("type"):
 			var type = object.get_meta("type")

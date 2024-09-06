@@ -180,7 +180,7 @@ func _on_load_file_dialog_dir_selected(dir):
 		return
 	char_sheet_arr = str_to_var(file.get_as_text())
 	file.close()
-	print(char_sheet_arr)
+	print("char sheet array: ", char_sheet_arr)
 	for object in node.get_children():
 		object.queue_free()
 	selected_objects = []
@@ -245,6 +245,8 @@ func load_input_from_dict(dict):
 		style.content_margin_left = 5
 		dict["left_margin"] = 5
 	input.add_theme_stylebox_override("normal", style)
+	if dict["fsize"] == -1:
+		dict["fsize"] = get_font_size(input.get_theme_font("font"), dict["size"], "00") - 4
 	input.add_theme_font_size_override("font_size", dict["fsize"])
 	input.set_meta("dict", dict)
 	input.get_h_scroll_bar().visible = false

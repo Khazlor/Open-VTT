@@ -21,6 +21,7 @@ var draw_comp: Node2D
 var draw_layer: Node2D
 var drag_drop_canvas_layer: CanvasLayer #for dragging characters to map
 var BG_ColorRect: ColorRect
+var camera
 
 var layers: Control
 var roll_panel: Control

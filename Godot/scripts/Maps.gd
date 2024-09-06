@@ -102,10 +102,10 @@ func _on_apply_button_pressed():
 	map.unit = popup.get_node("VBoxContainer/Unit").text
 	
 	#setting map_card
-	mapcard.get_node("PanelContainer/Name").text = map.map_name
-	mapcard.get_node("PanelContainer/MarginContainer/VBoxContainer/Desc").text = map.map_desc
-	mapcard.get_node("PanelContainer/MarginContainer/VBoxContainer/Size").text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
-	mapcard.get_node("PanelContainer/preview").texture = Globals.load_texture(map.image)
+	mapcard.get_node("PanelContainer/VBoxContainer/Name").text = map.map_name
+	mapcard.get_node("PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/Desc").text = map.map_desc
+	mapcard.get_node("PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/VBoxContainer/Size").text = "size: " + str(map.grid_size) + "px = " +str(map.unit_size) + " " + map.unit 
+	mapcard.get_node("PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/preview").texture = Globals.load_texture(map.image)
 
 	popup.hide()
 
