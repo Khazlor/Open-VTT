@@ -296,7 +296,7 @@ func load_characters_in_dir(dir: DirAccess, char_name: String, parent_item: Tree
 
 func get_char_path(tree_item: TreeItem):
 	var path_arr = []
-	var root = get_root()
+	var root = tree_item.get_tree().get_root() #TODO just get_root() was bugging tree_item in different tree for some reason
 	while tree_item != root:
 		path_arr.append(tree_item.get_text(0))
 		tree_item = tree_item.get_parent()
