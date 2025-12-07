@@ -62,4 +62,3 @@ func _on_value_text_edit_text_changed():
 func _on_option_button_item_selected(index):
 	item_attr_mod_dict["mode"] = index
 	
-

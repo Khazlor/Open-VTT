@@ -27,7 +27,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #check for connecting and disconnecting peers
-func _process(delta):
+func _process(_delta):
 	if tcp_server.is_connection_available():
 		var client = tcp_server.take_connection()
 		peer_pool.append(client)
@@ -136,14 +136,14 @@ func send_data(data: PackedByteArray, peer):
 	
 
 func rename_file(old_name):
-	var name = old_name
+	var new_name = old_name
 	var i = 2
 	var ind = old_name.rfind(".")
-	while FileAccess.file_exists(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + name):
-		name = old_name.insert(ind, "_" + str(i))
-		print(name)
+	while FileAccess.file_exists(Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + new_name):
+		new_name = old_name.insert(ind, "_" + str(i))
+		print(new_name)
 		i += 1
-	return name
+	return new_name
 
 
 func _on_tree_exiting():

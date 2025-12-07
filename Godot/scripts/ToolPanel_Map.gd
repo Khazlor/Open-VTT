@@ -156,4 +156,3 @@ func _on_fov_color_picker_button_color_changed(color):
 	fov.color = color
 	Globals.new_map.fov_color = color
 	set_map_setting_on_other_peers.rpc("fov_color", color)
-

@@ -14,6 +14,11 @@ var attribute_modifiers = {} #dictionary of all attribute modifiers (deflection 
 @export var player_character = true
 @export var char_sheet_path = ""
 
+@export var spellbooks: Dictionary = {} #dict of all character spell casting classes (spellbooks) with their settings, spells, spells slots in a dict
+#@export var spells = {} #dict of spellcasting classes with array of known spells for each
+#@export var spell_slots = {} #dict of spellcasting classes with array of spell_slots for each level - tracking of prepared spells and spells slots
+							 #{SpellBookOfClass: [spell level array[spell slot array for the spell level[spell_dict, already_cast_bool]]]}
+
 @export var token_shape: StringName = &"Square"
 @export var token_size: Vector2 = Vector2(70,70)
 @export var token_scale: Vector2 = Vector2(1,1)
@@ -56,11 +61,18 @@ signal unequip_item_from_slot(slot)
 signal attr_modifier_applied(attr: StringName, tooltip: String)
 signal inv_changed()
 
+signal spellbooks_changed(spellbook_name)
+signal spellbook_spells_changed(spellbook_name)
+signal spell_slot_changed(spellbook_name, level, slot_index)
+
 signal synch_item_added(item)
 signal synch_item_removed(item)
 signal synch_macro(macro_name, macro_dict, old_macro_name, remove)
 signal synch_equip_slot(side, ind, move_ind, slot_dict, new, remove)
 signal equip_slot_synched()
+
+enum {SPELL_CAST, SPELL_RES}
+enum {SPELLBOOK_ADD, SPELLBOOK_REMOVE, CHANGE_SETTINGS}
 
 func get_token():
 	emit_get_token_request_after_delay()
@@ -73,6 +85,7 @@ func emit_get_token_request_after_delay():
 		token = await Globals.draw_layer.get_tree().create_timer(0.01).timeout
 		emit_signal("get_token_request")
 		
+#region Save and Load
 #save character resource to file
 func save(resolve_conflict: bool = false):
 	#get full path to save
@@ -98,27 +111,31 @@ func save(resolve_conflict: bool = false):
 	save.close()
 	
 func store_char_data(save: FileAccess):
-	save.store_var(name)
-	save.store_var(attributes)
-	save.store_var(global)
-	save.store_var(singleton)
-	save.store_var(save_as_token)
-	save.store_var(player_character)
-	save.store_var(char_sheet_path)
-	save.store_var(token_shape)
-	save.store_var(token_size)
-	save.store_var(token_scale)
-	save.store_var(token_outline_width)
-	save.store_var(token_outline_color)
-	save.store_var(token_outline_faction_color)
-	save.store_var(token_texture)
-	save.store_var(token_texture_offset)
-	save.store_var(token_texture_scale)
-	save.store_var(items)
-	save.store_var(equip_slots)
-	save.store_var(bars)
-	save.store_var(attr_bubbles)
-	save.store_var(macros)
+	var save_dict = {
+		"name" = name,
+		"attributes" = attributes,
+		"global" = global,
+		"singleton" = singleton,
+		"save_as_token" = save_as_token,
+		"player_character" = player_character,
+		"char_sheet_path" = char_sheet_path,
+		"token_shape" = token_shape,
+		"token_size" = token_size,
+		"token_scale" = token_scale,
+		"token_outline_width" = token_outline_width,
+		"token_outline_color" = token_outline_color,
+		"token_outline_faction_color" = token_outline_faction_color,
+		"token_texture" = token_texture,
+		"token_texture_offset" = token_texture_offset,
+		"token_texture_scale" = token_texture_scale,
+		"items" = items,
+		"equip_slots" = equip_slots,
+		"bars" = bars,
+		"attr_bubbles" = attr_bubbles,
+		"macros" = macros,
+		"spellbooks" = spellbooks
+	}
+	save.store_line(JSON.stringify(save_dict))
 	
 func store_char_data_to_buffer():
 	var file_path = Globals.base_dir_path + "/temp" #temp file for character - find availible file name
@@ -158,27 +175,36 @@ func load_char(path: String, char_name: String, global: bool, tree_item: TreeIte
 	print("attr mods: ", attribute_modifiers)
 	
 func get_char_data(save: FileAccess):
-	name = save.get_var()
-	attributes = save.get_var()
-	global = save.get_var()
-	singleton = save.get_var()
-	save_as_token = save.get_var()
-	player_character = save.get_var()
-	char_sheet_path = save.get_var()
-	token_shape = save.get_var()
-	token_size = save.get_var()
-	token_scale = save.get_var()
-	token_outline_width = save.get_var()
-	token_outline_color = save.get_var()
-	token_outline_faction_color = save.get_var()
-	token_texture = save.get_var()
-	token_texture_offset = save.get_var()
-	token_texture_scale = save.get_var()
-	items = save.get_var()
-	equip_slots = save.get_var()
-	bars = save.get_var()
-	attr_bubbles = save.get_var()
-	macros = save.get_var()
+	var json = JSON.new()
+	var error = json.parse(save.get_line())
+	if error == null or not json.data is Dictionary:
+		print("ERROR character save file is not a json dictionary!")
+		return
+	var save_dict: Dictionary = json.data
+	for key in save_dict.keys():
+		self.set(key, save_dict[key])
+	#name = save.get_var()
+	#attributes = save.get_var()
+	#global = save.get_var()
+	#singleton = save.get_var()
+	#save_as_token = save.get_var()
+	#player_character = save.get_var()
+	#char_sheet_path = save.get_var()
+	#token_shape = save.get_var()
+	#token_size = save.get_var()
+	#token_scale = save.get_var()
+	#token_outline_width = save.get_var()
+	#token_outline_color = save.get_var()
+	#token_outline_faction_color = save.get_var()
+	#token_texture = save.get_var()
+	#token_texture_offset = save.get_var()
+	#token_texture_scale = save.get_var()
+	#items = save.get_var()
+	#equip_slots = save.get_var()
+	#bars = save.get_var()
+	#attr_bubbles = save.get_var()
+	#macros = save.get_var()
+	
 	for macro in macros: #fill macros_in_bar
 		if macros[macro]["in_bar"] == true:
 			macros_in_bar[macro] = macros[macro]
@@ -235,7 +261,9 @@ func load_equipped_items_from_equipment():
 		for slot in slot_array: #slots
 			if slot["item"] != null: #has item equipped
 				equipped_items.append(slot["item"])
-				
+#endregion
+
+#region Equipment and modifiers
 func equip_item(item, apply = true):
 	#item["equip_slot_character"] = self #set equip_slot after loading
 	item["equipped"] = true
@@ -365,3 +393,68 @@ func apply_modifiers_to_attr(attribute, _remote = false):
 
 func sort_by_priority(a, b):
 	return a["priority"] < b["priority"]
+#endregion
+
+#region Spell and SpellBooks
+# ========================= SPELL AND SPELLBOOK SECTION ==============================
+	
+	
+func add_new_spellbook(spellbook_name):
+	if spellbooks.has(spellbook_name):
+		return false
+	else:
+		var spellbook_dict = {
+			"spellbook_name": spellbook_name,
+			"allow_spells_in_higher_slots": true,
+			"spontaneous_spellcaster": false,
+			"allowed_spell_categories_all": [], #spells must have all these categories to qualify
+			"allowed_spell_categories_one": [], #spells must have one of these categories to qualify 
+								#if both are specified then we take the intersect of them
+								#example: all=[wizard, dnd] one=[evocation, illusion]
+									# grabs all evocation and illusion spells from dnd wizard spells
+									# ignore all spells that are not wizard and dnd and all not evocation/illusion spells
+			"excluded_spell_categories": [], #currently not used TODO if needed
+			"know_all_spells": false,
+			"spells": [], #array of known spells for each spellbook
+			"spell_slots": [] #array of spell_slots for each level - tracking of prepared spells and spells slots
+		}
+		spellbooks[spellbook_name] = spellbook_dict
+		emit_signal("spellbooks_changed", spellbook_name, SPELLBOOK_ADD)
+		return true
+
+func remove_spellbook(spellbook_name):
+	if not spellbooks.has(spellbook_name):
+		return false
+	else:
+		spellbooks.erase(spellbook_name)
+		emit_signal("spellbooks_changed", spellbook_name, SPELLBOOK_REMOVE)
+		return true
+		
+func add_spell_to_spellbook(spell_dict, spellbook_name):
+	if spellbooks.has(spellbook_name):
+		spellbooks[spellbook_name]["spells"].append(spell_dict)
+		emit_signal("spellbook_spells_changed", spellbook_name)
+		
+func remove_spell_from_spellbook(spell_dict, spellbook_name):
+	if spellbooks.has(spellbook_name):
+		spellbooks[spellbook_name]["spells"].erase(spell_dict)
+		emit_signal("spellbook_spells_changed", spellbook_name)
+
+func add_spell_to_prepared(spell, spell_slot_index, spellbook_name):
+	if spell == null:
+		print("spell is null !!!")
+		return
+	if spell_slot_index == null: #add spell to the firts free slot for the spell level
+		var slot_index = 0
+		for spell_slot in spellbooks[spellbook_name]["spell_slots"][spell["level"]]:
+			if spell_slot[SPELL_RES] == null: #free slot found
+				spell_slot[SPELL_RES] = spell
+				self.emit_signal("spell_slot_changed", spellbook_name, spell["level"], slot_index)
+				return
+			slot_index += 1
+	else: #specific spell slot - replace spell
+		spellbooks[spellbook_name]["spell_slots"][spell["level"]][spell_slot_index][SPELL_RES] = spell
+		self.emit_signal("spell_slot_changed", spellbook_name, spell["level"], spell_slot_index)
+
+
+#endregion

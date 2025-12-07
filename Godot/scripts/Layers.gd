@@ -246,4 +246,3 @@ func reset_layers_visibility():
 	var tree_layers = tree.get_root().get_children()
 	for tree_layer in tree_layers:
 		set_layer_visibility(tree_layer.get_meta("draw_layer"))
-

@@ -13,7 +13,7 @@ var button_players_not: Texture2D = preload("res://icons/Players_not.png")
 var button_add: Texture2D = preload("res://icons/Add.svg")
 var button_remove: Texture2D = preload("res://icons/Remove.svg")
 var button_light: Texture2D = preload("res://icons/LightOccluder2D.svg")
-var layer = preload("res://components/draw.tscn")
+var layer_comp = preload("res://components/draw.tscn")
 
 var draw_root
 
@@ -223,7 +223,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int, remote = false):
 			to_layer.add_child(layer)
 			to_layer.move_child(layer, 0)
 		AFTER:
-			var next_to_item = to_item.get_next() #get next sibling of to_item
+			#var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
 			
 #			#check if moved
@@ -233,71 +233,6 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int, remote = false):
 			to_layer.get_parent().add_child(layer)
 			to_layer.get_parent().move_child(layer, to_layer.get_index()+1) #not needed - sorted by z_index - only for saving and loading
 		
-#	var prev_item = item.get_prev_in_tree() # to check if items were moved
-#	var to_layer = to_item.get_meta("draw_layer")
-#	var layer = item.get_meta("draw_layer")
-#	print_indexes()
-#	match(shift):	
-#		BEFORE:
-#			item.move_before(to_item)
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#				draw_root.move_child(layer, to_layer.get_index())
-#				#children
-#				var next_item = item.get_next() #get next sibling
-#				while true:
-#					item = item.get_next_in_tree() #iterate over all in order
-#					if item == next_item:
-#						break
-#					layer = item.get_meta("draw_layer")
-#					draw_root.move_child(layer, to_layer.get_index())
-#		ON:
-#			if to_item.get_child_count() == 0:
-#				var dummy = create_item(to_item)
-#				item.move_before(dummy)
-#				to_item.remove_child(dummy)
-#			else:
-#				item.move_before(to_item.get_first_child())
-#
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#				draw_root.move_child(layer, to_layer.get_index()-1)
-#				#children
-#				var i = layer.get_index()
-#				var next_item = item.get_next() #get next sibling
-#				while true:
-#					item = item.get_next_in_tree() #iterate over all in order
-#					if item == next_item:
-#						break
-#					layer = item.get_meta("draw_layer")
-#					draw_root.move_child(layer, i-1)
-#					i = layer.get_index()
-#		AFTER:
-#			var next_to_item = to_item.get_next() #get next sibling of to_item
-#			item.move_after(to_item)
-#
-#			#check if moved
-#			if prev_item != item.get_prev_in_tree():
-#				if next_to_item != null:
-#					draw_root.move_child(layer, next_to_item.get_index()+1)
-#					#children
-#					var next_item = item.get_next() #get next sibling
-#					while true:
-#						item = item.get_next_in_tree() #iterate over all in order
-#						if item == next_item:
-#							break
-#						layer = item.get_meta("draw_layer")
-#						draw_root.move_child(layer, next_to_item.get_index()+1)
-#				else:
-#					draw_root.move_child(layer, 1)
-#					#children
-#					var next_item = item.get_next() #get next sibling
-#					while true:
-#						item = item.get_next_in_tree() #iterate over all in order
-#						if item == next_item:
-#							break
-#						layer = item.get_meta("draw_layer")
-#						draw_root.move_child(layer, 1)
 	change_z_indexes()
 	print_indexes()
 	return true
@@ -354,5 +289,3 @@ func get_descendants(treeitem: TreeItem):
 	return array
 		
 	
-
-

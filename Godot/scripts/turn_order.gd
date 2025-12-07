@@ -81,5 +81,5 @@ func lose_focus():
 #window is focused - lose focus on right and middle clicks (normally only on left click outside)
 func _on_window_input(event):
 	if event is InputEventMouseButton:
-		if event.is_action_pressed("mouseright") or Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		if event.is_action_pressed("mouseright") or event.is_action_pressed("mousemiddle"):
 			lose_focus()

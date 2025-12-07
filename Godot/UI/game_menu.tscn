@@ -1,0 +1,214 @@
+[gd_scene load_steps=2 format=3 uid="uid://4b1u1i1uq0n7"]
+
+[ext_resource type="Script" uid="uid://d2wjnfsxo6st" path="res://scripts/game_menu.gd" id="1_3y86k"]
+
+[node name="GameMenu" type="Window"]
+oversampling_override = 1.0
+initial_position = 2
+size = Vector2i(500, 500)
+transient = true
+exclusive = true
+script = ExtResource("1_3y86k")
+
+[node name="Menu" type="VBoxContainer" parent="."]
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -58.5
+offset_right = 58.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="MapsBtn" type="Button" parent="Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = " Map Selection "
+
+[node name="OptionsBtn" type="Button" parent="Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Options
+"
+
+[node name="HelpBtn" type="Button" parent="Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Help"
+
+[node name="HSeparator" type="HSeparator" parent="Menu"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="QuitBtn" type="Button" parent="Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Leave Game
+"
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+oversampling_override = 1.0
+title = "Are you sure?"
+initial_position = 2
+size = Vector2i(214, 100)
+dialog_text = "The server will shut down"
+
+[node name="Settings" type="VBoxContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="Settings"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Visual" type="ScrollContainer" parent="Settings/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="Settings/TabContainer/Visual"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Settings/TabContainer/Visual/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LabelVBox" type="VBoxContainer" parent="Settings/TabContainer/Visual/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UIScaleLabel" type="Label" parent="Settings/TabContainer/Visual/MarginContainer/HBoxContainer/LabelVBox"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "UI Scale:"
+vertical_alignment = 1
+
+[node name="EditVBox" type="VBoxContainer" parent="Settings/TabContainer/Visual/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UIScaleSpinBox" type="SpinBox" parent="Settings/TabContainer/Visual/MarginContainer/HBoxContainer/EditVBox"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+min_value = 20.0
+max_value = 300.0
+value = 100.0
+rounded = true
+allow_greater = true
+allow_lesser = true
+suffix = "%"
+
+[node name="Multiplayer" type="ScrollContainer" parent="Settings/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="Settings/TabContainer/Multiplayer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Settings/TabContainer/Multiplayer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LabelVBox" type="VBoxContainer" parent="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerNameLabel" type="Label" parent="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer/LabelVBox"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Player Name:"
+vertical_alignment = 1
+
+[node name="EditVBox" type="VBoxContainer" parent="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerNameLineEdit" type="LineEdit" parent="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer/EditVBox"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+placeholder_text = "Player"
+
+[node name="Key Mapping" type="ScrollContainer" parent="Settings/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Settings/TabContainer/Key Mapping"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="Settings/TabContainer/Key Mapping/VBoxContainer"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+text = "Please press enter to apply keybind"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="Settings/TabContainer/Key Mapping/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Settings/TabContainer/Key Mapping/VBoxContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LabelVBox" type="VBoxContainer" parent="Settings/TabContainer/Key Mapping/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EditVBox" type="VBoxContainer" parent="Settings/TabContainer/Key Mapping/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Settings"]
+layout_mode = 2
+
+[node name="ApplyBtn" type="Button" parent="Settings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply"
+
+[node name="CancelBtn" type="Button" parent="Settings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="window_input" from="." to="." method="_on_window_input"]
+[connection signal="pressed" from="Menu/MapsBtn" to="." method="_on_maps_btn_pressed"]
+[connection signal="pressed" from="Menu/OptionsBtn" to="." method="_on_options_btn_pressed"]
+[connection signal="pressed" from="Menu/HelpBtn" to="." method="_on_help_btn_pressed"]
+[connection signal="pressed" from="Menu/QuitBtn" to="." method="_on_quit_btn_pressed"]
+[connection signal="canceled" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_canceled"]
+[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
+[connection signal="tab_changed" from="Settings/TabContainer" to="." method="_on_tab_container_tab_changed"]
+[connection signal="value_changed" from="Settings/TabContainer/Visual/MarginContainer/HBoxContainer/EditVBox/UIScaleSpinBox" to="." method="_on_ui_scale_spin_box_value_changed"]
+[connection signal="text_changed" from="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer/EditVBox/PlayerNameLineEdit" to="." method="_on_player_name_line_edit_text_changed"]
+[connection signal="pressed" from="Settings/HBoxContainer/ApplyBtn" to="." method="_on_apply_btn_pressed"]
+[connection signal="pressed" from="Settings/HBoxContainer/CancelBtn" to="." method="_on_cancel_btn_pressed"]

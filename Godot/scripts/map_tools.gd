@@ -129,4 +129,3 @@ func _on_turn_order_pressed():
 		Globals.turn_order.hide()
 	else:
 		Globals.turn_order.popup()
-

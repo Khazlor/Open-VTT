@@ -134,4 +134,3 @@ func _on_delete_button_pressed():
 	map = null
 	popup.hide()
 	
-

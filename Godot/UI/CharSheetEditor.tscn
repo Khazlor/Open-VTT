@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://nxmvcsx2xf44"]
 
-[ext_resource type="Script" path="res://scripts/CollapsibleContainer.gd" id="1_p7j0e"]
-[ext_resource type="Script" path="res://scripts/CharSheetEditor.gd" id="1_x4rqg"]
+[ext_resource type="Script" uid="uid://cpfo3qmkokouf" path="res://scripts/CollapsibleContainer.gd" id="1_p7j0e"]
+[ext_resource type="Script" uid="uid://dp4c2bmt2qk1d" path="res://scripts/CharSheetEditor.gd" id="1_x4rqg"]
 [ext_resource type="Texture2D" uid="uid://cnbnkt1fgj6ry" path="res://icon.svg" id="2_xsa7h"]
 [ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="3_hdbiu"]
 
@@ -30,6 +30,7 @@ corner_radius_bottom_left = 5
 [sub_resource type="ButtonGroup" id="ButtonGroup_h3ksj"]
 
 [node name="CharSheetEditor" type="Window"]
+oversampling_override = 1.0
 title = "Character Sheet Editor"
 initial_position = 2
 size = Vector2i(1280, 720)
@@ -315,8 +316,8 @@ clip_text = true
 [node name="OptionButton" type="OptionButton" parent="HSplitContainer/VBoxContainer/ScrollContainer/Settings/LabelOptions/Container/HorzAlign"]
 layout_mode = 2
 size_flags_horizontal = 3
-item_count = 3
 selected = 0
+item_count = 3
 popup/item_0/text = "Left"
 popup/item_0/id = 0
 popup/item_1/text = "Center"
@@ -337,8 +338,8 @@ clip_text = true
 [node name="OptionButton" type="OptionButton" parent="HSplitContainer/VBoxContainer/ScrollContainer/Settings/LabelOptions/Container/VertAlign"]
 layout_mode = 2
 size_flags_horizontal = 3
-item_count = 3
 selected = 0
+item_count = 3
 popup/item_0/text = "Top"
 popup/item_0/id = 0
 popup/item_1/text = "Center"

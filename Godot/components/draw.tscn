@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://3qgtuhwblt4q"]
 
-[ext_resource type="Script" path="res://scripts/draw.gd" id="1_44obt"]
-[ext_resource type="Script" path="res://scripts/Drag_Drop_data.gd" id="2_enpjm"]
+[ext_resource type="Script" uid="uid://cfly5hrrb6q1s" path="res://scripts/draw.gd" id="1_44obt"]
+[ext_resource type="Script" uid="uid://sjl8eg3fm572" path="res://scripts/Drag_Drop_data.gd" id="2_enpjm"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_unuec"]
 light_mode = 1

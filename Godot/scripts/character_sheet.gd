@@ -20,6 +20,7 @@ var bar_setting = preload("res://components/bar_setting.tscn")
 var attr_bubble_setting = preload("res://components/attr_bubble_setting.tscn")
 var macro_setting = preload("res://components/macro_setting.tscn")
 var char_sheet_editor = preload("res://UI/CharSheetEditor.tscn")
+var spellbook_comp = preload("res://components/spellbook.tscn") 
 
 @onready var loadcharsheetdiag = $LoadCharSheetDialog
 
@@ -40,6 +41,8 @@ var char_sheet_editor = preload("res://UI/CharSheetEditor.tscn")
 @onready var empty_style = StyleBoxEmpty.new()
 var token: Control
 
+var spellbook_settings_selection
+
 #called even before ready
 func _enter_tree():
 	token = $TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/TokenPreview/ScrollContainer/Token
@@ -57,15 +60,119 @@ func _ready():
 	character.connect("attr_updated", on_attr_updated)
 	character.apply_modifiers() #sets tooltips of modified attributes
 	
+	character.connect("spellbooks_changed", on_character_spellbooks_changed)
+	
 	loadcharsheetdiag.root_subfolder = Globals.base_dir_path + "/saves/character_sheets/"
 	
 	if not token_sheet:
 		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.disabled = false
 	
+#save and close character sheet
+func _on_close_requested():
+	if not character.save_as_token:
+		character.save()
+	print("closing subwindow")
+	if $CustomButtons/PopupButton.visible == false:
+		print("closing popped up subwindow")
+		var view = get_parent().get_viewport()
+		print(view)
+		print(view.gui_embed_subwindows)
+		view.set_embedding_subwindows(false)
+		self.hide()
+		self.queue_free()
+		view.set_embedding_subwindows(true)
+	else:
+		print("closing embedded subwindow")
+		self.queue_free()
+		
+		
+#func _on_focus_exited():
+#	if mode == Window.MODE_MINIMIZED:
+#		print("TODO - minimizing bugged - closing instead")
+##		mode = Window.MODE_WINDOWED
+##		self.queue_free()
 
+#pops char sheet to separate window
+func _on_popup_button_pressed():
+	$CustomButtons/PopupButton.visible = false #hide button
+	#recreate window with embedding disabled
+	var parent = self.get_parent()
+	parent.get_viewport().set_embedding_subwindows(false)
+	parent.remove_child(self)
+	parent.add_child(self)
+	parent.get_viewport().set_embedding_subwindows(true)
+	
+#loads character from resource to character sheet
+func load_character():
+	#name
+	title = character.name + " - Character sheet"
+	#character sheet
+	load_char_sheet(character.char_sheet_path)
+	#attributes
+	for attribute in character.attributes:
+		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
+		
+	#macros
+	for macro_dict_key in character.macros:
+		var macro = macro_setting.instantiate()
+		macro.macro_dict = character.macros[macro_dict_key]
+		macro_list.add_child(macro)
+	#order macross
+	for macro in macro_list.get_children():
+		macro_list.move_child(macro, macro.macro_dict["ord"])
+		
+	#load token settings
+	for entry in Globals.tokenShapeDict:
+		shape.add_item(entry)
+		if entry == character.token_shape:
+			shape.select(shape.item_count-1)
+	token.custom_minimum_size = character.token_size
+	token.select()
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/PlayerCheckButton.button_pressed = character.player_character
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.button_pressed = character.singleton
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox.value = character.token_size.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox.value = character.token_size.y
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleXSpinBox.value = character.token_scale.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox.value = character.token_scale.y
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderWidthSpinBox.value = character.token_outline_width
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderColorPickerButton.color = character.token_outline_color
+	var texture = Globals.load_texture(character.token_texture)
+	if texture != null:
+		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
+		$TabContainer/Inventory/Equipment/BackgroundTextureRect.texture = texture
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox.value = character.token_texture_offset.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox.value = character.token_texture_offset.y
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
+	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox.value = character.token_texture_scale.y
+	
+	
+	#bars
+	for bar_data in character.bars:
+		var bar = bar_setting.instantiate()
+		bar.bar_dict = bar_data
+		bars.add_child(bar)
+	character.emit_signal("bars_changed")
+	
+	#attr_bubbles
+	for attr_data in character.attr_bubbles:
+		var attr = attr_bubble_setting.instantiate()
+		attr.attr_dict = attr_data
+		attr_bubbles.add_child(attr)
+		
+	#spellbooks
+	for spellbook in character.spellbooks:
+		var new_spellbook = spellbook_comp.instantiate()
+		#TODO set all spellbook data
+		new_spellbook.spellbook_name = spellbook;
+		$TabContainer.add_child(new_spellbook)
+		
+		
+# ================================= section of the main character sheet tab =====================================
+
+#region Character Sheet Tab
 #zoom and drag
 func _input(event):
-	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+	if event is InputEventMouseMotion and Input.is_action_pressed("mousemiddle"):
 		canvas_scroll.scroll_horizontal -= event.relative.x
 		canvas_scroll.scroll_vertical -= event.relative.y
 		get_viewport().set_input_as_handled()
@@ -98,14 +205,14 @@ func load_char_sheet(path):
 	print("dir: ", current_char_sheet_name)
 	var file = FileAccess.open(path + "/" + current_char_sheet_name + ".char_sheet", FileAccess.READ)
 	if file == null:
-		print("file is null")
+		print("file is null: " + path + "/" + current_char_sheet_name + ".char_sheet")
 		return
 	#var json_string = file.get_as_text()
 	#char_sheet_arr = JSON.parse_string(json_string)
 	#char_sheet_arr = file.get_var()
 	var char_sheet_arr = str_to_var(file.get_as_text())
 	file.close()
-	print(char_sheet_arr)
+	#print(char_sheet_arr)
 	char_sheet_canvas.custom_minimum_size = char_sheet_arr[0]
 	char_sheet_canvas.set_meta("cust_size", char_sheet_arr[0])
 	char_sheet_canvas.get_theme_stylebox("panel").bg_color = char_sheet_arr[1]
@@ -273,44 +380,11 @@ func _on_char_sheet_image_file_dialog_file_selected(path):
 		tex = Texture2D.new()
 	tex.set_meta("image_path", file_path)
 	char_sheet_image.texture = tex
+#endregion
 	
+# ================================= section of attributes and macros tab =====================================
 
-#save and close character sheet
-func _on_close_requested():
-	if not character.save_as_token:
-		character.save()
-	print("closing subwindow")
-	if $PopupButton.visible == false:
-		print("closing popped up subwindow")
-		var view = get_parent().get_viewport()
-		print(view)
-		print(view.gui_embed_subwindows)
-		view.set_embedding_subwindows(false)
-		self.hide()
-		self.queue_free()
-		view.set_embedding_subwindows(true)
-	else:
-		print("closing embedded subwindow")
-		self.queue_free()
-		
-		
-#func _on_focus_exited():
-#	if mode == Window.MODE_MINIMIZED:
-#		print("TODO - minimizing bugged - closing instead")
-##		mode = Window.MODE_WINDOWED
-##		self.queue_free()
-
-#pops char sheet to separate window
-func _on_popup_button_pressed():
-	$PopupButton.visible = false #hide button
-	#recreate window with embedding disabled
-	var parent = self.get_parent()
-	parent.get_viewport().set_embedding_subwindows(false)
-	parent.remove_child(self)
-	parent.add_child(self)
-	parent.get_viewport().set_embedding_subwindows(true)
-
-
+#region Attributes and Macros Tab
 func _on_add_attribute_button_pressed():
 	if character.attributes.has(name_line_edit.text):
 		print("character already has " + name_line_edit.text + " attribute")
@@ -364,7 +438,7 @@ func find_attr_node(attr_name):
 	
 
 func add_attribute_to_attribute_list(name: String, value: Array):
-	print("adding attribute to list in char sheet: ", name, character)
+	#print("adding attribute to list in char sheet: ", name, character)
 	var Hbox = HBoxContainer.new()
 	var text_edit = LineEdit.new()
 	#attribute name LineEdit
@@ -410,66 +484,11 @@ func _on_add_macro_button_pressed():
 	if character.token != null:
 		character.token.on_synch_macro(name, new_marco_setting.macro_dict)
 	#character.emit_signal("synch_macro", name, new_marco_setting.macro_dict)
-
-#loads character from resource to character sheet
-func load_character():
-	#name
-	title = character.name + " - Character sheet"
-	#character sheet
-	load_char_sheet(character.char_sheet_path)
-	#attributes
-	for attribute in character.attributes:
-		add_attribute_to_attribute_list(attribute, character.attributes[attribute])
-		
-	#macros
-	for macro_dict_key in character.macros:
-		var macro = macro_setting.instantiate()
-		macro.macro_dict = character.macros[macro_dict_key]
-		macro_list.add_child(macro)
-	#order macross
-	for macro in macro_list.get_children():
-		macro_list.move_child(macro, macro.macro_dict["ord"])
-		
-	#load token settings
-	for entry in Globals.tokenShapeDict:
-		shape.add_item(entry)
-		if entry == character.token_shape:
-			shape.select(shape.item_count-1)
-	token.custom_minimum_size = character.token_size
-	token.select()
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/PlayerCheckButton.button_pressed = character.player_character
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/SingletonCheckButton.button_pressed = character.singleton
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeXSpinBox.value = character.token_size.x
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer/ShapeSizeYSpinBox.value = character.token_size.y
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleXSpinBox.value = character.token_scale.x
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer/ShapeScaleYSpinBox.value = character.token_scale.y
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderWidthSpinBox.value = character.token_outline_width
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer/BorderColorPickerButton.color = character.token_outline_color
-	var texture = Globals.load_texture(character.token_texture)
-	if texture != null:
-		$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer/ImageTextureRect.texture = texture
-		$TabContainer/Inventory/Equipment/BackgroundTextureRect.texture = texture
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetXSpinBox.value = character.token_texture_offset.x
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer/ImageOffsetYSpinBox.value = character.token_texture_offset.y
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleXSpinBox.value = character.token_texture_scale.x
-	$TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox.value = character.token_texture_scale.y
-	
-	
-	#bars
-	for bar_data in character.bars:
-		var bar = bar_setting.instantiate()
-		bar.bar_dict = bar_data
-		bars.add_child(bar)
-	character.emit_signal("bars_changed")
-	
-	#attr_bubbles
-	for attr_data in character.attr_bubbles:
-		var attr = attr_bubble_setting.instantiate()
-		attr.attr_dict = attr_data
-		attr_bubbles.add_child(attr)
+#endregion
 
 # ================================= section of token editor =====================================
 
+#region Token Editor
 
 func _on_option_button_item_selected(index):
 	character.token_shape = shape.get_item_text(index)
@@ -624,14 +643,18 @@ func _on_singleton_check_button_toggled(toggled_on):
 	if character.token != null:
 		character.token.synch_token_settings_on_other_peers.rpc(["singleton", toggled_on])
 	character.singleton = toggled_on
+#endregion
 
+# ================================= section of character sheet =====================================
+
+#region Character Sheet
 
 func _on_choose_char_sheet_pressed():
 	loadcharsheetdiag.popup()
 
 
 func _on_load_char_sheet_dialog_confirmed():
-	character.char_sheet_path = Globals.base_dir_path + "/saves/character_sheets/" + loadcharsheetdiag.current_dir
+	character.char_sheet_path = loadcharsheetdiag.current_dir
 	load_char_sheet(character.char_sheet_path)
 
 
@@ -639,4 +662,148 @@ func _on_edit_char_sheet_pressed():
 	var editor = char_sheet_editor.instantiate()
 	self.add_child(editor)
 	editor.popup()
+#endregion
+
+# ================================= section of spellbook =====================================
+
+#region SpellBooks
+
+func _on_settings_pressed() -> void:
+	$SpellBookSettingsWindow.show()
+	load_spellbooks_settings_list()
+
+
+func _on_add_spell_book_pressed() -> void:
+	$SpellBookSettingsWindow/AddSpellBookPopup.show()
+
+
+func _on_spell_book_settings_window_close_requested() -> void:
+	$SpellBookSettingsWindow.hide()
+
+
+func _on_add_spell_book_popup_close_requested() -> void:
+	$SpellBookSettingsWindow/AddSpellBookPopup/LineEdit.text = ""
+	$SpellBookSettingsWindow/AddSpellBookPopup.hide()
+	$SpellBookSettingsWindow/AddSpellBookPopup/Unavailable.visible = false
+
+
+func _on_add_spell_book_name_diag_confirm_button_pressed() -> void:
+	var available_name = character.add_new_spellbook($SpellBookSettingsWindow/AddSpellBookPopup/LineEdit.text)
+	if available_name == true:
+		$SpellBookSettingsWindow/AddSpellBookPopup/LineEdit.text = ""
+		$SpellBookSettingsWindow/AddSpellBookPopup.hide()
+		$SpellBookSettingsWindow/AddSpellBookPopup/Unavailable.visible = false
+	else:
+		$SpellBookSettingsWindow/AddSpellBookPopup/Unavailable.visible = true
+		
+		
+func on_character_spellbooks_changed(spellbook_name, state):
+	if state == character.SPELLBOOK_ADD:
+		var new_spellbook = spellbook_comp.instantiate()
+		#TODO set all spellbook data
+		new_spellbook.spellbook_name = spellbook_name;
+		$TabContainer.add_child(new_spellbook)
+		new_spellbook.name = spellbook_name
+	elif state == character.SPELLBOOK_REMOVE:
+		var tab = $TabContainer.find_child(spellbook_name)
+		if tab != null:
+			tab.visible = false
+			tab.queue_free()
+
+
+func _on_remove_spell_book_pressed() -> void:
+	$SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/RemoveSpellBook/RemoveSpellbookConfirmationDialog.popup()
+
+
+func _on_remove_spellbook_confirmation_dialog_confirmed() -> void:
+	character.remove_spellbook($TabContainer.current_tab.name)
+
+
+func _on_remove_spellbook_confirmation_dialog_canceled() -> void:
+	pass # Replace with function body.
 	
+	
+func _on_back_to_spell_book_settings_selection_pressed() -> void:
+	$SpellBookSettingsWindow/SpellbookList.visible = true
+	$SpellBookSettingsWindow/SpellbookSettings.visible = false
+	
+func _on_spellbook_settings_button_pressed(spellbook_name = ""):
+	if not character.spellbooks.has(spellbook_name):
+		return
+	spellbook_settings_selection = spellbook_name
+	var spellbook = character.spellbooks[spellbook_name]
+	$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/SpellBookName.text = spellbook["spellbook_name"]
+	$SpellBookSettingsWindow/SpellbookSettings/AllowHighLevel.button_pressed = spellbook["allow_spells_in_higher_slots"]
+	$SpellBookSettingsWindow/SpellbookSettings/Spontaneous.button_pressed = spellbook["spontaneous_spellcaster"]
+	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text = var_to_str(spellbook["allowed_spell_categories_all"])
+	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text = var_to_str(spellbook["allowed_spell_categories_one"])
+	$SpellBookSettingsWindow/SpellbookSettings/KnowAll.button_pressed = spellbook["know_all_spells"]
+	
+	$SpellBookSettingsWindow/SpellbookSettings/Label.text = "Filter Spell Categories - spells must have all of these"
+	$SpellBookSettingsWindow/SpellbookSettings/Label2.text = "Allowed Spell Categories - one of these must be present"
+	$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/Label.text = "spellbook name"
+	
+	$SpellBookSettingsWindow/SpellbookList.visible = false
+	$SpellBookSettingsWindow/SpellbookSettings.visible = true
+	
+	
+func _on_spellbook_settings_apply_pressed() -> void:
+	var spellbook = character.spellbooks[spellbook_settings_selection]
+	$SpellBookSettingsWindow/SpellbookSettings/Label.text = "Filter Spell Categories - spells must have all of these"
+	$SpellBookSettingsWindow/SpellbookSettings/Label2.text = "Allowed Spell Categories - one of these must be present"
+	$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/Label.text = "spellbook name"
+	#check validity of spellbook_name
+	var new_spellbook_name = $SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/SpellBookName.text
+	if new_spellbook_name == "":
+		$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/Label.text += "\n WRONG INPUT - must have name"
+		return
+	if new_spellbook_name != spellbook["spellbook_name"]:
+		if character.spellbooks.has(new_spellbook_name):
+			$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/Label.text += "\n WRONG INPUT - name already in use"
+			return
+	#check validity of AllowedSpellsAll and AllowedSpellsOne inputs
+	var spell_list_all = []
+	var spell_list_one = []
+	if $SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text != "":
+		spell_list_all = str_to_var($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text)
+		if spell_list_all == null or not spell_list_all is Array :
+			$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not Array "
+			return
+		for str in spell_list_all:
+			if not str is String:
+				$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not String "
+				return
+	if $SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text != "":
+		spell_list_one = str_to_var($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text)
+		if spell_list_one == null or not spell_list_one is Array :
+			$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not Array "
+			return
+		for str in spell_list_one:
+			if not str is String:
+				$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not String "
+				return
+	#inputs are fine, apply changes
+	spellbook["spellbook_name"] = new_spellbook_name
+	spellbook["allow_spells_in_higher_slots"] = $SpellBookSettingsWindow/SpellbookSettings/AllowHighLevel.button_pressed
+	spellbook["spontaneous_spellcaster"] = $SpellBookSettingsWindow/SpellbookSettings/Spontaneous.button_pressed
+	spellbook["allowed_spell_categories_all"] = spell_list_all
+	spellbook["allowed_spell_categories_one"] = spell_list_one
+	spellbook["know_all_spells"] = $SpellBookSettingsWindow/SpellbookSettings/KnowAll.button_pressed
+	
+	if new_spellbook_name != spellbook_settings_selection:
+		character.remove_spellbook(spellbook_settings_selection)
+		character.add_new_spellbook(new_spellbook_name)
+		
+func load_spellbooks_settings_list():
+	#clear old
+	for child in $SpellBookSettingsWindow/SpellbookList.get_children():
+		if child is Button:
+			child.queue_free()
+	for spellbook in character.spellbooks:
+		spellbook_settings_selection
+		var new_btn = Button.new()
+		new_btn.text = spellbook
+		new_btn.connect("pressed", _on_spellbook_settings_button_pressed.bind(spellbook))
+		$SpellBookSettingsWindow/SpellbookList.add_child(new_btn)
+		
+#endregion

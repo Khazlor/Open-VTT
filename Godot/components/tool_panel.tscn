@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="4_ev7tq"]
 [ext_resource type="Script" path="res://scripts/ToolPanel_Map.gd" id="6_8u5xx"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o68u3"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_atfvi"]
 bg_color = Color(0.160784, 0.152941, 0.14902, 1)
 border_width_left = 1
@@ -20,8 +22,6 @@ corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o68u3"]
 
 [node name="ToolPanel" type="Control"]
 clip_contents = true
@@ -54,8 +54,9 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 mouse_force_pass_scroll_events = false
-theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_o68u3")
+theme_override_styles/tab_selected = SubResource("StyleBoxFlat_atfvi")
+current_tab = 0
 
 [node name="Characters" type="MarginContainer" parent="TabContainer"]
 clip_contents = true
@@ -66,6 +67,7 @@ theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
+metadata/_tab_index = 0
 
 [node name="Tree" type="Tree" parent="TabContainer/Characters"]
 layout_mode = 2
@@ -85,6 +87,7 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
 script = ExtResource("2_hdll0")
+metadata/_tab_index = 1
 
 [node name="Tree" type="Tree" parent="TabContainer/Items"]
 layout_mode = 2
@@ -119,6 +122,7 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
 script = ExtResource("3_oj6qf")
+metadata/_tab_index = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Object"]
 clip_contents = false
@@ -387,6 +391,7 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
 script = ExtResource("6_8u5xx")
+metadata/_tab_index = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Map"]
 clip_contents = false

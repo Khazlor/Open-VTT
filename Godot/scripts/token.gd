@@ -322,6 +322,7 @@ func unselect():
 
 # ========================= multiplayer =============================
 
+#region Multiplayer
 func on_synch_macro(macro_name, macro_dict, old_macro_name = "", remove = false):
 	synch_macro_to_peers.rpc(macro_name, macro_dict, old_macro_name, remove)
 
@@ -406,3 +407,4 @@ func synch_rename_attr_on_other_peers(old_name, new_name):
 func synch_char_sheet_text_on_other_peers(new_text):
 	character.char_sheet_text = new_text
 	character.emit_signal("char_sheet_text_changed", null)
+#endregion

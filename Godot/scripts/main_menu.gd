@@ -7,16 +7,20 @@ var maplist
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	Globals.main_window = self.get_window()
+	#load settings
+	if Globals.settings == null:
+		Globals.settings = Settings_res.new()
+		Globals.settings.load_settings()
+		Globals.settings.apply_settings()
+	
 	multiplayer.multiplayer_peer = null #end multiplayer if multiplayer was in progress
 	Globals.client = false
-	#set base path for all files
-	if OS.is_debug_build():
-		Globals.base_dir_path = "res:/" #project folder in debug - not working in export
-	elif OS.has_feature("android"):
-		Globals.base_dir_path = "user:/"
-	else:
-		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
-		#can be changed to user:// to use default user application folder based on OS
+		
+	#open spell db
+	Globals.spell_database = SpellDB.new()
+	Globals.spell_database.open_spell_db()
+	
 
 
 func _on_campaign_browser_btn_pressed():
@@ -71,3 +75,6 @@ func client_on_connect():
 	get_tree().change_scene_to_file("res://scenes/player_lobby.tscn")
 	
 
+
+func _on_quit_btn_pressed() -> void:
+	get_tree().quit()

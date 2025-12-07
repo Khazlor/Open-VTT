@@ -25,6 +25,7 @@ func _on_tree_item_activated():
 	ch_sh.token_sheet = false
 	ch_sh.character = tree.get_selected().get_meta("character")
 	if ch_sh.character == null:
+		ch_sh.free()
 		return
 	Globals.windows.add_child(ch_sh)
 
@@ -34,7 +35,9 @@ func _on_tree_item_selected():
 	pass
 
 
-func _on_tree_button_clicked(item, column, id, mouse_button_index):
+func _on_tree_button_clicked(item: TreeItem, _column, id, _mouse_button_index):
+	if item.get_parent() == item.get_tree().get_root(): #main folders - only one button - add
+		id = 1
 	if id == 0:#edit
 		tree.set_selected(item, 0)
 		tree.edit_selected(true)

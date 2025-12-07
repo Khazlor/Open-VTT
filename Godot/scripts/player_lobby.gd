@@ -182,10 +182,10 @@ func client_set_map(server_map_file_buffer, file_buffer_size):
 		Globals.campaign.tutorial = false
 
 #call on server to request file
-@rpc("any_peer", "call_remote", "reliable")
-func tcp_server_get_file(path):
-	var peer_id = multiplayer.get_remote_sender_id()
-	pass
+#@rpc("any_peer", "call_remote", "reliable")
+#func tcp_server_get_file(path):
+	#var peer_id = multiplayer.get_remote_sender_id()
+	#pass
 
 #check server files for file - based on name and hash
 #if file with same name and different hash exists - creates new file, under new name
@@ -278,6 +278,8 @@ func add_to_objects_waiting_for_file(file_name: String, object):
 
 # ============================ UNDO / REDO ===============================
 
+#region Undo/Redo
+
 func add_operation_to_undo_stack(undo_arr):
 	var begin = undo_stack_pos - Globals.undo_size + 1
 	if begin < 0:
@@ -357,3 +359,4 @@ func redo_operation():
 					object_arr[0].attributes[attr_arr[0]] = attr_arr[1]
 					object_arr[0].emit_signal("attr_updated", attr_arr[0], false)
 	undo_stack_pos += 1
+#endregion

@@ -5,3 +5,6 @@ Godot/saves/
 Godot/images/
 Godot/fonts/
 Godot/temp*
+Godot/spells.db
+Godot/settings.json
+Godot/keymaps.dat

@@ -1,0 +1,153 @@
+[gd_scene load_steps=5 format=3 uid="uid://dlf01asesjieo"]
+
+[ext_resource type="Script" path="res://scripts/spell_card.gd" id="1_n688e"]
+[ext_resource type="Texture2D" uid="uid://cxn4obecxdjgu" path="res://images/Campaign Name/Spell_fire_fireball02.webp.PNG" id="2_33o7o"]
+[ext_resource type="Texture2D" uid="uid://2sbeb2nihtia" path="res://icons/Forward.svg" id="3_46b20"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j8elw"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.366595, 0.366595, 0.366594, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.87046, 0, 0.0121604, 1)
+
+[node name="Spell" type="PanelContainer"]
+custom_minimum_size = Vector2(420, 0)
+offset_right = 420.0
+offset_bottom = 84.0
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_j8elw")
+script = ExtResource("1_n688e")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SpellCard" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/SpellCard"]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+texture = ExtResource("2_33o7o")
+expand_mode = 4
+stretch_mode = 4
+
+[node name="Title" type="Label" parent="VBoxContainer/SpellCard"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Magic Missile"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Collapse" type="Button" parent="VBoxContainer/SpellCard"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+toggle_mode = true
+icon = ExtResource("3_46b20")
+flat = true
+icon_alignment = 1
+
+[node name="CardContent" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 2
+
+[node name="Desc" type="RichTextLabel" parent="VBoxContainer/CardContent"]
+custom_minimum_size = Vector2(386.14, 0)
+layout_mode = 0
+offset_top = 10.0
+offset_right = 386.14
+offset_bottom = 125.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "Description of this spell goes here Description of this spell goes here Description of this spell goes here Description of this spell goes here Description of this spell goes here Description of this spell goes here"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+
+[node name="Materials" type="RichTextLabel" parent="VBoxContainer/CardContent"]
+custom_minimum_size = Vector2(386.14, 0)
+layout_mode = 0
+offset_top = 140.0
+offset_right = 386.14
+offset_bottom = 163.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "Material Components are these: [b]Coconut nut[/b]"
+fit_content = true
+autowrap_mode = 2
+
+[node name="CastTime" type="RichTextLabel" parent="VBoxContainer/CardContent"]
+custom_minimum_size = Vector2(386.14, 0)
+layout_mode = 0
+offset_top = 190.0
+offset_right = 386.14
+offset_bottom = 213.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "Casting Time: 1"
+fit_content = true
+
+[node name="Comp" type="RichTextLabel" parent="VBoxContainer/CardContent"]
+custom_minimum_size = Vector2(386.14, 0)
+layout_mode = 0
+offset_top = 190.0
+offset_right = 386.14
+offset_bottom = 213.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "[right]S V M[/right]"
+fit_content = true
+
+[node name="Macro" type="Label" parent="VBoxContainer/CardContent"]
+layout_mode = 0
+offset_top = 236.0
+offset_right = 392.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 31
+text = "/r 4d4+4 // DMG"
+horizontal_alignment = 1
+
+[node name="LeftMouseButton" type="Button" parent="."]
+layout_mode = 2
+mouse_filter = 1
+flat = true
+
+[node name="MiddleMouseButton" type="Button" parent="LeftMouseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+button_mask = 4
+flat = true
+
+[node name="RightMouseButton" type="Button" parent="LeftMouseButton/MiddleMouseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+button_mask = 2
+flat = true
+
+[connection signal="toggled" from="VBoxContainer/SpellCard/Collapse" to="." method="_on_collapse_toggled"]
+[connection signal="pressed" from="LeftMouseButton" to="." method="_on_left_mouse_button_pressed"]
+[connection signal="pressed" from="LeftMouseButton/MiddleMouseButton" to="." method="_on_middle_mouse_button_pressed"]
+[connection signal="pressed" from="LeftMouseButton/MiddleMouseButton/RightMouseButton" to="." method="_on_right_mouse_button_pressed"]

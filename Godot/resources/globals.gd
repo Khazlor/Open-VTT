@@ -2,10 +2,12 @@
 #Desc:
 #List of Global variables - used for setting currrent map and campaign and easy data sharing between scripts
 
-class_name Tool
 extends Node
 
-var base_dir_path # project folder for saving, res:// does not work in exported projects
+var base_dir_path # project folder for saving, res:// does not work in exported projects as of Godot 4.2
+
+var icon_opened = preload("res://icons/Collapse.svg")
+var icon_folded = preload("res://icons/Forward.svg")
 
 var enet_peer = null #for multiplayer
 var lobby: Node2D = null
@@ -17,12 +19,15 @@ var campaign: Campaign_res
 var map: Map_res
 var new_map: Map_res
 
+var settings: Settings_res 
+
 var draw_comp: Node2D
 var draw_layer: Node2D
 var drag_drop_canvas_layer: CanvasLayer #for dragging characters to map
 var BG_ColorRect: ColorRect
 var camera
 
+var main_window: Window
 var layers: Control
 var roll_panel: Control
 var action_bar: FlowContainer
@@ -30,6 +35,7 @@ var turn_order: Window
 var tool_bar
 var windows: Control
 var char_tree: Tree
+var non_embedded_viewport: Window
 
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
@@ -56,6 +62,26 @@ var undo_size = 25
 
 var tokenShapeDict = {"Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(0,1)]), "Pointed Square": PackedVector2Array([Vector2(0,0), Vector2(1,0), Vector2(1,0.8), Vector2(0.5,1), Vector2(0,0.8)])}
 
+var spell_database: SpellDB
+
+func _enter_tree() -> void:
+	#set base path for all files
+	if OS.is_debug_build():
+		Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+	elif OS.has_feature("android"):
+		Globals.base_dir_path = "user:/"
+	else:
+		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
+		#can be changed to user:// to use default user application folder based on OS
+	
+func _ready() -> void:
+	#create window for non-embedded windows
+	non_embedded_viewport = Window.new()
+	non_embedded_viewport.size = Vector2(0,0)
+	non_embedded_viewport.borderless = true
+	non_embedded_viewport.gui_embed_subwindows = false
+	get_window().add_child.call_deferred(non_embedded_viewport)
+	
 
 func load_texture(file_path):
 	if not FileAccess.file_exists(file_path):
@@ -94,3 +120,10 @@ func on_server_disconnected(): #handles closing of server on client side
 		i += 0.5
 		await get_tree().create_timer(0.5).timeout
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	
+#custom scene changing - adds support for players being on different scene than dm, non-embedded windows
+func change_scene_to_file(path: String):
+	pass
+	
+	
+	

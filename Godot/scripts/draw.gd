@@ -75,6 +75,7 @@ var unshaded_material: CanvasItemMaterial
 @onready var layer_tree = $"../CanvasLayer/Layers/Tree"
 @onready var tool_panel_object_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Object"
 @onready var tool_panel_map_menu = $"../CanvasLayer/HSplitContainer/VSplitContainer/ToolPanel/TabContainer/Map"
+@onready var game_menu = $"../GameMenu"
 
 signal targeting_end(selected_targets)
 
@@ -100,45 +101,12 @@ func _ready():
 	
 #handles all user input that wasn't handled by buttons, textedits etc.
 func _unhandled_input(event):
-#	print_tree_pretty() #DEBUG TODO remove
 	if event is InputEventMouse: #handle mouse envents
 		if Globals.draw_layer == null: #check if layer is selected
 			return
 		mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
-	#		var snapping_camera_adjusted = get_node("../Camera2D").zoom
-	#		var snapping_camera_offset = Vector2(fmod(get_node("../Camera2D").position.x, 70), fmod(get_node("../Camera2D").position.y, 70))
-	#		if snapping_camera_offset.x < 0:
-	#			snapping_camera_offset.x = 70 + snapping_camera_offset.x
-	#		if snapping_camera_offset.y < 0:
-	#			snapping_camera_offset.y = 70 + snapping_camera_offset.y
-	##		print(snapping_camera_adjusted)
-	#		print(get_node("../Camera2D").position)
-	#		print (event.position)
-	#		print (snapping_camera_offset)
-	#		var posxmod = fmod((event.position.x + snapping_camera_offset.x), 70 * snapping_camera_adjusted.x)
-	#		if posxmod < 70/2:
-	#			event.position.x -= posxmod
-	#		else:
-	#			event.position.x += (70-posxmod)
-	#		var posymod = fmod((event.position.y + snapping_camera_offset.y), 70 * snapping_camera_adjusted.y)
-	#		if posymod < 70/2:
-	#			event.position.y -= posymod
-	#		else:
-	#			event.position.y += (70-posymod)
-				
-	#		print(Vector2(fmod(get_node("../Camera2D").position.x, 70), fmod(get_node("../Camera2D").position.y, 70)))
-	#		event.position = 70 * round(event.position/70)
-	#		print(event.position)
-
-#			print(mouse_pos)
 			mouse_pos = round(mouse_pos/(70/Globals.snappingFraction))*(70/Globals.snappingFraction) #snap to grid
-#			print(mouse_pos)
-		#skip if position not changed
-	#	if last_event_pos == event.position:
-	#		return
-	#	else:
-	#		last_event_pos = event.position
 		if targeting and Input.is_action_just_pressed("mouseleft"): #targeting end
 			end_targeting()
 			return
@@ -188,6 +156,7 @@ func _unhandled_input(event):
 				child.queue_free()
 			current_measure.clear()
 
+#region Selection Finished
 		#select box
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "select":
 			print("mouse released with select - scaling: " + str(selected_scaling))
@@ -236,106 +205,107 @@ func _unhandled_input(event):
 			if select_box == null:
 				print("selectbox is null during select!")
 				return
-			var lines_children = Globals.draw_layer.get_children()
-			#max select box size and position based on drawn size
-			var max_x = select_box.position.x
-			var max_y = select_box.position.y
-			var min_x = select_box.size.x + select_box.position.x
-			var min_y = select_box.size.y + select_box.position.y
-			#snap selection size to children
+				
 			var new_selected = []
-			for child in lines_children:
-				if "character" in child: #if character token
-					child = child.get_child(0)
-				if child.is_class("Node2D"): #inherits from Node2D
-					if Globals.select_recursive:
-						if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
-							if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
-								continue
-							if child.visible:
-								lines_children.append_array(child.get_children())
-					continue
-				if child.rotation == 0: #no rotation - faster
-					if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
-						if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
-							if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
-								new_selected.append(child)
-								if child.scale.x > 0:
-									if child.position.x < min_x:
-										min_x = child.position.x
-									if child.position.x + child.size.x*child.scale.x > max_x:
-										max_x = child.position.x + child.size.x*child.scale.x
-								else:
-									if child.position.x + child.size.x*child.scale.x < min_x:
-										min_x = child.position.x + child.size.x*child.scale.x
-									if child.position.x > max_x:
-										max_x = child.position.x
-								if child.scale.y > 0:
-									if child.position.y < min_y:
-										min_y = child.position.y
-									if child.position.y + child.size.y*child.scale.y > max_y:
-										max_y = child.position.y + child.size.y*child.scale.y
-								else:
-									if child.position.y + child.size.y*child.scale.y < min_y:
-										min_y = child.position.y + child.size.y*child.scale.y
-								if child.position.y > max_y:
-										max_y = child.position.y
-				else: #rotated object - locate corners then decide
-					var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
-					var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
-					var top_left = child.position
-					var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
-					var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
-					var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
-					print("located corners: ", top_left, top_right, bottom_left, bottom_right)
-					print ("bounds: ", select_box.get_begin(), select_box.get_end())
-					var max = Vector2()#max x,y of rotated polygon
-					var min = Vector2()#min x,y of rotated polygon
-					max.x = top_left.x
-					max.y = top_left.y
-					if top_right.x > max.x:
-						max.x = top_right.x
-					if top_right.y > max.y:
-						max.y = top_right.y
-					if bottom_right.x > max.x:
-						max.x = bottom_right.x
-					if bottom_right.y > max.y:
-						max.y = bottom_right.y
-					if bottom_left.x > max.x:
-						max.x = bottom_left.x
-					if bottom_left.y > max.y:
-						max.y = bottom_left.y
-					#get min
-					min.x = top_left.x
-					min.y = top_left.y
-					if top_right.x < min.x:
-						min.x = top_right.x
-					if top_right.y < min.y:
-						min.y = top_right.y
-					if bottom_right.x < min.x:
-						min.x = bottom_right.x
-					if bottom_right.y < min.y:
-						min.y = bottom_right.y
-					if bottom_left.x < min.x:
-						min.x = bottom_left.x
-					if bottom_left.y < min.y:
-						min.y = bottom_left.y
-					var b = select_box.get_begin()
-					var e = select_box.get_end()
-					print(b, min, e, max)
-					if min.x >= b.x and min.y >= b.y:
-						if max.x <= e.x:
-							if max.y <= e.y:
-								new_selected.append(child)
-								if max.x > max_x:
-									max_x = max.x
-								if max.y > max_y:
-									max_y = max.y
-								if min.x < min_x:
-									min_x = min.x
-								if min.y < min_y:
-									min_y = min.y
-				min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
+			if not (select_box.size.x < 2 and select_box.size.y < 2): #skip next section if selectbox very small - probably just clicked
+				var lines_children = Globals.draw_layer.get_children()
+				#max select box size and position based on drawn size
+				var max_x = select_box.position.x
+				var max_y = select_box.position.y
+				var min_x = select_box.size.x + select_box.position.x
+				var min_y = select_box.size.y + select_box.position.y
+				for child in lines_children:
+					if "character" in child: #if character token
+						child = child.get_child(0)
+					if child.is_class("Node2D"): #inherits from Node2D
+						if Globals.select_recursive:
+							if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+								if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
+									continue
+								if child.visible:
+									lines_children.append_array(child.get_children())
+						continue
+					if child.rotation == 0: #no rotation - faster
+						if child.position.x >= select_box.position.x and child.position.y >= select_box.position.y:
+							if child.position.x + child.size.x*child.scale.x <= select_box.position.x + select_box.size.x:
+								if child.position.y + child.size.y*child.scale.y <= select_box.position.y + select_box.size.y:
+									new_selected.append(child)
+									if child.scale.x > 0:
+										if child.position.x < min_x:
+											min_x = child.position.x
+										if child.position.x + child.size.x*child.scale.x > max_x:
+											max_x = child.position.x + child.size.x*child.scale.x
+									else:
+										if child.position.x + child.size.x*child.scale.x < min_x:
+											min_x = child.position.x + child.size.x*child.scale.x
+										if child.position.x > max_x:
+											max_x = child.position.x
+									if child.scale.y > 0:
+										if child.position.y < min_y:
+											min_y = child.position.y
+										if child.position.y + child.size.y*child.scale.y > max_y:
+											max_y = child.position.y + child.size.y*child.scale.y
+									else:
+										if child.position.y + child.size.y*child.scale.y < min_y:
+											min_y = child.position.y + child.size.y*child.scale.y
+									if child.position.y > max_y:
+											max_y = child.position.y
+					else: #rotated object - locate corners then decide
+						var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+						var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+						var top_left = child.position
+						var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+						var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+						var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+						print("located corners: ", top_left, top_right, bottom_left, bottom_right)
+						print ("bounds: ", select_box.get_begin(), select_box.get_end())
+						var max = Vector2()#max x,y of rotated polygon
+						var min = Vector2()#min x,y of rotated polygon
+						max.x = top_left.x
+						max.y = top_left.y
+						if top_right.x > max.x:
+							max.x = top_right.x
+						if top_right.y > max.y:
+							max.y = top_right.y
+						if bottom_right.x > max.x:
+							max.x = bottom_right.x
+						if bottom_right.y > max.y:
+							max.y = bottom_right.y
+						if bottom_left.x > max.x:
+							max.x = bottom_left.x
+						if bottom_left.y > max.y:
+							max.y = bottom_left.y
+						#get min
+						min.x = top_left.x
+						min.y = top_left.y
+						if top_right.x < min.x:
+							min.x = top_right.x
+						if top_right.y < min.y:
+							min.y = top_right.y
+						if bottom_right.x < min.x:
+							min.x = bottom_right.x
+						if bottom_right.y < min.y:
+							min.y = bottom_right.y
+						if bottom_left.x < min.x:
+							min.x = bottom_left.x
+						if bottom_left.y < min.y:
+							min.y = bottom_left.y
+						var b = select_box.get_begin()
+						var e = select_box.get_end()
+						print(b, min, e, max)
+						if min.x >= b.x and min.y >= b.y:
+							if max.x <= e.x:
+								if max.y <= e.y:
+									new_selected.append(child)
+									if max.x > max_x:
+										max_x = max.x
+									if max.y > max_y:
+										max_y = max.y
+									if min.x < min_x:
+										min_x = min.x
+									if min.y < min_y:
+										min_y = min.y
+					min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
 			#if nothing in dragged square -> get clicked
 			if new_selected.is_empty():
 				var clicked = get_clicked(mouse_pos)
@@ -353,6 +323,7 @@ func _unhandled_input(event):
 				if min_max_x_y.w < select_pos_org.y + select_size_org.y:
 					min_max_x_y.w = select_pos_org.y + select_size_org.y
 			select_objects()
+#endregion
 		#circle or rect drawing finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "rect":
 			if current_panel == null:
@@ -370,6 +341,7 @@ func _unhandled_input(event):
 				create_object_on_remote_peers(current_ellipse, true)
 		#else button held -> drawing
 		if draw_enable:
+#region Draw Shapes
 			if Globals.tool == "rect":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
@@ -479,7 +451,9 @@ func _unhandled_input(event):
 					if Input.is_action_pressed("shift"):
 						current_ellipse.size.x = current_ellipse.size.y
 					current_ellipse.queue_redraw()
+#endregion
 					
+#region Text
 			if Globals.tool == "text":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
@@ -535,7 +509,9 @@ func _unhandled_input(event):
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					return
+#endregion
 					
+#region Measure
 			if Globals.tool == "measure":
 				if Globals.measureTool == 1: #measure line
 					if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -655,7 +631,9 @@ func _unhandled_input(event):
 						current_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
 						print(current_arc.center, begin)
 						print(current_arc.radius, " ", current_arc.angle_size, " ", current_arc.angle_direction, mouse_pos)
+#endregion
 					
+#region Selection - Create Scale Rotate Drag 
 			if Globals.tool == "select":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
@@ -932,7 +910,10 @@ func _unhandled_input(event):
 								select_box.size.x = select_box.size.y
 							else:
 								select_box.size.y = select_box.size.x
-								
+#endregion
+	
+
+#region Keyboard Event Handling
 	elif event is InputEventKey: #handle keyboard events
 		print("key pressed")
 		if Input.is_action_just_pressed("Delete") or Input.is_action_just_pressed("ui_cut"): #delete or cut selection
@@ -961,12 +942,13 @@ func _unhandled_input(event):
 				selected.clear()
 				mouse_over_clear()
 				return
-			if Globals.lobby.check_is_server():
-				get_tree().change_scene_to_file("res://scenes/Maps.tscn")
-			else:
-				multiplayer.multiplayer_peer = null #terminate multiplayer
-				get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
-			
+			else: #show or hide game menu
+				if game_menu.visible:
+					game_menu.hide()
+				else:
+					game_menu.popup_centered()
+				return
+				
 		elif Input.is_action_just_pressed("I-pressed"): #open inventory TODO - get character from token
 			print("released I")
 			if not selected.is_empty():
@@ -1106,6 +1088,7 @@ func _unhandled_input(event):
 			Globals.lobby.undo_operation()
 		elif Input.is_action_just_pressed("ui_redo"):
 			Globals.lobby.redo_operation()
+#endregion
 
 
 func remove_object(object, remote = false, set_undo = false, set_undo_part = false):
@@ -1164,6 +1147,45 @@ func copy_to_clipboard():
 			var light = get_object_light(object).duplicate(5)
 			Globals.clipboard_lights.append(light)
 		Globals.clipboard_objects.append(object.duplicate(5))
+	
+#region Select Box
+
+func create_select_box(position):
+	select_box = Panel.new()
+	select_box.mouse_filter = Control.MOUSE_FILTER_PASS
+	begin = position
+	select_box.set_begin(begin)
+	select_box.set_end(begin)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.5,0.5,1,0.2)
+	style.border_color = Color.CORNSILK
+	style.set_border_width_all(2)
+	select_box.add_theme_stylebox_override("panel", style)
+	select_box.material = unshaded_material
+	select_box.connect("mouse_entered", _on_select_mouse_entered)
+	select_box.connect("mouse_exited", _on_select_mouse_exited)
+	$Select.add_child(select_box)
+	
+#creates handle for selection box
+#preset - anchor point
+#s - size
+func create_handle(preset: Control.LayoutPreset, s: float):
+	current_panel = Panel.new()
+	current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	current_panel.position = Vector2(-s/2,-s/2)
+	current_panel.size = Vector2(s,s)
+	current_panel.pivot_offset = Vector2(s/2,s/2)
+	current_panel.set_anchors_preset(preset)
+	current_panel.scale = Vector2(1/$"../Camera2D".zoom.x, 1/$"../Camera2D".zoom.y)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color.WHITE
+	style.border_color = Color.BLACK
+	style.set_border_width_all(s/5)
+	style.set_corner_radius_all(s)
+	current_panel.add_theme_stylebox_override("panel", style)
+	current_panel.material = unshaded_material
+	select_box.add_child(current_panel)
+	
 
 #gets top object in current layer at given position
 func get_clicked(mouse_position: Vector2):
@@ -1387,6 +1409,10 @@ func select_objects():
 	current_panel.connect("mouse_exited", _rotate_handle_mouse_exited)
 	
 	
+func select_token(token):
+	selected = [token.token_polygon]
+	select_objects()
+
 func _on_select_mouse_entered():
 	print("mouse over selected")
 	mouse_over_selected = true
@@ -1506,27 +1532,7 @@ func scale_items():
 		#if object is token - update UI
 		if "character" in object.get_parent():
 			object.get_parent().UI_set_position()
-	
-#creates handle for selection box
-#preset - anchor point
-#s - size
-func create_handle(preset: Control.LayoutPreset, s: float):
-	current_panel = Panel.new()
-	current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
-	current_panel.position = Vector2(-s/2,-s/2)
-	current_panel.size = Vector2(s,s)
-	current_panel.pivot_offset = Vector2(s/2,s/2)
-	current_panel.set_anchors_preset(preset)
-	current_panel.scale = Vector2(1/$"../Camera2D".zoom.x, 1/$"../Camera2D".zoom.y)
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color.WHITE
-	style.border_color = Color.BLACK
-	style.set_border_width_all(s/5)
-	style.set_corner_radius_all(s)
-	current_panel.add_theme_stylebox_override("panel", style)
-	current_panel.material = unshaded_material
-	select_box.add_child(current_panel)
-	
+
 func _tl_handle_mouse_entered():
 	if !selected_scaling:
 		mouse_over_tl = true
@@ -1566,6 +1572,7 @@ func _rotate_handle_mouse_entered():
 func _rotate_handle_mouse_exited():
 	if !selected_scaling:
 		mouse_over_rotate = false
+#endregion
 
 #drag and drop images
 func on_files_dropped(files):
@@ -1631,6 +1638,7 @@ func _text_edit_finished():
 func _text_edit_text_changed():
 	current_textedit.size = current_textedit.get_theme_font("normal_font").get_multiline_string_size(current_textedit.text) + Vector2(20, current_textedit.get_theme_font("normal_font").get_height(Globals.fontSize))
 	
+#region Edit Selected Objects by settings
 func _on_transform_signal(index, value):
 	if index == 0:
 		for object in selected:
@@ -1982,27 +1990,76 @@ func _on_fov_opacity_changed_signal(value):
 			tokens_clear = true
 	if tokens_clear:
 		Globals.new_map.remove_tokens_from_token_array()
-	
-func select_token(token):
-	selected = [token.token_polygon]
-	select_objects()
-	
-func create_select_box(position):
-	select_box = Panel.new()
-	select_box.mouse_filter = Control.MOUSE_FILTER_PASS
-	begin = position
-	select_box.set_begin(begin)
-	select_box.set_end(begin)
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.5,0.5,1,0.2)
-	style.border_color = Color.CORNSILK
-	style.set_border_width_all(2)
-	select_box.add_theme_stylebox_override("panel", style)
-	select_box.material = unshaded_material
-	select_box.connect("mouse_entered", _on_select_mouse_entered)
-	select_box.connect("mouse_exited", _on_select_mouse_exited)
-	$Select.add_child(select_box)
 
+#modify selected objects
+func on_line_settings_changed(setting):
+	print("change of setting")
+	print(setting)
+	print(selected)
+	for object in selected:
+		if object.has_meta("type"):
+			var type = object.get_meta("type")
+			if type == "rect":
+				var style = object.get_theme_stylebox("panel")
+				if style == null:
+					print("style is null !!!!")
+					return
+				if setting == "lc":
+					style.border_color = Globals.colorLines
+				elif setting == "lw":
+					style.set_border_width_all(Globals.lineWidth)
+				elif setting == "bg":
+					style.bg_color = Globals.colorBack
+				create_object_on_remote_peers(object)
+			elif type == "circle":
+				if setting == "lc":
+					object.line_color = Globals.colorLines
+				elif setting == "bg":
+					object.back_color = Globals.colorBack
+				elif setting == "lw":
+					object.line_width = Globals.lineWidth
+				object.queue_redraw()
+				create_object_on_remote_peers(object)
+			elif type == "line":
+				var line
+				for child in object.get_children():
+					if child is Line2D:
+						line = child
+						break
+				if line == null:
+					print("saving line - not line - need fix") 
+					return
+				if setting == "lw":
+					line.width = Globals.lineWidth
+				elif setting == "lc":
+					line.default_color = Globals.colorLines
+				create_object_on_remote_peers(object)
+				
+#modify selected text objects
+func on_font_settings_changed(setting):
+	print(setting)
+	for object in selected:
+		if object.has_meta("type"):
+			var type = object.get_meta("type")
+			if type == "text":
+				if setting == "f":
+					if Globals.fontName != "default":
+						object.add_theme_font_override("font", Globals.font)
+				elif setting == "fs":
+					object.add_theme_font_size_override("font_size", Globals.fontSize)
+				elif setting == "fc":
+					object.add_theme_color_override("font_color", Globals.fontColor)
+				create_object_on_remote_peers(object)
+#endregion
+
+	
+func get_object_center(object):
+	var distance = Vector2(0,0).distance_to((object.size * object.scale)/2)
+	var angle = Vector2(0,0).angle_to_point((object.size * object.scale)/2) + object.rotation
+	var center = object.position + Vector2(distance * cos(angle), distance * sin(angle))
+	return center
+
+#region Macro Targeting
 #creates proper shapes for targeting based on entered macro
 func create_targeting(targeting_data):
 	print("targeting data: ", targeting_data)
@@ -2170,77 +2227,11 @@ func reset_targeting_variables():
 	targeting_origin = null
 	targeting_point_radius = -1
 	targeting_self = false
+#endregion
 	
-
-func get_object_center(object):
-	var distance = Vector2(0,0).distance_to((object.size * object.scale)/2)
-	var angle = Vector2(0,0).angle_to_point((object.size * object.scale)/2) + object.rotation
-	var center = object.position + Vector2(distance * cos(angle), distance * sin(angle))
-	return center
-
-#modify selected objects
-func on_line_settings_changed(setting):
-	print("change of setting")
-	print(setting)
-	print(selected)
-	for object in selected:
-		if object.has_meta("type"):
-			var type = object.get_meta("type")
-			if type == "rect":
-				var style = object.get_theme_stylebox("panel")
-				if style == null:
-					print("style is null !!!!")
-					return
-				if setting == "lc":
-					style.border_color = Globals.colorLines
-				elif setting == "lw":
-					style.set_border_width_all(Globals.lineWidth)
-				elif setting == "bg":
-					style.bg_color = Globals.colorBack
-				create_object_on_remote_peers(object)
-			elif type == "circle":
-				if setting == "lc":
-					object.line_color = Globals.colorLines
-				elif setting == "bg":
-					object.back_color = Globals.colorBack
-				elif setting == "lw":
-					object.line_width = Globals.lineWidth
-				object.queue_redraw()
-				create_object_on_remote_peers(object)
-			elif type == "line":
-				var line
-				for child in object.get_children():
-					if child is Line2D:
-						line = child
-						break
-				if line == null:
-					print("saving line - not line - need fix") 
-					return
-				if setting == "lw":
-					line.width = Globals.lineWidth
-				elif setting == "lc":
-					line.default_color = Globals.colorLines
-				create_object_on_remote_peers(object)
-				
-#modify selected text objects
-func on_font_settings_changed(setting):
-	print(setting)
-	for object in selected:
-		if object.has_meta("type"):
-			var type = object.get_meta("type")
-			if type == "text":
-				if setting == "f":
-					if Globals.fontName != "default":
-						object.add_theme_font_override("font", Globals.font)
-				elif setting == "fs":
-					object.add_theme_font_size_override("font_size", Globals.fontSize)
-				elif setting == "fc":
-					object.add_theme_color_override("font_color", Globals.fontColor)
-				create_object_on_remote_peers(object)
-
-
 # ============== multiplayer synch of objects on map =================
 
+#region Multiplayer synch RPC functions
 func create_object_on_remote_peers(object, set_undo = false, set_undo_part = false):
 	object.name = object.name
 	var serialized_object = serialize_object_for_rpc(object)
@@ -2640,6 +2631,7 @@ func update_other_peers_timer_start():
 	update_other_peers = false
 	await get_tree().create_timer(update_timer_interval).timeout
 	update_other_peers = true
+#endregion
 
 
 func _on_tutorial_window_close_requested():

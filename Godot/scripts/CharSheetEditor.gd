@@ -97,6 +97,8 @@ func _ready():
 	node.remove_child(select_box)
 	node.add_child(select_box, false, Node.INTERNAL_MODE_FRONT)
 
+func get_canvas_mouse_pos():
+	return node.get_local_mouse_position()
 
 func get_font_size(font: Font, size, text):
 	print("get_font_size")
@@ -113,12 +115,13 @@ func get_font_size(font: Font, size, text):
 			break
 	return min(m,n)
 
-
 func apply_zoom():
 	canvas.custom_minimum_size = Vector2(char_sheet_arr[0].x * zoom, char_sheet_arr[0].y * zoom)
 	node.scale = Vector2(zoom, zoom)
 
 # =============================== saving and loading =====================================
+
+#region Saving and Loading
 
 func check_save_folder():
 	if not DirAccess.dir_exists_absolute(char_sheet_base_path):
@@ -284,10 +287,14 @@ func load_image_from_dict(dict):
 	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode = TextureRect.STRETCH_SCALE
 	return image
+#endregion
+
 # ================================== drawing ============================================
 
+#region Drawing
+
 func _input(event):
-	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+	if event is InputEventMouseMotion and Input.is_action_pressed("mousemiddle"):
 		canvas_scroll.scroll_horizontal -= event.relative.x
 		canvas_scroll.scroll_vertical -= event.relative.y
 		get_viewport().set_input_as_handled()
@@ -315,7 +322,7 @@ func _unhandled_input(event):
 					dragging = true
 					print("dragging")
 					return
-				var focus = get_window().gui_get_focus_owner() #fix for selecting object with option range selected
+				var focus = Globals.main_window.gui_get_focus_owner() #fix for selecting object with option range selected
 				if focus != null:
 					focus.release_focus()
 				creating = true
@@ -509,8 +516,11 @@ func _unhandled_input(event):
 				elif type == "image":
 					selected_objects.append(load_image_from_dict(new_dict))
 			recalculate_select_box()
+#endregion
 
 # ================================== tool selection ===================================================
+
+#region Tool Selection
 func _on_select_toggled(toggled_on):
 	if toggled_on:
 		if creating:
@@ -554,8 +564,11 @@ func _on_image_toggled(toggled_on):
 			creating = false
 		tool = Tools.IMAGE
 		show_selected_options()
+#endregion
 
 # ======================================= select functions =================================
+
+#region Select Helper Functions
 
 #returns pos and size based on begin and end
 func get_pos_and_size():
@@ -644,9 +657,6 @@ func recalculate_select_box():
 			min_y = object.position.y
 	select_box.position = Vector2(min_x, min_y) - node.position
 	select_box.size = Vector2(max_x-min_x, max_y-min_y)
-
-func get_canvas_mouse_pos():
-	return node.get_local_mouse_position()
 		
 func set_polygon_pos_and_size(object):
 	if object.points.is_empty():
@@ -678,7 +688,11 @@ func set_polygon_pos_and_size(object):
 	object.size = Vector2(max_x - min_x, max_y - min_y)
 	dict["size"] = object.size
 	object.queue_redraw()
-		
+#endregion
+
+# ================================ load options =======================================
+
+#region Loading Selection Options
 func show_selected_options():
 	if current_opt != null:
 		current_opt.visible = false
@@ -834,9 +848,11 @@ func load_image_opt(dict, reload_image = false):
 	else:
 		opt_image.get_node("Container/Attribute").visible = false
 	loading = false
+#endregion
 
 # ================================ changing options =======================================
 
+#region Changing Selection Options
 func _on_canvas_size_x_spin_box_value_changed(value):
 	canvas.custom_minimum_size.x = value
 	char_sheet_arr[0].x = value
@@ -1315,3 +1331,4 @@ func _on_label_vert_align_option_button_item_selected(index):
 		for object: Label in selected_objects:
 			object.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 			object.get_meta("dict")["valign"] = VERTICAL_ALIGNMENT_BOTTOM
+#endregion

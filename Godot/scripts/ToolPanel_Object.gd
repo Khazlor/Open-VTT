@@ -131,4 +131,3 @@ func get_shadow_one_sided():
 func get_shadow_flipped():
 	return $ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer/FlipSides.button_pressed
 	
-

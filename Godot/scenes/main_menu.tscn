@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://cwe83xmexp2g"]
+[gd_scene load_steps=5 format=3 uid="uid://cwe83xmexp2g"]
 
-[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_8ica2"]
+[ext_resource type="Script" uid="uid://c14eqrac1x42f" path="res://scripts/main_menu.gd" id="1_8ica2"]
 [ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="1_8y4y0"]
-[ext_resource type="Texture2D" uid="uid://ec1r4074qwp8" path="res://icons/Close.svg" id="3_gj8af"]
 
 [sub_resource type="GDScript" id="GDScript_t0u01"]
 script/source = "extends Button
@@ -30,7 +29,7 @@ properties/1/path = NodePath(".:position")
 properties/1/spawn = true
 properties/1/replication_mode = 2
 
-[node name="Control" type="Control"]
+[node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,6 +44,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 343.0
+offset_bottom = 395.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -98,40 +99,16 @@ size_flags_stretch_ratio = 0.5
 theme_override_font_sizes/font_size = 40
 text = "Join Game"
 
-[node name="GlobalCharactersBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
-visible = false
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="QuitBtn" type="Button" parent="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.5
 theme_override_font_sizes/font_size = 40
-text = "Monsters
+text = "Exit Game
 "
-
-[node name="ExitBtn" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -56.0
-offset_top = 8.0
-offset_right = -9.0
-offset_bottom = 56.0
-grow_horizontal = 0
-icon = ExtResource("3_gj8af")
-icon_alignment = 1
-
-[node name="OptBtn" type="Button" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -120.0
-offset_top = 8.0
-offset_right = -73.0
-offset_bottom = 56.0
-grow_horizontal = 0
-text = "O"
 
 [node name="HostGameDialog" type="ConfirmationDialog" parent="."]
 title = "Host Game"
@@ -238,7 +215,6 @@ size_flags_horizontal = 3
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/CampaignEditBtn" to="." method="_on_campaign_browser_btn_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/HostGameBtn" to="." method="_on_host_game_btn_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/JoinGameBtn" to="." method="_on_join_game_btn_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/QuitBtn" to="." method="_on_quit_btn_pressed"]
 [connection signal="confirmed" from="HostGameDialog" to="." method="_on_host_game_dialog_confirmed"]
-[connection signal="delta_synchronized" from="HostGameDialog/MultiplayerSynchronizer" to="." method="_on_multiplayer_synchronizer_delta_synchronized"]
-[connection signal="synchronized" from="HostGameDialog/MultiplayerSynchronizer" to="." method="_on_multiplayer_synchronizer_synchronized"]
 [connection signal="confirmed" from="JoinGameDialog" to="." method="_on_join_game_dialog_confirmed"]

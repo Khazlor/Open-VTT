@@ -1,0 +1,83 @@
+[gd_scene load_steps=4 format=3 uid="uid://18gb34wkgp8o"]
+
+[ext_resource type="Script" uid="uid://2d0p3ix6gsm7" path="res://scripts/spellbook.gd" id="1_43ovv"]
+[ext_resource type="Texture2D" uid="uid://bx60ts8penn5g" path="res://icons/ZoomLess.svg" id="2_qkdhc"]
+[ext_resource type="Texture2D" uid="uid://c41kod62g1a6j" path="res://icons/ZoomMore.svg" id="3_l5b10"]
+
+[node name="SpellBook" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_43ovv")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 250
+
+[node name="SidePanel" type="VBoxContainer" parent="HSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/SidePanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Prepared" type="VBoxContainer" parent="HSplitContainer/SidePanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/SidePanel/ScrollContainer/Prepared"]
+layout_mode = 2
+
+[node name="LevelLess" type="Button" parent="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Remove Spell Level"
+icon = ExtResource("2_qkdhc")
+flat = true
+icon_alignment = 1
+
+[node name="Label" type="Label" parent="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Prepared Spells"
+horizontal_alignment = 1
+
+[node name="LevelMore" type="Button" parent="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Add Spell Level"
+icon = ExtResource("3_l5b10")
+flat = true
+
+[node name="OpenSpellLibBtn" type="Button" parent="HSplitContainer/SidePanel"]
+layout_mode = 2
+text = "Open Spell Library"
+
+[node name="KnownSpells" type="TabContainer" parent="HSplitContainer"]
+layout_mode = 2
+
+[node name="ContextMenu" type="PopupMenu" parent="."]
+auto_translate_mode = 1
+size = Vector2i(304, 100)
+system_menu_id = 4
+item_count = 3
+item_0/text = "Prepare Spell (middle mouse button)"
+item_0/id = 0
+item_1/text = "Cast Spell"
+item_1/id = 1
+item_2/text = "Print Spell"
+item_2/id = 2
+
+[connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelLess" to="." method="_on_level_less_pressed"]
+[connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelMore" to="." method="_on_level_more_pressed"]
+[connection signal="pressed" from="HSplitContainer/SidePanel/OpenSpellLibBtn" to="." method="_on_open_spell_lib_btn_pressed"]

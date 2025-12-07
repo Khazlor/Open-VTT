@@ -45,7 +45,7 @@ func _ready():
 
 
 #creates new character in tree (duplicates selected)
-func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
+func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true, edit_and_delete_button = true):
 	#if tree was empty, hide root
 	if hide_root == false:
 		hide_root = true
@@ -57,9 +57,12 @@ func add_new_item(item_name: String, parent: TreeItem = null, new: bool = true):
 	item.set_icon(0, icon)
 	item.set_icon_max_width(0, 25)
 	item.set_text(0, item_name)
-	item.add_button(0, button_edit)
-	item.add_button(0, button_add)
-	item.add_button(0, button_remove)
+	if edit_and_delete_button:
+		item.add_button(0, button_edit)
+		item.add_button(0, button_add)
+		item.add_button(0, button_remove)
+	else:
+		item.add_button(0, button_add)
 	
 	#create character
 	if new:
@@ -262,15 +265,11 @@ func rename_character(item: TreeItem, new_name: String):
 func load_characters():
 	#locals
 	var dir = DirAccess.open(Globals.base_dir_path + "/saves/Campaigns/" + Globals.campaign.campaign_name + "/Characters")
-	var item:TreeItem = add_new_item("Campaign", get_root(), false)
-	item.erase_button(0, 0)
-	item.erase_button(0, 2)
+	var item:TreeItem = add_new_item("Campaign", get_root(), false, false)
 	if dir != null:
 		load_characters_in_dir(dir, "", item, false)
-	item = add_new_item("Globals", get_root(), false)
+	item = add_new_item("Globals", get_root(), false, false)
 	global_item = item
-	item.erase_button(0, 0)
-	item.erase_button(0, 2)
 	#globals
 	dir = DirAccess.open(Globals.base_dir_path + "/saves/Characters")
 	if dir != null:

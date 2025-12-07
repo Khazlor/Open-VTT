@@ -17,7 +17,7 @@ func _ready():
 #handles user input
 func _unhandled_input(event):
 	#movement
-	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+	if event is InputEventMouseMotion and Input.is_action_pressed("mousemiddle"):
 		position -= event.relative * dragSen / zoom
 		
 	#zoom

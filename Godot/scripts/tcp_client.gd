@@ -13,14 +13,13 @@ signal connected
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var error = 1
 	connecting_func_running = true
 	await connecting_func()
 	emit_signal("connected")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #check for incomming data
-func _process(delta):
+func _process(_delta):
 	if peer.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 		if peer.get_available_bytes() > 0:
 			var size = peer.get_u64()

@@ -99,4 +99,3 @@ func _on_token_image_file_dialog_file_selected(path):
 		attr_dict["image"] = path
 		$VBoxContainer/MarginContainer/FlowContainer/HBoxContainer3/PanelContainer/ImageTextureButton.texture_normal = Globals.load_texture(path)
 	character_sheet.character.emit_signal("attr_bubbles_changed")
-

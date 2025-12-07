@@ -131,5 +131,3 @@ func set_owner_on_self_and_children(node, owner: Node2D):
 		
 	
 		
-
-

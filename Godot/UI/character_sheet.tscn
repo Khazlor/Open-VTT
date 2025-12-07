@@ -1,6 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://chldgnhe1p4fg"]
+[gd_scene load_steps=12 format=3 uid="uid://chldgnhe1p4fg"]
 
-[ext_resource type="Script" path="res://scripts/character_sheet.gd" id="1_bacpi"]
+[ext_resource type="Script" uid="uid://dq0cobyqpb8nh" path="res://scripts/character_sheet.gd" id="1_bacpi"]
 [ext_resource type="Texture2D" uid="uid://cqlyj4abmtc1i" path="res://icons/FileAccess.svg" id="2_axc3y"]
 [ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="2_jwo46"]
 [ext_resource type="Texture2D" uid="uid://bsrjpdacbqs26" path="res://icons/MakeFloating.svg" id="3_03ubt"]
@@ -10,8 +10,10 @@
 [ext_resource type="PackedScene" uid="uid://cb2w5ybormmnv" path="res://components/equipment.tscn" id="5_hfapw"]
 [ext_resource type="PackedScene" uid="uid://c037v4p420u8d" path="res://components/inventory.tscn" id="6_yts28"]
 [ext_resource type="PackedScene" uid="uid://c37cg5ywn3qfe" path="res://components/equip_slot_settings.tscn" id="7_140mj"]
+[ext_resource type="Texture2D" uid="uid://dupfjhlcxfjf1" path="res://icons/Settings.svg" id="11_iy2pu"]
 
 [node name="CharacterSheet" type="Window"]
+oversampling_override = 1.0
 title = "Name - Character sheet"
 initial_position = 1
 size = Vector2i(1000, 700)
@@ -24,14 +26,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+current_tab = 3
 use_hidden_tabs_for_min_size = true
 
 [node name="CharacterSheet" type="MarginContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
+metadata/_tab_index = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/CharacterSheet"]
 layout_mode = 2
@@ -74,6 +79,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+metadata/_tab_index = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="TabContainer/Attributes"]
 layout_mode = 2
@@ -141,6 +147,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+metadata/_tab_index = 2
 
 [node name="MarginContainer" type="ScrollContainer" parent="TabContainer/Token"]
 layout_mode = 2
@@ -433,10 +440,10 @@ icon = ExtResource("2_jwo46")
 layout_mode = 2
 
 [node name="Inventory" type="HSplitContainer" parent="TabContainer"]
-visible = false
 clip_contents = true
 layout_mode = 2
 split_offset = 350
+metadata/_tab_index = 3
 
 [node name="Equipment" parent="TabContainer/Inventory" instance=ExtResource("5_hfapw")]
 layout_mode = 2
@@ -448,13 +455,24 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 
-[node name="PopupButton" type="Button" parent="."]
+[node name="CustomButtons" type="HBoxContainer" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -30.0
-offset_bottom = 30.0
+offset_left = -52.0
+offset_top = 3.46
+offset_bottom = 27.46
 grow_horizontal = 0
+
+[node name="Settings" type="Button" parent="CustomButtons"]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+icon = ExtResource("11_iy2pu")
+icon_alignment = 1
+expand_icon = true
+
+[node name="PopupButton" type="Button" parent="CustomButtons"]
+layout_mode = 2
 icon = ExtResource("3_03ubt")
 icon_alignment = 1
 
@@ -483,6 +501,166 @@ size = Vector2i(400, 500)
 ok_button_text = "Select Current Folder"
 file_mode = 2
 
+[node name="SpellBookSettingsWindow" type="Window" parent="."]
+oversampling_override = 1.0
+title = "Character SpellBook Settings"
+initial_position = 4
+size = Vector2i(450, 500)
+
+[node name="SpellbookList" type="VBoxContainer" parent="SpellBookSettingsWindow"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SpellBookSettingsWindow/SpellbookList"]
+layout_mode = 2
+
+[node name="AddSpellBook" type="Button" parent="SpellBookSettingsWindow/SpellbookList/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Add New"
+
+[node name="SpellbookSettings" type="VBoxContainer" parent="SpellBookSettingsWindow"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+
+[node name="BackToSpellBookSettingsSelection" type="Button" parent="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+
+[node name="SpellbookSettingsApply" type="Button" parent="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.65
+text = "Apply"
+
+[node name="RemoveSpellBook" type="Button" parent="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Remove"
+
+[node name="RemoveSpellbookConfirmationDialog" type="ConfirmationDialog" parent="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/RemoveSpellBook"]
+oversampling_override = 1.0
+title = "Are you sure?"
+initial_position = 2
+size = Vector2i(284, 100)
+ok_button_text = "Yes"
+dialog_text = "Remove SpellBook From Character"
+
+[node name="HSeparator" type="HSeparator" parent="SpellBookSettingsWindow/SpellbookSettings"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="SpellBookNameHbox" type="HBoxContainer" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox"]
+layout_mode = 2
+text = " spellbook name: "
+
+[node name="SpellBookName" type="LineEdit" parent="SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AllowHighLevel" type="CheckButton" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+text = "Allow spells in higher level slots"
+
+[node name="Spontaneous" type="CheckButton" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+text = "Spontaneous Spellcaster"
+
+[node name="KnowAll" type="CheckButton" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+text = "Know all allowed spells"
+
+[node name="HSeparator2" type="HSeparator" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+text = "Filter Spell Categories - spells must have all of these"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AllowedSpellsAll" type="LineEdit" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+tooltip_text = "please enter as comma separated array:
+[\"wizard\", \"dnd2e\"]
+this will filter all spells from database that have all of these categories
+[\"wizard\", \"dnd2e\"] - will grab all wizard spells from dnd2e
+
+- allow all when empty"
+placeholder_text = "[\"wizard\", \"dnd2e\"]"
+
+[node name="HSeparator3" type="HSeparator" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+text = "Allowed Spell Categories - one of these must be present"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AllowedSpellsOne" type="LineEdit" parent="SpellBookSettingsWindow/SpellbookSettings"]
+layout_mode = 2
+tooltip_text = "please enter as comma separated array:
+[\"invocation\", \"illusion\", \"conjuration\"]
+this will filter all spells from database that have at least one of these categories
+[\"invocation\", \"illusion\", \"conjuration\"] - will grab all invocation, illusion and conjuration spells from filtered spell list
+
+- allow all when empty"
+placeholder_text = "[\"invocation\", \"illusion\", \"conjuration\"]"
+
+[node name="AddSpellBookPopup" type="Window" parent="SpellBookSettingsWindow"]
+oversampling_override = 1.0
+title = "Enter New SpellBook Name"
+initial_position = 4
+size = Vector2i(300, 100)
+visible = false
+
+[node name="Unavailable" type="Label" parent="SpellBookSettingsWindow/AddSpellBookPopup"]
+visible = false
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.84221, 0.0971377, 2.88785e-07, 1)
+text = "*SpellBook Name Already in Use"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="SpellBookSettingsWindow/AddSpellBookPopup"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 20.0
+offset_bottom = 51.0
+grow_horizontal = 2
+
+[node name="AddSpellBookNameDiagConfirmButton" type="Button" parent="SpellBookSettingsWindow/AddSpellBookPopup"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -89.5
+offset_top = -31.0
+offset_right = 89.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "Create New SpellBook"
+
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
 [connection signal="pressed" from="TabContainer/CharacterSheet/VBoxContainer/HBoxContainer/ChooseCharSheet" to="." method="_on_choose_char_sheet_pressed"]
@@ -505,7 +683,17 @@ file_mode = 2
 [connection signal="value_changed" from="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer/ImageScaleYSpinBox" to="." method="_on_image_scale_y_spin_box_value_changed"]
 [connection signal="pressed" from="TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer/AddBarButton" to="." method="_on_add_bar_button_pressed"]
 [connection signal="pressed" from="TabContainer/Token/MarginContainer2/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer/AddAttrButton" to="." method="_on_add_attr_button_pressed"]
-[connection signal="pressed" from="PopupButton" to="." method="_on_popup_button_pressed"]
+[connection signal="pressed" from="CustomButtons/Settings" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="CustomButtons/PopupButton" to="." method="_on_popup_button_pressed"]
 [connection signal="file_selected" from="TokenImageFileDialog" to="." method="_on_token_image_file_dialog_file_selected"]
 [connection signal="file_selected" from="CharSheetImageFileDialog" to="." method="_on_char_sheet_image_file_dialog_file_selected"]
 [connection signal="confirmed" from="LoadCharSheetDialog" to="." method="_on_load_char_sheet_dialog_confirmed"]
+[connection signal="close_requested" from="SpellBookSettingsWindow" to="." method="_on_spell_book_settings_window_close_requested"]
+[connection signal="pressed" from="SpellBookSettingsWindow/SpellbookList/HBoxContainer/AddSpellBook" to="." method="_on_add_spell_book_pressed"]
+[connection signal="pressed" from="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/BackToSpellBookSettingsSelection" to="." method="_on_back_to_spell_book_settings_selection_pressed"]
+[connection signal="pressed" from="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/SpellbookSettingsApply" to="." method="_on_spellbook_settings_apply_pressed"]
+[connection signal="pressed" from="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/RemoveSpellBook" to="." method="_on_remove_spell_book_pressed"]
+[connection signal="canceled" from="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/RemoveSpellBook/RemoveSpellbookConfirmationDialog" to="." method="_on_remove_spellbook_confirmation_dialog_canceled"]
+[connection signal="confirmed" from="SpellBookSettingsWindow/SpellbookSettings/HBoxContainer/RemoveSpellBook/RemoveSpellbookConfirmationDialog" to="." method="_on_remove_spellbook_confirmation_dialog_confirmed"]
+[connection signal="close_requested" from="SpellBookSettingsWindow/AddSpellBookPopup" to="." method="_on_add_spell_book_popup_close_requested"]
+[connection signal="pressed" from="SpellBookSettingsWindow/AddSpellBookPopup/AddSpellBookNameDiagConfirmButton" to="." method="_on_add_spell_book_name_diag_confirm_button_pressed"]

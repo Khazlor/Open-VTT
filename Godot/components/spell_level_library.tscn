@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://hgdb4kwrwowt"]
+
+[ext_resource type="Script" uid="uid://brvsho1p0ytwf" path="res://scripts/spell_level_library.gd" id="1_3g28t"]
+
+[node name="SpellLibrary" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("1_3g28t")
+metadata/_tab_index = 0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="FlowContainer" type="FlowContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
+alignment = 1
+last_wrap_alignment = 1

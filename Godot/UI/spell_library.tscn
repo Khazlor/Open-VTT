@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://byxclggc1qatr"]
+
+[ext_resource type="Texture2D" uid="uid://bsrjpdacbqs26" path="res://icons/MakeFloating.svg" id="1_4chug"]
+[ext_resource type="Script" uid="uid://n31k4v2ir0n" path="res://scripts/spell_library.gd" id="1_bj2jx"]
+
+[node name="SpellLibrary" type="Window"]
+oversampling_override = 1.0
+title = "Spell Library"
+initial_position = 2
+size = Vector2i(1000, 800)
+script = ExtResource("1_bj2jx")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Spell Categories Filter"
+
+[node name="AllowedSpellsAll" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "please enter as comma separated array:
+[\"wizard\", \"dnd2e\"]
+this will filter all spells from database that have all of these categories
+[\"wizard\", \"dnd2e\"] - will grab all wizard spells from dnd2e
+
+- allow all when empty"
+placeholder_text = "[\"wizard\", \"dnd2e\"]"
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Spell Categories Search"
+
+[node name="AllowedSpellsOne" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "please enter as comma separated array:
+[\"invocation\", \"illusion\", \"conjuration\"]
+this will filter all spells from database that have at least one of these categories
+[\"invocation\", \"illusion\", \"conjuration\"] - will grab all invocation, illusion and conjuration spells from filtered spell list
+
+- allow all when empty"
+placeholder_text = "[\"invocation\", \"illusion\", \"conjuration\"]"
+
+[node name="SearchButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Search
+"
+
+[node name="PopUpButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("1_4chug")
+
+[node name="SpellLevelLibs" type="TabContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AcceptDialog" type="AcceptDialog" parent="."]
+oversampling_override = 1.0
+title = "WRONG INPUT"
+initial_position = 2
+size = Vector2i(250, 100)
+visible = true
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/SearchButton" to="." method="_on_search_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/PopUpButton" to="." method="_on_pop_up_button_pressed"]

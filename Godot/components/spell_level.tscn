@@ -1,0 +1,56 @@
+[gd_scene load_steps=5 format=3 uid="uid://ctufieaux3lav"]
+
+[ext_resource type="Texture2D" uid="uid://bx60ts8penn5g" path="res://icons/ZoomLess.svg" id="1_7rqei"]
+[ext_resource type="Script" uid="uid://dansnhaxwbdxp" path="res://scripts/spell_level.gd" id="1_bopu7"]
+[ext_resource type="Texture2D" uid="uid://c41kod62g1a6j" path="res://icons/ZoomMore.svg" id="2_bopu7"]
+[ext_resource type="PackedScene" uid="uid://brg0p3cdksskk" path="res://components/spell_slot.tscn" id="3_5b8fm"]
+
+[node name="SpellLevel" type="VBoxContainer"]
+script = ExtResource("1_bopu7")
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SlotLess" type="Button" parent="HBoxContainer2"]
+layout_mode = 2
+tooltip_text = "Remove Spell Slot"
+icon = ExtResource("1_7rqei")
+flat = true
+icon_alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Lvl.1"
+horizontal_alignment = 1
+
+[node name="SlotMore" type="Button" parent="HBoxContainer2"]
+layout_mode = 2
+tooltip_text = "Add Spell Slot"
+icon = ExtResource("2_bopu7")
+flat = true
+
+[node name="HFlowContainer" type="HFlowContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="SpellSlot" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
+
+[node name="SpellSlot2" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
+
+[node name="SpellSlot3" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
+
+[node name="SpellSlot4" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
+
+[node name="SpellSlot5" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
+
+[node name="SpellSlot6" parent="HFlowContainer" instance=ExtResource("3_5b8fm")]
+layout_mode = 2
