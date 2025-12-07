@@ -8,3 +8,4 @@ Godot/temp*
 Godot/spells.db
 Godot/settings.json
 Godot/keymaps.dat
+*.tmp

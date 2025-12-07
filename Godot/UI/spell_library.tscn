@@ -68,7 +68,6 @@ oversampling_override = 1.0
 title = "WRONG INPUT"
 initial_position = 2
 size = Vector2i(250, 100)
-visible = true
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/SearchButton" to="." method="_on_search_button_pressed"]

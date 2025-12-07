@@ -2,7 +2,6 @@ extends PanelContainer
 
 @onready var collapse_button = $VBoxContainer/SpellCard/Collapse
 @onready var content = $VBoxContainer/CardContent
-@onready var context_menu = spellbook.get_node("ContextMenu")
 var spellbook
 
 
@@ -11,11 +10,6 @@ var spell_dict = {}
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	load_spell_card(1)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
 
 
 func _on_collapse_toggled(toggled_on: bool) -> void:
@@ -39,8 +33,13 @@ func _on_left_mouse_button_pressed() -> void:
 
 func _on_right_mouse_button_pressed() -> void:
 	print("right")
-	context_menu.position = Vector2(get_window().position) + get_global_mouse_position()
-	context_menu.show()
+	var popup = spellbook.custom_popup_comp.instantiate()
+	popup.items = spellbook.popup_items
+	popup.position = DisplayServer.mouse_get_position()
+	popup.connect("item_pressed", spellbook._on_context_menu_item_pressed)
+	spellbook.current_spell_dict = spell_dict
+	spellbook.add_child(popup)
+	
 
 func _on_middle_mouse_button_pressed() -> void:
 	print("middle")
@@ -154,7 +153,7 @@ func load_image_from_dict(dict):
 	var texture: ImageTexture
 	var img: Image = Image.new()
 	img.load_jpg_from_buffer(dict["texture"])
-	texture.create_from_image(image)
+	texture.create_from_image(img)
 	#if texture = bi:
 		#texture = load(character.char_sheet_path + "/" + dict["image"]) 
 	#if texture == null:

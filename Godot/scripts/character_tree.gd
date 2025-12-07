@@ -233,7 +233,7 @@ func _move_item(item: TreeItem, to_item: TreeItem, shift: int):
 			character.global = to_character.global
 			
 			#move in tree
-			var next_to_item = to_item.get_next() #get next sibling of to_item
+			#var next_to_item = to_item.get_next() #get next sibling of to_item
 			item.move_after(to_item)
 	if character.global != old_global:
 		character.save()

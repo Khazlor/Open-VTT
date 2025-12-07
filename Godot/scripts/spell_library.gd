@@ -1,25 +1,25 @@
 extends Window
 
 var is_main_spell_library = true # to detect if window is spell library - for spellcards options on rightclick
-var embedded = true
-var embedded_parent
 
 var spell_card_comp = preload("res://components/spell_card.tscn")
 var spell_level_library_comp = preload("res://components/spell_level_library.tscn")
+var custom_popup_comp = preload("res://components/custom_pop_up.tscn")
+var popup_items = ["Learn Spell", "Print Spell", "Cast Spell"]
 
 @onready var spell_libraries_container = $"VBoxContainer/SpellLevelLibs"
 
 var spell_libraries = []
 
 var character: Character = null #for learning spells
+var spellbook_name = ""
 var spells_all_arr = []
 var spells_one_arr = []
 
-
+var current_spell_dict
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	embedded_parent = self.get_parent()
 	$VBoxContainer/HBoxContainer/AllowedSpellsAll.text = var_to_str(spells_all_arr)
 	$VBoxContainer/HBoxContainer/AllowedSpellsOne.text = var_to_str(spells_one_arr)
 	fill_spell_library()
@@ -82,13 +82,24 @@ func clear_spell_library():
 
 
 func _on_pop_up_button_pressed() -> void:
-	if embedded:
-		self.reparent(Globals.non_embedded_viewport)
-		embedded = false
-	else:
-		self.reparent(embedded_parent)
-		embedded = true
+	self.hide()
+	self.force_native = not self.force_native
+	if self.force_native:
+		self.content_scale_factor = Globals.main_window.content_scale_factor
+		self.size = self.size * self.content_scale_factor
+	self.popup()
 
 
 func _on_close_requested() -> void:
+	self.hide()
 	self.queue_free()
+
+
+func _on_context_menu_item_pressed(item_index: Variant) -> void:
+	if item_index == 0: #learn spell
+		if character != null:
+			character.add_spell_to_spellbook(current_spell_dict, spellbook_name)
+	elif item_index == 1: #print spell TODO
+		pass
+	else: #cast spell TODO
+		pass

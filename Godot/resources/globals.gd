@@ -35,7 +35,6 @@ var turn_order: Window
 var tool_bar
 var windows: Control
 var char_tree: Tree
-var non_embedded_viewport: Window
 
 var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
@@ -73,14 +72,6 @@ func _enter_tree() -> void:
 	else:
 		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
 		#can be changed to user:// to use default user application folder based on OS
-	
-func _ready() -> void:
-	#create window for non-embedded windows
-	non_embedded_viewport = Window.new()
-	non_embedded_viewport.size = Vector2(0,0)
-	non_embedded_viewport.borderless = true
-	non_embedded_viewport.gui_embed_subwindows = false
-	get_window().add_child.call_deferred(non_embedded_viewport)
 	
 
 func load_texture(file_path):
@@ -120,10 +111,4 @@ func on_server_disconnected(): #handles closing of server on client side
 		i += 0.5
 		await get_tree().create_timer(0.5).timeout
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
-	
-#custom scene changing - adds support for players being on different scene than dm, non-embedded windows
-func change_scene_to_file(path: String):
-	pass
-	
-	
 	

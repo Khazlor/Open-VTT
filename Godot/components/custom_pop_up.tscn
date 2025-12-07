@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4fn4px5yb5xp"]
+
+[ext_resource type="Script" uid="uid://c55ck0oabjca4" path="res://scripts/custom_pop_up.gd" id="1_60xp5"]
+
+[node name="CustomPopUp" type="Window"]
+oversampling_override = 1.0
+size = Vector2i(1, 1)
+visible = false
+borderless = true
+popup_window = true
+force_native = true
+script = ExtResource("1_60xp5")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 1
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="resized" from="VBoxContainer" to="." method="update_size"]

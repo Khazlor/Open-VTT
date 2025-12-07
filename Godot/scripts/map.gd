@@ -97,8 +97,6 @@ func _ready():
 	
 func _on_child_exiting_tree(node):
 	if node == self.get_child(-1): #first node - rest are still in tree - save layers
-		#subwindows will be embeded - otherwise breaks popups of other scenes - reason for subviewport in this scene
-		get_viewport().set_embedding_subwindows(true)
 		#clear tokens list in map
 		#Globals.map.tokens.clear() - no lomger filled in set_owner_on_self_and_children
 		#set ownership of all nodes (might have been deleted when moving layers around)

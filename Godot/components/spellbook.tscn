@@ -66,18 +66,6 @@ text = "Open Spell Library"
 [node name="KnownSpells" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2
 
-[node name="ContextMenu" type="PopupMenu" parent="."]
-auto_translate_mode = 1
-size = Vector2i(304, 100)
-system_menu_id = 4
-item_count = 3
-item_0/text = "Prepare Spell (middle mouse button)"
-item_0/id = 0
-item_1/text = "Cast Spell"
-item_1/id = 1
-item_2/text = "Print Spell"
-item_2/id = 2
-
 [connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelLess" to="." method="_on_level_less_pressed"]
 [connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelMore" to="." method="_on_level_more_pressed"]
 [connection signal="pressed" from="HSplitContainer/SidePanel/OpenSpellLibBtn" to="." method="_on_open_spell_lib_btn_pressed"]

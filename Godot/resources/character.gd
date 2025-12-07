@@ -431,7 +431,7 @@ func remove_spellbook(spellbook_name):
 		return true
 		
 func add_spell_to_spellbook(spell_dict, spellbook_name):
-	if spellbooks.has(spellbook_name):
+	if spell_dict != null and spellbooks.has(spellbook_name):
 		spellbooks[spellbook_name]["spells"].append(spell_dict)
 		emit_signal("spellbook_spells_changed", spellbook_name)
 		

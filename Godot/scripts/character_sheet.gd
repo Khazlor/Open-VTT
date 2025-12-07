@@ -72,18 +72,7 @@ func _on_close_requested():
 	if not character.save_as_token:
 		character.save()
 	print("closing subwindow")
-	if $CustomButtons/PopupButton.visible == false:
-		print("closing popped up subwindow")
-		var view = get_parent().get_viewport()
-		print(view)
-		print(view.gui_embed_subwindows)
-		view.set_embedding_subwindows(false)
-		self.hide()
-		self.queue_free()
-		view.set_embedding_subwindows(true)
-	else:
-		print("closing embedded subwindow")
-		self.queue_free()
+	self.queue_free()
 		
 		
 #func _on_focus_exited():
@@ -94,13 +83,12 @@ func _on_close_requested():
 
 #pops char sheet to separate window
 func _on_popup_button_pressed():
-	$CustomButtons/PopupButton.visible = false #hide button
-	#recreate window with embedding disabled
-	var parent = self.get_parent()
-	parent.get_viewport().set_embedding_subwindows(false)
-	parent.remove_child(self)
-	parent.add_child(self)
-	parent.get_viewport().set_embedding_subwindows(true)
+	self.hide()
+	self.force_native = not self.force_native
+	if self.force_native:
+		self.content_scale_factor = Globals.main_window.content_scale_factor
+		self.size = self.size * self.content_scale_factor
+	self.popup()
 	
 #loads character from resource to character sheet
 func load_character():

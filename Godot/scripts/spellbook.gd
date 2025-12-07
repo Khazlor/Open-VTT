@@ -10,6 +10,10 @@ var spell_card_comp = preload("res://components/spell_card.tscn")
 var spell_level_comp = preload("res://components/spell_level.tscn")
 var spell_level_library_comp = preload("res://components/spell_level_library.tscn")
 var spell_library_comp = preload("res://UI/spell_library.tscn")
+var custom_popup_comp = preload("res://components/custom_pop_up.tscn")
+var popup_items = ["Prepare Spell (middle mouse button)", "Cast Spell", "Print Spell"]
+
+var current_spell_dict
 
 var spellbook_name
 
@@ -72,4 +76,14 @@ func _on_open_spell_lib_btn_pressed() -> void:
 		var spellbook_dict = character_sheet.character.spellbooks[spellbook_name]
 		spell_lib.spells_all_arr = spellbook_dict["allowed_spell_categories_all"]
 		spell_lib.spells_one_arr = spellbook_dict["allowed_spell_categories_one"]
+		spell_lib.spellbook_name = spellbook_name
 	self.add_child(spell_lib)
+
+
+func _on_context_menu_item_pressed(item_index: Variant) -> void:
+	if item_index == 0: #prepare spell
+		pass
+	elif item_index == 1: #cast spell TODO
+		pass
+	else: #print spell TODO
+		pass
