@@ -15,7 +15,7 @@ func test_db():
 	
 	add_color_to_keyword_in_db("wizard", Color.BLACK, 1)
 	add_color_to_keyword_in_db("invocation", Color.RED, 2)
-	add_color_to_keyword_in_db("enchant", Color.RED, 2)
+	add_color_to_keyword_in_db("enchant", Color.FOREST_GREEN, 2)
 	
 	get_spells_from_database([], [])
 	get_spells_from_database(["dnd2e", "wizard"], [])
@@ -27,7 +27,7 @@ func test_db():
 	
 	#database.query("
 	#SELECT * FROM
-		#(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_id, k.keyword_name, k.keyword_color
+		#(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_name, k.keyword_name, k.keyword_color
 		#FROM spells s
 		#INNER JOIN spell_keywords sk ON s.spell_id = sk.spell_id
 		#INNER JOIN keywords k ON sk.keyword_name = k.keyword_name
@@ -62,22 +62,6 @@ func open_spell_db():
 	else:
 		create_spell_db()
 
-	var label_dict = {
-	"type": "label",
-	"pos": Vector2(20,20),
-	"size": Vector2(260,80),
-	"text": "LABEL OF DESCRIPTION",
-	"fsize": 11,
-	"lcolor": Color.BLACK,
-	"width": 2,
-	"BGcolor": Color.TRANSPARENT,
-	"fcolor": Color.BLACK,
-	"valign": VERTICAL_ALIGNMENT_TOP,
-	"halign": HORIZONTAL_ALIGNMENT_LEFT
-	}
-	
-	database.update_rows("spellcards", "true", {"spellcard_component_array" : var_to_str([Vector2(300,400), Color.WHITE, Color.BLACK, [label_dict]])})
-
 func create_spell_db():
 	DirAccess.remove_absolute(Globals.base_dir_path + "/spells.db")
 	
@@ -93,7 +77,7 @@ func create_spell_db():
 	table_dict["spell_icon"] = {"data_type":"blob"}
 	table_dict["spell_level"] = {"data_type":"int"}
 	table_dict["spell_attributes"] = {"data_type":"text"}
-	table_dict["spellcard_id"] = {"data_type":"int", "foreign_key": "spellcards.spellcard_id"}
+	table_dict["spellcard_name"] = {"data_type":"text", "foreign_key": "spellcards.spellcard_name"}
 	
 	database.create_table("spells", table_dict)
 	
@@ -102,7 +86,7 @@ func create_spell_db():
 	#table_dict["id"] = {"data_type":"int", "primary_key": true, "not_null": true, "auto_increment": true}
 	table_dict["keyword_name"] = {"data_type":"text", "not_null": true, "primary_key": true, "unique": true}
 	table_dict["keyword_color"] = {"data_type":"text"}
-	table_dict["keyword_color_priority"] = {"data_type":"text"}
+	table_dict["keyword_color_priority"] = {"data_type":"int"}
 
 	database.create_table("keywords", table_dict)
 	
@@ -116,8 +100,7 @@ func create_spell_db():
 	
 	#spellcard table
 	table_dict = {}
-	table_dict["spellcard_id"] = {"data_type":"int", "primary_key": true, "not_null": true, "auto_increment": true}
-	table_dict["spellcard_name"] = {"data_type":"text", "not_null": true}
+	table_dict["spellcard_name"] = {"data_type":"text", "primary_key": true, "not_null": true}
 	table_dict["spellcard_component_array"] = {"data_type":"text"}
 
 	database.create_table("spellcards", table_dict)
@@ -125,9 +108,8 @@ func create_spell_db():
 	#search presets table
 	table_dict = {}
 	table_dict["preset_id"] = {"data_type":"int", "primary_key": true, "not_null": true, "auto_increment": true}
-	table_dict["preset_name"] = {"data_type":"text", "not_null": true}
+	table_dict["preset_name"] = {"data_type":"text"}
 	table_dict["preset_query"] = {"data_type":"text"}
-	table_dict["preset_parent_id"] = {"data_type":"int", "foreign_key": "presets.id"}
 
 	database.create_table("presets", table_dict)
 
@@ -139,31 +121,45 @@ func add_spell_to_db(spell_dict, keyword_array):
 	database.insert_row("spells" ,spell_dict)
 	var spell_id = database.last_insert_rowid
 	for keyword in keyword_array:
-		database.insert_row("keywords", {"keyword_name": keyword})
-		database.insert_row("spell_keywords", {"spell_id": spell_id, "keyword_name": keyword})
+		add_spell_keyword_to_db(spell_id, keyword)
 		
 func edit_spell_in_db(spell_db_id, spell_dict):
 	database.update_rows("spells", "id = " + str(spell_db_id), spell_dict)
 
 func add_spell_keyword_to_db(spell_db_id, keyword):
-	database.insert_row("keywords", {"keyword_name": keyword})
+	if not has_keyword_in_db(keyword):
+		database.insert_row("keywords", {"keyword_name": keyword})
 	database.insert_row("spell_keywords", {"spell_id": spell_db_id, "keyword_name": keyword})
+	
+func has_keyword_in_db(keyword):
+	var result_array = database.select_rows("keywords", "keyword_name = '" + keyword + "'", ["*"])
+	print(result_array, keyword)
+	if result_array.is_empty():
+		return false
+	return true
 	
 func remove_spell_keyword_from_db(spell_db_id, keyword):
 	database.delete_rows("spell_keywords", "spell_id = " + str(spell_db_id) + " and keyword_name == \'" + keyword + "\'")
 
 func add_color_to_keyword_in_db(keyword, color: Color, priority: int = 0):
-	database.update_rows("keywords", "keyword_name = \'" + keyword + "\'", {"keyword_color": str(color), "keyword_color_priority": priority})
+	if not has_keyword_in_db(keyword):
+		database.insert_row("keywords", {"keyword_name": keyword, "keyword_color": var_to_str(color), "keyword_color_priority": priority})
+	else:
+		database.update_rows("keywords", "keyword_name = \'" + keyword + "\'", {"keyword_color": var_to_str(color), "keyword_color_priority": priority})
 	
 func add_spellcard_to_db(spellcard_name, component_array):
 	database.insert_row("spellcards", {"spellcard_name": spellcard_name, "spellcard_component_array": var_to_str(component_array)})
 	return database.last_insert_rowid
 	
-func edit_spellcard_in_db(spellcard_id, spellcard_name, component_array):
-	database.update_rows("spellcards", "spellcard_id = " + str(spellcard_id), {"spellcard_name": spellcard_name, "spellcard_component_array": component_array})
+func edit_spellcard_in_db(spellcard_name, component_array):
+	database.update_rows("spellcards", "spellcard_name = \'" + spellcard_name + "\'", {"spellcard_component_array": var_to_str(component_array)})
+
 	
-func get_spellcard_from_db(spellcard_id):
-	return (database.select_rows("spellcards", "spellcard_id = " + str(spellcard_id), ["*"]))[0]
+func get_spellcard_from_db(spellcard_name):
+	var result_array = database.select_rows("spellcards", "spellcard_name = \'" + spellcard_name + "\'", ["*"])
+	if result_array.is_empty():
+		return null
+	return result_array[0]
 	
 func add_preset_to_db(preset_name, query, preset_parent_id = null):
 	database.insert_row("presets", {"preset_name": preset_name, "preset_query": query, "preset_parent_id": preset_parent_id})
@@ -181,6 +177,7 @@ func get_spells_from_database(must_have_all_keywords_array, must_have_one_keywor
 	var result = database.query_result
 	var str = "spells found: "
 	for spell in result:
+		spell["spell_attributes"] = str_to_var(spell["spell_attributes"])
 		str += spell["spell_name"] + ", "
 	print(str)
 	return result
@@ -221,7 +218,7 @@ func construct_query(must_have_all_keywords_array, must_have_one_keyword_array):
 	if not must_have_keywords_string.is_empty():
 		var query = "
 	SELECT * FROM
-		(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_id, k.keyword_name, k.keyword_color
+		(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_name, k.keyword_name, k.keyword_color
 		FROM spells s
 		INNER JOIN spell_keywords sk ON s.spell_id = sk.spell_id
 		INNER JOIN keywords k ON sk.keyword_name = k.keyword_name
@@ -232,7 +229,7 @@ func construct_query(must_have_all_keywords_array, must_have_one_keyword_array):
 	else:
 		var query = "
 	SELECT * FROM
-		(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_id, k.keyword_name, k.keyword_color
+		(SELECT s.spell_id, s.spell_name, s.spell_icon, s.spell_level, s.spell_attributes, s.spellcard_name, k.keyword_name, k.keyword_color
 		FROM spells s
 		INNER JOIN spell_keywords sk ON s.spell_id = sk.spell_id
 		INNER JOIN keywords k ON sk.keyword_name = k.keyword_name

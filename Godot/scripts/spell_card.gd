@@ -6,19 +6,12 @@ var spellbook
 
 
 var spell_dict = {}
+var card_comp_array = null
+var content_loaded = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	load_spell_card(1)
-
-
-func _on_collapse_toggled(toggled_on: bool) -> void:
-	if toggled_on:
-		collapse_button.icon = Globals.icon_opened
-		content.visible = true
-	else:
-		collapse_button.icon = Globals.icon_folded
-		content.visible = false
+	load_spell_card()
 
 
 func _on_left_mouse_button_pressed() -> void:
@@ -28,6 +21,8 @@ func _on_left_mouse_button_pressed() -> void:
 		content.visible = false
 	else:
 		collapse_button.icon = Globals.icon_opened
+		if not content_loaded:
+			load_spell_card_content()
 		content.visible = true
 
 
@@ -51,35 +46,72 @@ func _get_drag_data(at_position: Vector2) -> Variant:
 	return spell_dict
 	
 
-func load_spell_card(spell_card_id):
-	#TODO instantiate loaded from spellcard_comp_dict 
+func load_spell_card():
+	if not spell_dict.has("spellcard_name"):
+		return
+	var card_dict = Globals.spell_database.get_spellcard_from_db(spell_dict["spellcard_name"])
 	
-	var card_dict = Globals.spell_database.get_spellcard_from_db(spell_card_id)
-	
-	var card_comp_array = str_to_var(card_dict["spellcard_component_array"])
+	card_comp_array = str_to_var(card_dict["spellcard_component_array"])
 	
 	$VBoxContainer/SpellCard/Title.text = spell_dict["spell_name"]
 	
-	print("card_arr: ", card_comp_array)
+	#print("card_arr: ", card_comp_array)
 	if card_comp_array == null:
 		return
-	content.custom_minimum_size = Vector2(400, 300)
+	content.get_parent().custom_minimum_size.x = card_comp_array[0].x
+	content.custom_minimum_size = card_comp_array[0]
 	content.set_meta("cust_size", card_comp_array[0])
-	#self.get_theme_stylebox("panel").bg_color = card_comp_array[1]
-	#$VBoxContainer/SpellCard/Title.modulate = card_comp_array[2]
-	#$VBoxContainer/SpellCard/Collapse.modulate = card_comp_array[2]
-	#for dict in card_comp_array[3]:
-		#var type = dict["type"]
-		#if type == "label":
-			#load_label_from_dict(dict)
-		#elif type == "input":
-			#load_input_from_dict(dict)
-		#elif type == "polygon":
-			#load_polygon_from_dict(dict)
-		#elif type == "image":
-			#load_image_from_dict(dict)
-	#apply_zoom()
-#
+	var style = self.get_theme_stylebox("panel").duplicate()
+	self.add_theme_stylebox_override("panel", style) 
+	style.bg_color = card_comp_array[1]
+	var brightness = 0.2126 * card_comp_array[1][0] +0.7152 * card_comp_array[1][1]+0.0722 * card_comp_array[1][2] #set to be more global, no need to recalculate on each spellcard
+	if brightness >= 0.5: # bright bg
+		$VBoxContainer/SpellCard/Title.modulate = Color.BLACK
+		$VBoxContainer/SpellCard/Collapse.modulate = Color.BLACK
+	else: #dark bg
+		$VBoxContainer/SpellCard/Title.modulate = Color.WHITE
+		$VBoxContainer/SpellCard/Collapse.modulate = Color.WHITE
+	#keyword color
+	if spell_dict.has("keyword_color") and spell_dict["keyword_color"] != null:
+		style.border_color = str_to_var(spell_dict["keyword_color"])
+		print(spell_dict["spell_name"], spell_dict["keyword_name"], spell_dict["keyword_color"], self.get_theme_stylebox("panel").border_color, card_comp_array[1])
+
+func load_spell_card_content():
+	content_loaded = true
+	for dict in card_comp_array[2]:
+		var type = dict["type"]
+		if type == "label":
+			load_label_from_dict(dict)
+		elif type == "input":
+			load_input_from_dict(dict)
+		elif type == "polygon":
+			load_polygon_from_dict(dict)
+		elif type == "image":
+			load_image_from_dict(dict)
+	card_comp_array.clear()
+
+func replace_attributes_in_text(text):
+	var last_index = text.find('@')
+	while last_index != -1:
+		#found occurance of @ - replace word with attribute
+		var word_len = 0
+		for i in range( last_index + 1, text.length()): #find word
+			if text[i] == " " or text[i] == "\n" or text[i] == "@":
+				break #found end
+			word_len += 1
+		if word_len > 0:
+			var word = text.substr(last_index + 1, word_len)
+			text = text.erase(last_index, word_len + 1)
+			if spell_dict["spell_attributes"].has(word):
+				text = text.insert(last_index, spell_dict["spell_attributes"][word])
+				last_index = last_index + spell_dict["spell_attributes"][word].length()#ignore recursive @
+			else:
+				last_index += word_len
+		else:
+			last_index += word_len
+		last_index = text.find('@',last_index)
+	return text
+
 func load_label_from_dict(dict):
 	var label = Label.new()
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -88,7 +120,9 @@ func load_label_from_dict(dict):
 	label.clip_text = true
 	content.add_child(label)
 	label.add_theme_color_override("font_color", dict["fcolor"])
-	label.text = dict["text"]
+	var text: String = dict["text"]
+	text = replace_attributes_in_text(text)
+	label.text = text
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]
@@ -102,31 +136,28 @@ func load_label_from_dict(dict):
 	return label
 	
 func load_input_from_dict(dict):
-	var scroll = ScrollContainer.new()
-	scroll.position = dict["pos"]
-	scroll.size = dict["size"]
-	
-	var label = Label.new()
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.clip_text = true
-	label.add_theme_color_override("font_color", dict["fcolor"])
-	label.text = dict["text"]
+	var textedit = TextEdit.new()
+	textedit.position = dict["pos"]
+	textedit.size = dict["size"]
+	textedit.editable = false
+	textedit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	var text: String = dict["attr"]
+	text = replace_attributes_in_text(text)
+	textedit.text = text
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]
 	style.set_border_width_all(dict["width"])
-	label.add_theme_stylebox_override("normal", style)
-	label.add_theme_font_size_override("font_size", dict["fsize"])
-	label.vertical_alignment = dict["valign"]
-	label.horizontal_alignment = dict["halign"]
-	scroll.set_meta("dict", dict)
-	scroll.z_index = 1
+	textedit.add_theme_stylebox_override("read_only", style)
+	textedit.add_theme_stylebox_override("normal", style)
+	textedit.add_theme_font_size_override("font_size", dict["fsize"])
+	textedit.add_theme_color_override("font_readonly_color", dict["fcolor"])
+	textedit.set_meta("dict", dict)
+	textedit.z_index = 10
 	
-	scroll.add_child(label)
-	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	content.add_child(scroll)
+	content.add_child(textedit)
 	
-	return scroll
+	return textedit
 	
 func load_polygon_from_dict(dict):
 	var polygon = CustomPolygon.new()

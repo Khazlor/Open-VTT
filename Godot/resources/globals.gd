@@ -73,12 +73,14 @@ func _enter_tree() -> void:
 		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
 		#can be changed to user:// to use default user application folder based on OS
 	
-
-func load_texture(file_path):
+#texture loading during runtime, supports resizing to specific size
+func load_texture(file_path, resize_to = -1 ):
 	if not FileAccess.file_exists(file_path):
 		print("load texture - file does not exist")
 		return null
 	var image = Image.load_from_file(file_path)
+	if resize_to != -1:
+		image.resize(resize_to, resize_to)
 	var texture = ImageTexture.create_from_image(image)
 	if texture != null:
 		texture.set_meta("image_path", file_path)

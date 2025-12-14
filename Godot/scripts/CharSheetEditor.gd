@@ -149,7 +149,7 @@ func _on_load_button_pressed():
 
 
 func _on_save_file_dialog_confirmed():
-	var path = char_sheet_base_path + "/" + savefilediag.current_path
+	var path = savefilediag.current_path
 	current_char_sheet_name = savefilediag.current_file
 	if DirAccess.dir_exists_absolute(path):
 		$ConfirmationDialog.popup()
@@ -159,10 +159,13 @@ func _on_save_file_dialog_confirmed():
 
 func _on_confirmation_dialog_confirmed(path = null):
 	if path == null:
-		path = char_sheet_base_path + "/" + savefilediag.current_path
+		path = savefilediag.current_path
 	if not DirAccess.dir_exists_absolute(path):
 		DirAccess.make_dir_recursive_absolute(path)
 	var file = FileAccess.open(path + "/" + current_char_sheet_name + ".char_sheet", FileAccess.WRITE)
+	if file == null:
+		print("ERROR file is null: ", path + "/" + current_char_sheet_name + ".char_sheet")
+		return
 	print("arr: ", char_sheet_arr)
 	print("str: ", var_to_str(char_sheet_arr))
 	#file.store_var(char_sheet_arr)
@@ -470,6 +473,7 @@ func _unhandled_input(event):
 			
 	if event is InputEventKey:
 		if Input.is_action_just_pressed("Delete"):
+			print("delete pressed")
 			for object in selected_objects:
 				char_sheet_arr[2].erase(object.get_meta("dict"))
 				object.queue_free()
