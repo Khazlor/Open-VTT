@@ -107,9 +107,8 @@ func create_spell_db():
 	
 	#search presets table
 	table_dict = {}
-	table_dict["preset_id"] = {"data_type":"int", "primary_key": true, "not_null": true, "auto_increment": true}
-	table_dict["preset_name"] = {"data_type":"text"}
-	table_dict["preset_query"] = {"data_type":"text"}
+	table_dict["preset_name"] = {"data_type":"text", "primary_key": true, "not_null": true}
+	table_dict["preset_query"] = {"data_type":"text"} #contains full query expressiong - in case of custom query commands
 
 	database.create_table("presets", table_dict)
 
@@ -161,26 +160,47 @@ func get_spellcard_from_db(spellcard_name):
 		return null
 	return result_array[0]
 	
-func add_preset_to_db(preset_name, query, preset_parent_id = null):
-	database.insert_row("presets", {"preset_name": preset_name, "preset_query": query, "preset_parent_id": preset_parent_id})
+func add_preset_to_db(preset_name, query):
+	database.insert_row("presets", {"preset_name": preset_name, "preset_query": query})
 	
-func edit_preset_in_db(preset_id, preset_name, query, preset_parent_id = null):
-	database.update_rows("presets", "preset_id = " + str(preset_id), {"preset_name": preset_name, "preset_query": query, "preset_parent_id": preset_parent_id})
+func edit_preset_in_db(preset_name, query):
+	database.update_rows("presets", "preset_name = \'" + preset_name + "\'", {"preset_query": query})
 	
-func get_spells_from_database(must_have_all_keywords_array, must_have_one_keyword_array):
-	print("keywords array all: ", must_have_all_keywords_array)
-	print("keywords array one: ", must_have_one_keyword_array)
+func get_preset_from_db(preset_name):
+	var result_array = database.select_rows("presets", "preset_name = \'" + preset_name + "\'", ["*"])
+	if result_array.is_empty():
+		return null
+	return result_array[0]
+	
+func get_all_presets_from_db():
+	var result_array = database.select_rows("presets", "", ["*"])
+	if result_array.is_empty():
+		return null
+	return result_array
+	
+func get_spells_from_database(must_have_all_keywords_array, must_have_one_keyword_array, calling_object = null):
 	var query = construct_query(must_have_all_keywords_array, must_have_one_keyword_array)
-	print("query database: ", query)
 	database.query(query)
-	#print("querry result: ", database.query_result)
 	var result = database.query_result
-	var str = "spells found: "
 	for spell in result:
 		spell["spell_attributes"] = str_to_var(spell["spell_attributes"])
-		str += spell["spell_name"] + ", "
-	print(str)
+	if calling_object != null:
+		calling_object.last_database_query = query
 	return result
+	
+func custom_select_query(query, calling_object = null):
+	database.query(query)
+	var result = database.query_result
+	for spell in result:
+		spell["spell_attributes"] = str_to_var(spell["spell_attributes"])
+	if calling_object != null:
+		calling_object.last_database_query = query
+	return result
+	
+func custom_database_query(query):
+	if query == "":
+		return false
+	return database.query(query)
 	
 func construct_query(must_have_all_keywords_array, must_have_one_keyword_array):
 	var must_have_keywords_string = ""

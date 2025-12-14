@@ -1,6 +1,26 @@
-[gd_scene load_steps=2 format=3 uid="uid://4b1u1i1uq0n7"]
+[gd_scene load_steps=10 format=3 uid="uid://4b1u1i1uq0n7"]
 
 [ext_resource type="Script" uid="uid://d2wjnfsxo6st" path="res://scripts/game_menu.gd" id="1_3y86k"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="2_2qedo"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="3_f4psl"]
+
+[sub_resource type="Resource" id="Resource_y331g"]
+script = ExtResource("3_f4psl")
+
+[sub_resource type="Resource" id="Resource_aroug"]
+script = ExtResource("3_f4psl")
+
+[sub_resource type="Resource" id="Resource_h44us"]
+script = ExtResource("3_f4psl")
+
+[sub_resource type="Resource" id="Resource_nammb"]
+script = ExtResource("3_f4psl")
+
+[sub_resource type="Resource" id="Resource_4q8w5"]
+script = ExtResource("3_f4psl")
+
+[sub_resource type="Resource" id="Resource_aq2d1"]
+script = ExtResource("3_f4psl")
 
 [node name="GameMenu" type="Window"]
 oversampling_override = 1.0
@@ -69,6 +89,10 @@ current_tab = 0
 
 [node name="Visual" type="ScrollContainer" parent="Settings/TabContainer"]
 layout_mode = 2
+script = ExtResource("2_2qedo")
+wheel_scroll_damper = SubResource("Resource_y331g")
+dragging_scroll_damper = SubResource("Resource_aroug")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 metadata/_tab_index = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="Settings/TabContainer/Visual"]
@@ -92,6 +116,7 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "UI Scale:"
 vertical_alignment = 1
 
@@ -102,6 +127,7 @@ size_flags_horizontal = 3
 [node name="UIScaleSpinBox" type="SpinBox" parent="Settings/TabContainer/Visual/MarginContainer/HBoxContainer/EditVBox"]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
+mouse_filter = 1
 min_value = 20.0
 max_value = 300.0
 value = 100.0
@@ -113,6 +139,10 @@ suffix = "%"
 [node name="Multiplayer" type="ScrollContainer" parent="Settings/TabContainer"]
 visible = false
 layout_mode = 2
+script = ExtResource("2_2qedo")
+wheel_scroll_damper = SubResource("Resource_h44us")
+dragging_scroll_damper = SubResource("Resource_nammb")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 metadata/_tab_index = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="Settings/TabContainer/Multiplayer"]
@@ -136,6 +166,7 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Player Name:"
 vertical_alignment = 1
 
@@ -146,11 +177,16 @@ size_flags_horizontal = 3
 [node name="PlayerNameLineEdit" type="LineEdit" parent="Settings/TabContainer/Multiplayer/MarginContainer/HBoxContainer/EditVBox"]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
+mouse_filter = 1
 placeholder_text = "Player"
 
 [node name="Key Mapping" type="ScrollContainer" parent="Settings/TabContainer"]
 visible = false
 layout_mode = 2
+script = ExtResource("2_2qedo")
+wheel_scroll_damper = SubResource("Resource_4q8w5")
+dragging_scroll_damper = SubResource("Resource_aq2d1")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 metadata/_tab_index = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Settings/TabContainer/Key Mapping"]
@@ -161,6 +197,7 @@ size_flags_vertical = 3
 [node name="Label" type="Label" parent="Settings/TabContainer/Key Mapping/VBoxContainer"]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
+mouse_filter = 1
 text = "Please press enter to apply keybind"
 horizontal_alignment = 1
 vertical_alignment = 1

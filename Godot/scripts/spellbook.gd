@@ -1,8 +1,9 @@
 extends Control
 
 @onready var character_sheet = $"../.."
+@onready var character = character_sheet.character
 @onready var spell_libraries_container = $"HSplitContainer/KnownSpells"
-@onready var spells_prepared = $"HSplitContainer/Prepared"
+@onready var spells_prepared = $"HSplitContainer/SidePanel/ScrollContainer/Prepared"
 
 var spell_libraries = []
 
@@ -13,7 +14,7 @@ var spell_library_comp = preload("res://UI/spell_library.tscn")
 var custom_popup_comp = preload("res://components/custom_pop_up.tscn")
 var popup_items = ["Prepare Spell (middle mouse button)", "Cast Spell", "Print Spell"]
 
-var current_spell_dict
+var current_spellcard
 
 var spellbook_name
 
@@ -63,6 +64,7 @@ func _on_level_more_pressed() -> void:
 	var new_spell_level = spell_level_comp.instantiate()
 	new_spell_level.spell_level = spells_prepared.get_child_count() - 1
 	new_spell_level.spellbook = self
+	spells_prepared.add_child(new_spell_level)
 
 
 func _on_level_less_pressed() -> void:
@@ -85,5 +87,10 @@ func _on_context_menu_item_pressed(item_index: Variant) -> void:
 		pass
 	elif item_index == 1: #cast spell TODO
 		pass
-	else: #print spell TODO
-		pass
+	else:
+		if current_spellcard == null:
+			return
+		var print_spellcard = spell_card_comp.instantiate()
+		print_spellcard.print = true
+		print_spellcard.spell_dict = current_spellcard.spell_dict
+		Globals.roll_panel.add_node_to_rollpanel(print_spellcard)

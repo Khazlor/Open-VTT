@@ -1,13 +1,15 @@
-[gd_scene load_steps=11 format=3 uid="uid://shwkx1k388tb"]
+[gd_scene load_steps=17 format=3 uid="uid://shwkx1k388tb"]
 
-[ext_resource type="Script" path="res://scripts/ToolPanel.gd" id="1_57fim"]
-[ext_resource type="Script" path="res://scripts/ToolPanel_Items.gd" id="2_hdll0"]
-[ext_resource type="Script" path="res://scripts/character_tree.gd" id="2_nt2nq"]
-[ext_resource type="Script" path="res://scripts/item_tree.gd" id="3_6ctqh"]
-[ext_resource type="Script" path="res://scripts/CollapsibleContainer.gd" id="3_8bqlb"]
-[ext_resource type="Script" path="res://scripts/ToolPanel_Object.gd" id="3_oj6qf"]
+[ext_resource type="Script" uid="uid://clggb1agldr20" path="res://scripts/ToolPanel.gd" id="1_57fim"]
+[ext_resource type="Script" uid="uid://savfo8jxhhms" path="res://scripts/ToolPanel_Items.gd" id="2_hdll0"]
+[ext_resource type="Script" uid="uid://cdhbl6mqj7j00" path="res://scripts/character_tree.gd" id="2_nt2nq"]
+[ext_resource type="Script" uid="uid://c0wln50bxisym" path="res://scripts/item_tree.gd" id="3_6ctqh"]
+[ext_resource type="Script" uid="uid://cpfo3qmkokouf" path="res://scripts/CollapsibleContainer.gd" id="3_8bqlb"]
+[ext_resource type="Script" uid="uid://brwyvwfl1dqe5" path="res://scripts/ToolPanel_Object.gd" id="3_oj6qf"]
 [ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="4_ev7tq"]
-[ext_resource type="Script" path="res://scripts/ToolPanel_Map.gd" id="6_8u5xx"]
+[ext_resource type="Script" uid="uid://deft4ela0of4g" path="res://scripts/ToolPanel_Map.gd" id="6_8u5xx"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="6_a6s87"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="7_lvvce"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o68u3"]
 
@@ -22,6 +24,18 @@ corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
+
+[sub_resource type="Resource" id="Resource_trh8q"]
+script = ExtResource("7_lvvce")
+
+[sub_resource type="Resource" id="Resource_s0mf7"]
+script = ExtResource("7_lvvce")
+
+[sub_resource type="Resource" id="Resource_6fb6e"]
+script = ExtResource("7_lvvce")
+
+[sub_resource type="Resource" id="Resource_e0qcq"]
+script = ExtResource("7_lvvce")
 
 [node name="ToolPanel" type="Control"]
 clip_contents = true
@@ -131,6 +145,10 @@ size_flags_vertical = 3
 mouse_filter = 0
 mouse_force_pass_scroll_events = false
 horizontal_scroll_mode = 0
+script = ExtResource("6_a6s87")
+wheel_scroll_damper = SubResource("Resource_trh8q")
+dragging_scroll_damper = SubResource("Resource_s0mf7")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer"]
 layout_mode = 2
@@ -143,11 +161,13 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Transform"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="TransformContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container"]
 layout_mode = 2
@@ -158,11 +178,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X"]
 layout_mode = 2
+mouse_filter = 1
 text = "Position X:"
 
 [node name="PosXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position X"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -172,11 +194,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y"]
 layout_mode = 2
+mouse_filter = 1
 text = "Position Y:"
 
 [node name="PosYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Position Y"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -186,11 +210,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X"]
 layout_mode = 2
+mouse_filter = 1
 text = "Size X:"
 
 [node name="SizeXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size X"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 
 [node name="Size Y" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
@@ -199,11 +225,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size Y"]
 layout_mode = 2
+mouse_filter = 1
 text = "Size Y:"
 
 [node name="SizeYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Size Y"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 
 [node name="Scale X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer"]
@@ -212,12 +240,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale X"]
 layout_mode = 2
+mouse_filter = 1
 text = "Scale X:
 "
 
 [node name="ScaleXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale X"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -227,11 +257,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale Y"]
 layout_mode = 2
+mouse_filter = 1
 text = "Scale Y:"
 
 [node name="ScaleYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Scale Y"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -241,11 +273,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Rotation"]
 layout_mode = 2
+mouse_filter = 1
 text = "Rotation:"
 
 [node name="RotSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/TransformContainer/Rotation"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 max_value = 360.0
 
 [node name="CollapsibleContainer2" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer"]
@@ -254,17 +288,20 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
 layout_mode = 2
+mouse_filter = 1
 text = "Light"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="LightContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container"]
 layout_mode = 2
 
 [node name="CastLight" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Cast Light"
 
 [node name="Offset X" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
@@ -273,11 +310,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset X"]
 layout_mode = 2
+mouse_filter = 1
 text = "Offset X:"
 
 [node name="OffsetXSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset X"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -287,11 +326,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset Y"]
 layout_mode = 2
+mouse_filter = 1
 text = "Offset Y:"
 
 [node name="OffsetYSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Offset Y"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 allow_greater = true
 allow_lesser = true
 
@@ -301,11 +342,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Resolution"]
 layout_mode = 2
+mouse_filter = 1
 text = "Resolution:"
 
 [node name="ResolutionSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Resolution"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 value = 100.0
 allow_greater = true
 
@@ -315,12 +358,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Radius"]
 layout_mode = 2
+mouse_filter = 1
 text = "Radius:
 "
 
 [node name="RadiusSpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Radius"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 value = 100.0
 allow_greater = true
 
@@ -330,12 +375,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Color"]
 layout_mode = 2
+mouse_filter = 1
 text = "Color:
 "
 
 [node name="ColorPickerButton" type="ColorPickerButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Color"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 color = Color(0.807843, 0.615686, 0.45098, 1)
 
 [node name="Energy" type="HBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer"]
@@ -344,11 +391,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Energy"]
 layout_mode = 2
+mouse_filter = 1
 text = "Energy:"
 
 [node name="EnergySpinBox" type="SpinBox" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/LightContainer/Energy"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 max_value = 10.0
 step = 0.05
 value = 1.0
@@ -359,25 +408,30 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
 layout_mode = 2
+mouse_filter = 1
 text = "Shadow"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="ShadowContainer" type="VBoxContainer" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container"]
 layout_mode = 2
 
 [node name="CastShadow" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Cast Shadows"
 
 [node name="OneSided" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "One Sided"
 
 [node name="FlipSides" type="CheckButton" parent="TabContainer/Object/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/ShadowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Flip Sides"
 
 [node name="Map" type="MarginContainer" parent="TabContainer"]
@@ -400,6 +454,10 @@ size_flags_vertical = 3
 mouse_filter = 0
 mouse_force_pass_scroll_events = false
 horizontal_scroll_mode = 0
+script = ExtResource("6_a6s87")
+wheel_scroll_damper = SubResource("Resource_6fb6e")
+dragging_scroll_damper = SubResource("Resource_e0qcq")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer"]
 layout_mode = 2
@@ -412,12 +470,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/BackgroundColor"]
 layout_mode = 2
+mouse_filter = 1
 text = "Background Color:
 "
 
 [node name="BackgroundColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/BackgroundColor"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 color = Color(0.261719, 0.386719, 0.3125, 1)
 
 [node name="CollapsibleContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
@@ -426,17 +486,20 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Grid"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="GridContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container"]
 layout_mode = 2
 
 [node name="GridEnable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Grid Enabled"
 
 [node name="Thickness" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
@@ -445,6 +508,7 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Thickness"]
 layout_mode = 2
+mouse_filter = 1
 text = "Thickness:
 "
 
@@ -452,6 +516,7 @@ text = "Thickness:
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+mouse_filter = 1
 max_value = 1.0
 step = 0.01
 
@@ -461,12 +526,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Color"]
 layout_mode = 2
+mouse_filter = 1
 text = "Color:
 "
 
 [node name="GridColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Color"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 color = Color(0.807843, 0.615686, 0.45098, 1)
 
 [node name="Grid Size px" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer"]
@@ -475,11 +542,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size px"]
 layout_mode = 2
+mouse_filter = 1
 text = "Grid Size (px):"
 
 [node name="GridSizePxSpinBox" type="SpinBox" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size px"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = 10.0
 value = 70.0
 allow_greater = true
@@ -490,11 +559,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size Units"]
 layout_mode = 2
+mouse_filter = 1
 text = "Units per grid cell:"
 
 [node name="GridSizeUnitSpinBox" type="SpinBox" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Grid Size Units"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 value = 5.0
 allow_greater = true
 allow_lesser = true
@@ -505,11 +576,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Units"]
 layout_mode = 2
+mouse_filter = 1
 text = "Distance Unit:"
 
 [node name="LineEdit" type="LineEdit" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer/Container/GridContainer/Units"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "ft"
 placeholder_text = "Unit"
 
@@ -519,17 +592,20 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
 layout_mode = 2
+mouse_filter = 1
 text = "Light and Shadow"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="Light and Shadow" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container"]
 layout_mode = 2
 
 [node name="Darkness Enable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
 layout_mode = 2
+mouse_filter = 1
 text = "Darkness Enable"
 
 [node name="Darkness Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
@@ -538,11 +614,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Color"]
 layout_mode = 2
+mouse_filter = 1
 text = "Darkness Color:"
 
 [node name="DarknessColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/Darkness Color"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 
 [node name="DM Darkness Color" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow"]
 layout_mode = 2
@@ -550,11 +628,13 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/DM Darkness Color"]
 layout_mode = 2
+mouse_filter = 1
 text = "DM Darkness Color:"
 
 [node name="DmDarknessColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer2/Container/Light and Shadow/DM Darkness Color"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 color = Color(0.172549, 0.172549, 0.172549, 1)
 
 [node name="CollapsibleContainer3" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer"]
@@ -563,17 +643,20 @@ script = ExtResource("3_8bqlb")
 
 [node name="Button" type="Button" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
 layout_mode = 2
+mouse_filter = 1
 text = "Field of Vision"
 icon = ExtResource("4_ev7tq")
 
 [node name="Container" type="PanelContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="FovContainer" type="VBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container"]
 layout_mode = 2
 
 [node name="FovEnable" type="CheckButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "FOV Enable"
 
 [node name="Opacity" type="HBoxContainer" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer"]
@@ -582,6 +665,7 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Opacity"]
 layout_mode = 2
+mouse_filter = 1
 text = "Unselected Opacity:
 "
 
@@ -589,6 +673,7 @@ text = "Unselected Opacity:
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+mouse_filter = 1
 max_value = 1.0
 step = 0.01
 value = 0.3
@@ -599,12 +684,14 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color"]
 layout_mode = 2
+mouse_filter = 1
 text = "Color:
 "
 
 [node name="FovColorPickerButton" type="ColorPickerButton" parent="TabContainer/Map/ScrollContainer/VBoxContainer/CollapsibleContainer3/Container/FovContainer/Color"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 title = "Warning"

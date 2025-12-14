@@ -1,7 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://bbiwsjeki8x0"]
+[gd_scene load_steps=7 format=3 uid="uid://bbiwsjeki8x0"]
 
-[ext_resource type="Script" path="res://scripts/Campaigns.gd" id="1_7ach1"]
+[ext_resource type="Script" uid="uid://d1n7ej7hsihj6" path="res://scripts/Campaigns.gd" id="1_7ach1"]
 [ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="2_ea16a"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="3_5yr6w"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="4_aien6"]
+
+[sub_resource type="Resource" id="Resource_okcy3"]
+script = ExtResource("4_aien6")
+
+[sub_resource type="Resource" id="Resource_tekml"]
+script = ExtResource("4_aien6")
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -43,6 +51,10 @@ vertical_alignment = 1
 [node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("3_5yr6w")
+wheel_scroll_damper = SubResource("Resource_okcy3")
+dragging_scroll_damper = SubResource("Resource_tekml")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
@@ -74,15 +86,18 @@ offset_bottom = 225.0
 
 [node name="EditLabel" type="Label" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Edit:"
 
 [node name="CampaignName" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Map name"
+mouse_filter = 1
 
 [node name="CampaignDesc" type="TextEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Map description"
+mouse_filter = 1
 scroll_fit_content_height = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
@@ -91,25 +106,31 @@ layout_mode = 2
 [node name="ApplyButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Apply"
 
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Cancel"
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="DuplicateButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Duplicate"
 
 [node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="DeleteButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Delete"
 
 [node name="Back" type="Button" parent="."]

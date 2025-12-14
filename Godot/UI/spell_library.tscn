@@ -209,6 +209,75 @@ text = "     Apply     "
 layout_mode = 2
 text = "     Cancel     "
 
+[node name="SaveFilterPresetNameDiag" type="Window" parent="."]
+oversampling_override = 1.0
+title = "please enter a preset name"
+initial_position = 2
+size = Vector2i(400, 150)
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SaveFilterPresetNameDiag"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -72.0
+offset_top = -59.5
+offset_right = 72.0
+offset_bottom = 59.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="SaveFilterPresetNameDiag/VBoxContainer"]
+layout_mode = 2
+text = "WARNIGN - this will overwrite any existing preset"
+
+[node name="LineEdit" type="LineEdit" parent="SaveFilterPresetNameDiag/VBoxContainer"]
+custom_minimum_size = Vector2(144.665, 0)
+layout_mode = 2
+placeholder_text = "Preset Name"
+alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="SaveFilterPresetNameDiag/VBoxContainer"]
+custom_minimum_size = Vector2(0, 24.935)
+layout_mode = 2
+
+[node name="SavePresetDiagBtn" type="Button" parent="SaveFilterPresetNameDiag/VBoxContainer"]
+layout_mode = 2
+text = "SavePreset"
+
+[node name="LoadFilterPresetDiag" type="Window" parent="."]
+oversampling_override = 1.0
+title = "Choose Filter Preset"
+initial_position = 2
+size = Vector2i(300, 150)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LoadFilterPresetDiag"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -18.0
+offset_right = 60.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="OptionButton" type="OptionButton" parent="LoadFilterPresetDiag/VBoxContainer"]
+custom_minimum_size = Vector2(120.59, 36.65)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="LoadFilterPresetDiag/VBoxContainer"]
+layout_mode = 2
+
+[node name="LoadFilterPresetDiagBtn" type="Button" parent="LoadFilterPresetDiag/VBoxContainer"]
+layout_mode = 2
+text = "Load Preset"
+
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/SearchButton" to="." method="_on_search_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/PopUpButton" to="." method="_on_pop_up_button_pressed"]
@@ -228,3 +297,7 @@ text = "     Cancel     "
 [connection signal="close_requested" from="SetColorToKeyword" to="." method="_on_set_color_to_keyword_close_requested"]
 [connection signal="pressed" from="SetColorToKeyword/VBoxContainer/HBoxContainer3/KeywordColorApplyBtn" to="." method="_on_keyword_color_apply_btn_pressed"]
 [connection signal="pressed" from="SetColorToKeyword/VBoxContainer/HBoxContainer3/KeywordColorCancelBtn" to="." method="_on_set_color_to_keyword_close_requested"]
+[connection signal="close_requested" from="SaveFilterPresetNameDiag" to="." method="_on_save_filter_preset_name_diag_close_requested"]
+[connection signal="pressed" from="SaveFilterPresetNameDiag/VBoxContainer/SavePresetDiagBtn" to="." method="_on_save_preset_diag_btn_pressed"]
+[connection signal="close_requested" from="LoadFilterPresetDiag" to="." method="_on_load_filter_preset_diag_close_requested"]
+[connection signal="pressed" from="LoadFilterPresetDiag/VBoxContainer/LoadFilterPresetDiagBtn" to="." method="_on_load_filter_preset_diag_btn_pressed"]

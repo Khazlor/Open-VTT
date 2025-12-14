@@ -1,7 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://c37cg5ywn3qfe"]
+[gd_scene load_steps=7 format=3 uid="uid://c37cg5ywn3qfe"]
 
 [ext_resource type="Texture2D" uid="uid://dyfabdpg87qmi" path="res://icons/Add.svg" id="1_2gkwa"]
-[ext_resource type="Script" path="res://scripts/equip_slot_settings.gd" id="1_pl4im"]
+[ext_resource type="Script" uid="uid://bx1pgusqlodd" path="res://scripts/equip_slot_settings.gd" id="1_pl4im"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="2_xbf5l"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="3_73fal"]
+
+[sub_resource type="Resource" id="Resource_xs34y"]
+script = ExtResource("3_73fal")
+
+[sub_resource type="Resource" id="Resource_ikbwm"]
+script = ExtResource("3_73fal")
 
 [node name="EquipSlotSettings" type="PanelContainer"]
 anchors_preset = 15
@@ -13,6 +21,10 @@ script = ExtResource("1_pl4im")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
+script = ExtResource("2_xbf5l")
+wheel_scroll_damper = SubResource("Resource_xs34y")
+dragging_scroll_damper = SubResource("Resource_ikbwm")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
 layout_mode = 2
@@ -28,10 +40,12 @@ layout_mode = 2
 [node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Left Equipment Slots:"
 
 [node name="LeftAddButton" type="Button" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer/HBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 icon = ExtResource("1_2gkwa")
 
 [node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/LeftVBoxContainer"]
@@ -46,10 +60,12 @@ layout_mode = 2
 [node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Middle Equipment Slots:"
 
 [node name="MiddleAddButton" type="Button" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer/HBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 icon = ExtResource("1_2gkwa")
 
 [node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/MiddleVBoxContainer"]
@@ -64,10 +80,12 @@ layout_mode = 2
 [node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/RightVBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Right Equipment Slots:"
 
 [node name="RightAddButton" type="Button" parent="ScrollContainer/VBoxContainer/RightVBoxContainer/HBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 icon = ExtResource("1_2gkwa")
 
 [node name="SlotsVBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/RightVBoxContainer"]

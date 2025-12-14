@@ -1,10 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://3qgtuhwblt4q"]
+[gd_scene load_steps=8 format=3 uid="uid://3qgtuhwblt4q"]
 
 [ext_resource type="Script" uid="uid://cfly5hrrb6q1s" path="res://scripts/draw.gd" id="1_44obt"]
 [ext_resource type="Script" uid="uid://sjl8eg3fm572" path="res://scripts/Drag_Drop_data.gd" id="2_enpjm"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="3_fo8ei"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="4_dgsmo"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_unuec"]
 light_mode = 1
+
+[sub_resource type="Resource" id="Resource_kuu8o"]
+script = ExtResource("4_dgsmo")
+
+[sub_resource type="Resource" id="Resource_xaf7x"]
+script = ExtResource("4_dgsmo")
 
 [node name="Draw" type="Node2D"]
 script = ExtResource("1_44obt")
@@ -42,6 +50,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("3_fo8ei")
+wheel_scroll_damper = SubResource("Resource_kuu8o")
+dragging_scroll_damper = SubResource("Resource_xaf7x")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="MarginContainer" type="MarginContainer" parent="TutorialWindow/ScrollContainer"]
 layout_mode = 2
@@ -54,6 +66,7 @@ theme_override_constants/margin_bottom = 5
 
 [node name="RichTextLabel" type="RichTextLabel" parent="TutorialWindow/ScrollContainer/MarginContainer"]
 layout_mode = 2
+mouse_filter = 1
 bbcode_enabled = true
 text = "This tutorial can be accessed at any time by pressing the F1 key
 [font_size=25]Tool menu[/font_size]

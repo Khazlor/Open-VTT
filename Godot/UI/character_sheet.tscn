@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://chldgnhe1p4fg"]
+[gd_scene load_steps=22 format=3 uid="uid://chldgnhe1p4fg"]
 
 [ext_resource type="Script" uid="uid://dq0cobyqpb8nh" path="res://scripts/character_sheet.gd" id="1_bacpi"]
 [ext_resource type="Texture2D" uid="uid://cqlyj4abmtc1i" path="res://icons/FileAccess.svg" id="2_axc3y"]
@@ -6,11 +6,37 @@
 [ext_resource type="Texture2D" uid="uid://bsrjpdacbqs26" path="res://icons/MakeFloating.svg" id="3_03ubt"]
 [ext_resource type="PackedScene" uid="uid://0gfii8buhxxb" path="res://components/token.tscn" id="3_dp58x"]
 [ext_resource type="Texture2D" uid="uid://bl56spd6o7atq" path="res://icons/Edit.svg" id="3_igpe4"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="4_o8hxk"]
 [ext_resource type="Texture2D" uid="uid://cnbnkt1fgj6ry" path="res://icon.svg" id="4_odk7d"]
 [ext_resource type="PackedScene" uid="uid://cb2w5ybormmnv" path="res://components/equipment.tscn" id="5_hfapw"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="5_xsx1p"]
 [ext_resource type="PackedScene" uid="uid://c037v4p420u8d" path="res://components/inventory.tscn" id="6_yts28"]
 [ext_resource type="PackedScene" uid="uid://c37cg5ywn3qfe" path="res://components/equip_slot_settings.tscn" id="7_140mj"]
 [ext_resource type="Texture2D" uid="uid://dupfjhlcxfjf1" path="res://icons/Settings.svg" id="11_iy2pu"]
+
+[sub_resource type="Resource" id="Resource_mt5ql"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_ln88o"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_o8hxk"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_xsx1p"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_s67xq"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_60qo4"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_c5ugu"]
+script = ExtResource("5_xsx1p")
+
+[sub_resource type="Resource" id="Resource_6uub3"]
+script = ExtResource("5_xsx1p")
 
 [node name="CharacterSheet" type="Window"]
 oversampling_override = 1.0
@@ -58,11 +84,16 @@ icon = ExtResource("3_igpe4")
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/CharacterSheet/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("4_o8hxk")
+wheel_scroll_damper = SubResource("Resource_mt5ql")
+dragging_scroll_damper = SubResource("Resource_ln88o")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="CharSheetCanvas" type="Panel" parent="TabContainer/CharacterSheet/VBoxContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
+mouse_filter = 1
 metadata/cust_size = Vector2(1000, 800)
 
 [node name="Node" type="Node2D" parent="TabContainer/CharacterSheet/VBoxContainer/ScrollContainer/CharSheetCanvas"]
@@ -71,6 +102,7 @@ metadata/cust_size = Vector2(1000, 800)
 visible = false
 offset_right = 189.0
 offset_bottom = 28.0
+mouse_filter = 1
 theme_override_font_sizes/font_size = 20
 text = "ADASFASFASFJKBAF"
 
@@ -91,6 +123,10 @@ theme_override_constants/margin_bottom = 10
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Attributes/MarginContainer"]
 layout_mode = 2
+script = ExtResource("4_o8hxk")
+wheel_scroll_damper = SubResource("Resource_o8hxk")
+dragging_scroll_damper = SubResource("Resource_xsx1p")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Attributes/MarginContainer/ScrollContainer"]
 layout_mode = 2
@@ -98,6 +134,7 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Attributes"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer"]
@@ -106,10 +143,12 @@ layout_mode = 2
 [node name="Name_LineEdit" type="LineEdit" parent="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 placeholder_text = "Name"
 
 [node name="Add_Attribute_Button" type="Button" parent="TabContainer/Attributes/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 icon = ExtResource("2_jwo46")
 
 [node name="MarginContainer2" type="MarginContainer" parent="TabContainer/Attributes"]
@@ -152,6 +191,10 @@ metadata/_tab_index = 2
 [node name="MarginContainer" type="ScrollContainer" parent="TabContainer/Token"]
 layout_mode = 2
 size_flags_horizontal = 3
+script = ExtResource("4_o8hxk")
+wheel_scroll_damper = SubResource("Resource_s67xq")
+dragging_scroll_damper = SubResource("Resource_60qo4")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer"]
 layout_mode = 2
@@ -167,16 +210,22 @@ clip_contents = true
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 1
 
 [node name="Label" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/TokenPreview"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
+mouse_filter = 1
 text = "Preview:"
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/TokenPreview"]
 layout_mode = 2
+script = ExtResource("4_o8hxk")
+wheel_scroll_damper = SubResource("Resource_c5ugu")
+dragging_scroll_damper = SubResource("Resource_6uub3")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="Token" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/TokenPreview/ScrollContainer" instance=ExtResource("3_dp58x")]
 layout_mode = 2
@@ -190,24 +239,28 @@ size_flags_vertical = 3
 [node name="PlayerCheckButton" type="CheckButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Enables FOV on this character, players will be able to open character sheet"
+mouse_filter = 1
 button_pressed = true
 text = "Player character"
 
 [node name="SingletonCheckButton" type="CheckButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Link all tokens of this character together. Stats will be persistent across all tokens of this character on all maps."
+mouse_filter = 1
 disabled = true
 button_pressed = true
 text = "Link tokens:"
 
 [node name="ShapePanel" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel"]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Shape:"
 horizontal_alignment = 1
 
@@ -217,17 +270,20 @@ layout_mode = 2
 [node name="OptionButton" type="OptionButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 
 [node name="ShapeSizeFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer"]
 layout_mode = 2
 
 [node name="ShapeSizeXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "size x:"
 
 [node name="ShapeSizeXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = 1.0
 max_value = 1000.0
 value = 70.0
@@ -236,11 +292,13 @@ update_on_text_changed = true
 
 [node name="ShapeSizeYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "size y:"
 
 [node name="ShapeSizeYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeSizeFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = 1.0
 max_value = 1000.0
 value = 70.0
@@ -252,11 +310,13 @@ layout_mode = 2
 
 [node name="ShapeScaleXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "scale x:"
 
 [node name="ShapeScaleXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 step = 0.01
 value = 1.0
 allow_greater = true
@@ -265,11 +325,13 @@ update_on_text_changed = true
 
 [node name="ShapeScaleYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "scale y:"
 
 [node name="ShapeScaleYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/ShapeScaleFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 step = 0.01
 value = 1.0
 allow_greater = true
@@ -281,11 +343,13 @@ layout_mode = 2
 
 [node name="BorderWidth" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Border Width:"
 
 [node name="BorderWidthSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = -1.0
 value = 5.0
 allow_greater = true
@@ -293,28 +357,33 @@ update_on_text_changed = true
 
 [node name="BorderColor" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Color:"
 
 [node name="BorderColorPickerButton" type="ColorPickerButton" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ShapePanel/VBoxContainer/BorderFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 
 [node name="ImagePanel" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel"]
 layout_mode = 2
 
 [node name="ImageLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Image:"
 horizontal_alignment = 1
 
 [node name="ImagePanelContainer" type="PanelContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 1
 
 [node name="ImageTextureRect" type="TextureRect" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer"]
 custom_minimum_size = Vector2(128, 128)
@@ -325,6 +394,7 @@ stretch_mode = 5
 
 [node name="BrowseImageButton" type="Button" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImagePanelContainer"]
 layout_mode = 2
+mouse_filter = 1
 flat = true
 
 [node name="ImageOffsetFlowContainer" type="HBoxContainer" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer"]
@@ -332,11 +402,13 @@ layout_mode = 2
 
 [node name="ImageOffsetXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "offset x:"
 
 [node name="ImageOffsetXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = -1000.0
 max_value = 1000.0
 allow_greater = true
@@ -345,11 +417,13 @@ update_on_text_changed = true
 
 [node name="ImageOffsetYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "offset y:"
 
 [node name="ImageOffsetYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageOffsetFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 min_value = -1000.0
 max_value = 1000.0
 allow_greater = true
@@ -361,11 +435,13 @@ layout_mode = 2
 
 [node name="ImageScaleXLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "scale x:"
 
 [node name="ImageScaleXSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 step = 0.01
 value = 1.0
 allow_greater = true
@@ -374,11 +450,13 @@ update_on_text_changed = true
 
 [node name="ImageScaleYLabel" type="Label" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "scale y:"
 
 [node name="ImageScaleYSpinBox" type="SpinBox" parent="TabContainer/Token/MarginContainer/VBoxContainer/VSplitContainer/VBoxContainer/ImagePanel/VBoxContainer/ImageScaleFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 step = 0.01
 value = 1.0
 allow_greater = true

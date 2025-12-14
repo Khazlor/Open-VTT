@@ -1,7 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://7ynxnxtwfalq"]
+[gd_scene load_steps=7 format=3 uid="uid://7ynxnxtwfalq"]
 
 [ext_resource type="FontFile" uid="uid://ba0ochwu4b23x" path="res://fonts/Seagram tfb.ttf" id="1_65ntf"]
-[ext_resource type="Script" path="res://scripts/Maps.gd" id="1_wdgyu"]
+[ext_resource type="Script" uid="uid://vd55a6v5r78x" path="res://scripts/Maps.gd" id="1_wdgyu"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="3_o42fw"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="4_ho0kc"]
+
+[sub_resource type="Resource" id="Resource_uma7w"]
+script = ExtResource("4_ho0kc")
+
+[sub_resource type="Resource" id="Resource_ukjry"]
+script = ExtResource("4_ho0kc")
 
 [node name="Maps" type="Control"]
 layout_mode = 3
@@ -45,6 +53,10 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 0
 mouse_force_pass_scroll_events = false
+script = ExtResource("3_o42fw")
+wheel_scroll_damper = SubResource("Resource_uma7w")
+dragging_scroll_damper = SubResource("Resource_ukjry")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
@@ -72,32 +84,38 @@ mouse_passthrough = true
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 246.0
-offset_bottom = 327.0
+offset_bottom = 323.0
 
 [node name="EditLabel" type="Label" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Edit:"
 
 [node name="MapName" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Map name"
+mouse_filter = 1
 
 [node name="MapDesc" type="TextEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Map description"
+mouse_filter = 1
 scroll_fit_content_height = true
 
 [node name="GridSizePx" type="SpinBox" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "number of pixels per grid cell"
+mouse_filter = 1
 
 [node name="UnitSize" type="SpinBox" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Numerical size of grid cell"
+mouse_filter = 1
 
 [node name="Unit" type="LineEdit" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "Unit of grid cell (ft, km, miles, etc.)"
+mouse_filter = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
@@ -105,25 +123,31 @@ layout_mode = 2
 [node name="ApplyButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Apply"
 
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 text = "Cancel"
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="DuplicateButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Duplicate"
 
 [node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="DeleteButton" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/PopupPanel/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Delete"
 
 [node name="Back" type="Button" parent="."]

@@ -90,11 +90,13 @@ func create_roll_panel(text_in: String, DM = Globals.lobby.check_is_server(), se
 	label.tooltip_text = text_in
 	
 	var result_node_local = roll_panel_item_local.get_node("VBoxContainer/Result")
-	$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(roll_panel_item_local)
+	add_node_to_rollpanel(roll_panel_item_local)
 	if set_global:
 		result_node = result_node_local
 	return result_node_local
 
+func add_node_to_rollpanel(node):
+	$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(node)
 
 func evaluate_roll(roll_section: String):
 	#print("roll: ", roll_section)

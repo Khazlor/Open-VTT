@@ -38,7 +38,7 @@ import/reimport_missing_imported_files=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg")
+enabled=PackedStringArray("res://addons/SmoothScroll/plugin.cfg", "res://addons/godot-sqlite/plugin.cfg")
 
 [filesystem]
 

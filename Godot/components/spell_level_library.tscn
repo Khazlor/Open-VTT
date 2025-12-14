@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://hgdb4kwrwowt"]
+[gd_scene load_steps=6 format=3 uid="uid://hgdb4kwrwowt"]
 
 [ext_resource type="Script" uid="uid://brvsho1p0ytwf" path="res://scripts/spell_level_library.gd" id="1_3g28t"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="2_bq4gx"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="3_fjiqq"]
+
+[sub_resource type="Resource" id="Resource_mhl31"]
+script = ExtResource("3_fjiqq")
+
+[sub_resource type="Resource" id="Resource_gh450"]
+script = ExtResource("3_fjiqq")
 
 [node name="SpellLibrary" type="MarginContainer"]
 anchors_preset = 15
@@ -18,6 +26,10 @@ metadata/_tab_index = 0
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
 horizontal_scroll_mode = 0
+script = ExtResource("2_bq4gx")
+wheel_scroll_damper = SubResource("Resource_mhl31")
+dragging_scroll_damper = SubResource("Resource_gh450")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="FlowContainer" type="FlowContainer" parent="ScrollContainer"]
 layout_mode = 2

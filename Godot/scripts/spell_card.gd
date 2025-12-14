@@ -4,6 +4,7 @@ extends PanelContainer
 @onready var content = $VBoxContainer/CardContent
 var spellbook
 
+var print = false # indicates spellcard is going to be printed in roll_panel - remove some functionality
 
 var spell_dict = {}
 var card_comp_array = null
@@ -12,6 +13,10 @@ var content_loaded = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	load_spell_card()
+	if print:
+		self.get_child(0).free() #remove buttons
+		_on_left_mouse_button_pressed()
+		collapse_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 
 func _on_left_mouse_button_pressed() -> void:
@@ -32,13 +37,13 @@ func _on_right_mouse_button_pressed() -> void:
 	popup.items = spellbook.popup_items
 	popup.position = DisplayServer.mouse_get_position()
 	popup.connect("item_pressed", spellbook._on_context_menu_item_pressed)
-	spellbook.current_spell_dict = spell_dict
+	spellbook.current_spellcard = self
 	spellbook.add_child(popup)
 	
 
 func _on_middle_mouse_button_pressed() -> void:
 	print("middle")
-	spellbook.character_sheet.character.add_spell_to_prepared(spell_dict, null, spellbook.spellbook_name)
+	spellbook.character.add_spll_to_prepared(spell_dict, null, spellbook.spellbook_name)
 
 
 func _get_drag_data(at_position: Vector2) -> Variant:
