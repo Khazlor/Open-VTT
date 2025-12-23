@@ -40,6 +40,7 @@ var snapping = false
 var measureTool = 1 #1 == line | 2 == circle | 3 == angle
 var measureAngle = 30
 var snappingFraction = 1
+var snappingNearestSize = 70
 var select_recursive = true
 var tool = "select"
 var colorLines = Color(0,0,0,1)

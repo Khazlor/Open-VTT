@@ -55,6 +55,8 @@ func _on_snap_check_box_toggled(button_pressed):
 
 func _on_snap_fraction_option_button_item_selected(index):
 	Globals.snappingFraction = index + 1
+	print(Globals.snappingFraction)
+	Globals.snappingNearestSize = Globals.new_map.grid_size / Globals.snappingFraction
 
 
 func _on_measure_options_pressed():

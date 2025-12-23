@@ -106,7 +106,7 @@ func _unhandled_input(event):
 			return
 		mouse_pos = get_global_mouse_position()
 		if Globals.snapping == true:
-			mouse_pos = round(mouse_pos/(70/Globals.snappingFraction))*(70/Globals.snappingFraction) #snap to grid
+			mouse_pos = round(mouse_pos/(Globals.snappingNearestSize))*(Globals.snappingNearestSize) #snap to grid
 		if targeting and Input.is_action_just_pressed("mouseleft"): #targeting end
 			end_targeting()
 			return
@@ -164,8 +164,16 @@ func _unhandled_input(event):
 			if selected_dragging:
 				selected_dragging = false
 				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				var snap_pos_offset: Vector2
+				if Globals.snapping:
+					snap_pos_offset.x = round(select_box.position.x / Globals.snappingNearestSize) * (Globals.snappingNearestSize)
+					snap_pos_offset.y = round(select_box.position.y / Globals.snappingNearestSize) * (Globals.snappingNearestSize)
+					snap_pos_offset = snap_pos_offset - select_box.position
+					select_box.position += snap_pos_offset
 				var i = 0
 				for object in selected:
+					if Globals.snapping:
+						object.position += snap_pos_offset
 					var path = get_path_to(object)
 					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position]], [["position", selected_org_pos[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position]])
@@ -308,7 +316,7 @@ func _unhandled_input(event):
 					min_max_x_y = Vector4(min_x, min_y, max_x, max_y)
 			#if nothing in dragged square -> get clicked
 			if new_selected.is_empty():
-				var clicked = get_clicked(mouse_pos)
+				var clicked = get_clicked(get_global_mouse_position())
 				if clicked != null:
 					selected.append(clicked)
 			else:
@@ -690,7 +698,7 @@ func _unhandled_input(event):
 							select_pos_org = select_box.position
 							select_size_org = select_box.size
 							select_box.queue_free()
-						create_select_box(mouse_pos)
+						create_select_box(get_global_mouse_position())
 	#					else:
 	#						selected.clear()
 	#						current_panel = $Select.get_child(0)
@@ -892,7 +900,7 @@ func _unhandled_input(event):
 						return
 					#drawing selection box - update size
 					else:
-						var end = mouse_pos
+						var end = get_global_mouse_position()
 						if begin.x > end.x and begin.y > end.y:
 							select_box.set_begin(end)
 							select_box.set_end(begin)

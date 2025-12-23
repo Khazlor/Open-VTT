@@ -93,6 +93,7 @@ func _on_grid_size_px_spin_box_value_changed(value):
 	grid.texture.height = value
 	grid.texture.width = value
 	Globals.new_map.grid_size = value
+	Globals.snappingNearestSize = value / Globals.snappingFraction
 	set_map_setting_on_other_peers.rpc("grid_size", value)
 
 
