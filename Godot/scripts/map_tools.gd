@@ -5,9 +5,25 @@
 extends Control
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	Globals.tool = "select"
 	Globals.tool_bar = $MarginContainer/VBoxContainer/Select
+	
 	$VBoxContainer/TextOptions/Panel/VBoxContainer/FontSizeSpinBox.get_line_edit().focus_mode = FOCUS_CLICK
 	$VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox.get_line_edit().focus_mode = FOCUS_CLICK
+	
+	#load settings
+	$MarginContainer/VBoxContainer/SnapPanelContainer/HBoxContainer/SnapCheckBox.set_pressed_no_signal(Globals.snapping)
+	$MarginContainer/VBoxContainer/SnapPopupPanel/VBoxContainer/SnapFractionOptionButton.selected = Globals.snappingFraction - 1
+	Globals.measureTool = 1 #line
+	$MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/HBoxContainer/MeasureAngleSpinBox.set_value_no_signal(Globals.measureAngle)
+	$VBoxContainer/TextOptions/Panel/VBoxContainer/FontColorPickerButton.color = Globals.fontColor
+	$VBoxContainer/TextOptions/Panel/VBoxContainer/FontSizeSpinBox.set_value_no_signal(Globals.fontSize)
+	Globals.font = $VBoxContainer/TextOptions/Panel/VBoxContainer/FontOptionButton.get_item_text(0) #default
+	$VBoxContainer/LineOptions/Panel/VBoxContainer/FillColorPickerButton.color = Globals.colorBack
+	$VBoxContainer/LineOptions/Panel/VBoxContainer/LineColorPickerButton.color = Globals.colorLines
+	$VBoxContainer/LineOptions/Panel/VBoxContainer/LineSpinBox.set_value_no_signal(Globals.lineWidth)
+	
+	
 	
 
 func _on_draw_item_selected(index):
@@ -85,8 +101,8 @@ func _on_measure_angle_radio_toggled(button_pressed):
 		Globals.measureTool = 3
 
 
-func _on_line_edit_text_changed(new_text):
-	Globals.measureAngle = int($MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/HBoxContainer/MeasureAngleLineEdit.text)
+func _on_measure_angle_spinbox_value_changed(value):
+	Globals.measureAngle = value
 
 
 func _on_text_pressed():
@@ -95,7 +111,7 @@ func _on_text_pressed():
 
 
 func _on_font_option_button_item_selected(index):
-	Globals.font = $VBoxContainer/TextOptions/Panel/VBoxContainer/FontOptionButton.get_item_text(index) # Replace with function body.
+	Globals.font = $VBoxContainer/TextOptions/Panel/VBoxContainer/FontOptionButton.get_item_text(index)
 	Globals.draw_comp.emit_signal("font_settings_changed", "f")
 
 

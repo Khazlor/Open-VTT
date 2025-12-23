@@ -93,6 +93,8 @@ func _ready():
 	$CanvasLayer/VSplitContainer/Maps/Back.connect("pressed", _on_maps_back_button_pressed)
 #	$CanvasLayer/Maps.connect("mouse_entered", _on_maps_mouse_entered)
 #	$CanvasLayer/Maps.connect("mouse_exited", _on_maps_mouse_exited)
+
+	Globals.snappingNearestSize = Globals.new_map.grid_size / Globals.snappingFraction
 	
 	
 func _on_child_exiting_tree(node):
