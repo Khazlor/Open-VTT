@@ -357,10 +357,12 @@ func load_data_for_self_and_children(file: FileAccess):
 		if object_data_arr[1][0] == "light":
 			var light = PointLight2D.new()
 			light.position = node.position
+			light.blend_mode = Light2D.BLEND_MODE_MIX
 			var texture = GradientTexture2D.new()
 			texture.gradient = Gradient.new()
 			texture.gradient.set_offset(0, 0.7)
 			texture.gradient.set_offset(1, 0)
+			texture.gradient.set_color(1, Color.TRANSPARENT)
 			texture.height = object_data_arr[1][3]
 			texture.width = texture.height
 			texture.fill = GradientTexture2D.FILL_RADIAL

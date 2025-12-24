@@ -1887,10 +1887,12 @@ func create_or_enable_light(object, light_dict = null):
 	light.range_item_cull_mask = object.light_mask
 	light.shadow_item_cull_mask = object.light_mask
 	light.position = light_dict["position"]
+	light.blend_mode = Light2D.BLEND_MODE_MIX
 	var texture = GradientTexture2D.new()
 	texture.gradient = Gradient.new()
 	texture.gradient.set_offset(0, 0.7)
 	texture.gradient.set_offset(1, 0)
+	texture.gradient.set_color(1, Color.TRANSPARENT)
 #		texture.gradient.add_point(0.7, Color.BLACK)
 #		texture.gradient.add_point(0, Color.WHITE)
 	texture.height = light_dict["resolution"]
@@ -2405,10 +2407,12 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			print("has light")
 			var light = PointLight2D.new()
 			light.position = node.position
+			light.blend_mode = Light2D.BLEND_MODE_MIX
 			var texture = GradientTexture2D.new()
 			texture.gradient = Gradient.new()
 			texture.gradient.set_offset(0, 0.7)
 			texture.gradient.set_offset(1, 0)
+			texture.gradient.set_color(1, Color.TRANSPARENT)
 			texture.height = object_data_arr[1][3]
 			texture.width = texture.height
 			texture.fill = GradientTexture2D.FILL_RADIAL
