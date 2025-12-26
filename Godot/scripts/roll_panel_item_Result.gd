@@ -1,8 +1,8 @@
 #Author: Vladimír Horák
 #Desc:
 #Script implementing custom tooltip for rolled results
-
 extends RichTextLabel
+class_name Roll_Panel_Item_Result
 	
 #custom tooltip for rolls - using RichTextLabel to allow BBCode formatting
 func _make_custom_tooltip(for_text):

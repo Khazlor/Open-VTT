@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://gft43bnph770"]
 
-[ext_resource type="Script" path="res://scripts/roll_panel_item_Result.gd" id="1_542ih"]
+[ext_resource type="Script" uid="uid://w1do4ycbxixy" path="res://scripts/roll_panel_item_Result.gd" id="1_542ih"]
 
 [node name="Roll_panel_item" type="PanelContainer"]
 clip_contents = true

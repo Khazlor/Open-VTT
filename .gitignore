@@ -9,3 +9,5 @@ Godot/*.db
 Godot/settings.json
 Godot/keymaps.dat
 *.tmp
+*.csv
+*.csv.import

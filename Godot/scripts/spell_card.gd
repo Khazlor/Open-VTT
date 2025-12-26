@@ -5,15 +5,19 @@ extends PanelContainer
 var spellbook
 
 var print = false # indicates spellcard is going to be printed in roll_panel - remove some functionality
+var cast = false # indicates spellcard is going to be casted in roll_panel - remove some functionality and roll macros
 
 var spell_dict = {}
 var card_comp_array = null
 var content_loaded = false
 
+var macro_nodes = []
+var macros_not_in_card = []
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	load_spell_card()
-	if print:
+	if print or cast:
 		self.get_child(0).free() #remove buttons
 		_on_left_mouse_button_pressed()
 		collapse_button.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -43,7 +47,7 @@ func _on_right_mouse_button_pressed() -> void:
 
 func _on_middle_mouse_button_pressed() -> void:
 	print("middle")
-	spellbook.character.add_spll_to_prepared(spell_dict, null, spellbook.spellbook_name)
+	spellbook.character.add_spell_to_prepared(spell_dict, spellbook.spellbook_name)
 
 
 func _get_drag_data(at_position: Vector2) -> Variant:
@@ -116,18 +120,45 @@ func replace_attributes_in_text(text):
 			last_index += word_len
 		last_index = text.find('@',last_index)
 	return text
+	
+func replace_text_by_macro(text):
+	print("replacing text by macro:", text)
+	print(spell_dict["spell_attributes"])
+	if spell_dict["spell_attributes"].has(text):
+		return spell_dict["spell_attributes"][text]
+	else:
+		print("macro not found:", text)
+		return ""
 
 func load_label_from_dict(dict):
 	var label = Label.new()
+	var text: String = dict["text"]
+	if text.begins_with("##"): #macro that gets rolled in new rollpanel item
+		text = replace_text_by_macro(text.substr(2))
+		macros_not_in_card.append(text)
+		label.queue_free() # delete this label
+		return
+	if text.begins_with("#"): #macro that gets rolled in card
+		if cast:
+			label.queue_free()
+			label = Roll_Panel_Item_Result.new()
+			label.fit_content = true
+			label.scroll_active = false
+			label.bbcode_enabled = true
+		text = replace_text_by_macro(text.substr(1))
+		if text != "":
+			macro_nodes.append(label)
+		label.text = text
+	else:
+		text = replace_attributes_in_text(text)
+		label.text = text
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.position = dict["pos"]
 	label.size = dict["size"]
-	label.clip_text = true
+	if label is Label:
+		label.clip_text = true
 	content.add_child(label)
 	label.add_theme_color_override("font_color", dict["fcolor"])
-	var text: String = dict["text"]
-	text = replace_attributes_in_text(text)
-	label.text = text
 	var style = StyleBoxFlat.new()
 	style.bg_color = dict["BGcolor"]
 	style.border_color = dict["lcolor"]

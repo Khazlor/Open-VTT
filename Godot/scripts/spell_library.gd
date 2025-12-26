@@ -111,8 +111,12 @@ func _on_context_menu_item_pressed(item_index: Variant) -> void:
 		print_spellcard.spell_dict = current_spellcard.spell_dict
 		Globals.roll_panel.add_node_to_rollpanel(print_spellcard)
 		
-	else: #cast spell TODO
-		pass
+	else:
+		if character != null:
+			character.cast_spell(spellbook_name, null, null, current_spellcard.spell_dict)
+		else:
+			Globals.roll_panel.cast_spell(current_spellcard.spell_dict, null)
+		
 
 
 
@@ -160,7 +164,9 @@ func _on_import_spells_btn_pressed() -> void:
 
 
 func _on_export_spells_btn_pressed() -> void:
-	pass # Replace with function body.
+	if $ExportFileDialog.current_file == "":
+		$ExportFileDialog.current_file = "exported_spells.csv"
+	$ExportFileDialog.popup()
 
 
 func _on_custom_sql_btn_pressed() -> void:
@@ -194,11 +200,11 @@ func _on_file_dialog_file_selected(path: String) -> void:
 		var line = file.get_csv_line()
 		if line.size() == header.size():
 			for i in range(header.size()):
-				if line[i] == "" or header[i] == "" or header[i] == "spell_id":
+				if line[i] == "" or header[i] == "":
 					continue
 				elif header[i] == "keywords":
 					new_spell_keywords.append(line[i])
-				elif header[i] == "spell_level" or header[i] == "spell_name" or header[i] == "spellcard_name":
+				elif header[i] == "spell_level" or header[i] == "spell_name" or header[i] == "spellcard_name" or header[i] == "spell_id":
 					new_spell_dict[header[i]] = line[i]
 				elif header[i] == "spell_icon_path":
 					if FileAccess.file_exists(line[i]):
@@ -313,3 +319,57 @@ func _on_keyword_color_apply_btn_pressed() -> void:
 	var color = $SetColorToKeyword/VBoxContainer/HBoxContainer2/KeywordColorPickerBtn.color
 	Globals.spell_database.add_color_to_keyword_in_db(keyword, color, priority)
 	$SetColorToKeyword.hide()
+
+
+func _on_export_file_dialog_confirmed() -> void:
+	var file = FileAccess.open($ExportFileDialog.current_path , FileAccess.WRITE)
+	if file == null:
+		print("error no such file")
+		return
+	#get all headers
+	var spell_array = Globals.spell_database.get_spells_from_database(spells_all_arr, spells_one_arr, self)
+	#print(spell_array)
+	var header_array: PackedStringArray = ["spell_id", "spell_name", "spell_level", "spellcard_name", "spell_icon"]
+	var header_attr_array: PackedStringArray = []
+	var num_of_keywords = 0
+	for spell in spell_array:
+		for spell_attr in spell["spell_attributes"]:
+			if not header_attr_array.has(spell_attr):
+				header_attr_array.append(spell_attr)
+		var keyword_array = Globals.spell_database.get_all_keywords_of_spell(spell["spell_id"])
+		if num_of_keywords < keyword_array.size():
+			num_of_keywords = keyword_array.size()
+	#construct csv file
+	#headers first, then keywords
+	var keyword_header_array: PackedStringArray = []
+	for keyword in num_of_keywords:
+		keyword_header_array.append("keywords")
+	file.store_csv_line(header_array + header_attr_array + keyword_header_array)
+	for spell in spell_array:
+		var write_spell_array: PackedStringArray = []
+		for header in header_array:
+			if spell.has(header):
+				write_spell_array.append(str(spell[header]))
+			else:
+				write_spell_array.append("")
+		var spell_attributes: Dictionary
+		if spell.has("spell_attributes"):
+			spell_attributes = spell["spell_attributes"]
+		else:
+			spell_attributes = {}
+		for attr_header in header_attr_array:
+			if spell_attributes.has(attr_header):
+				write_spell_array.append(str(spell_attributes[attr_header]))
+			else:
+				write_spell_array.append("")
+		var keyword_array = Globals.spell_database.get_all_keywords_of_spell(spell["spell_id"])
+		for i in range(keyword_header_array.size()):
+			if keyword_array.size() > i:
+				write_spell_array.append(keyword_array[i]["keyword_name"])
+			else:
+				write_spell_array.append("")
+		#write constructed line
+		file.store_csv_line(write_spell_array) 
+	file.close()
+			
+	

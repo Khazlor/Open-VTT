@@ -63,6 +63,7 @@ signal inv_changed()
 
 signal spellbooks_changed(spellbook_name)
 signal spellbook_spells_changed(spellbook_name)
+signal spell_slots_changed(spellbook_name, level, status)
 signal spell_slot_changed(spellbook_name, level, slot_index)
 
 signal synch_item_added(item)
@@ -71,8 +72,9 @@ signal synch_macro(macro_name, macro_dict, old_macro_name, remove)
 signal synch_equip_slot(side, ind, move_ind, slot_dict, new, remove)
 signal equip_slot_synched()
 
-enum {SPELL_CAST, SPELL_RES}
+enum {SPELL_SLOT_DICT, SPELL_SLOT_CAST}
 enum {SPELLBOOK_ADD, SPELLBOOK_REMOVE, CHANGE_SETTINGS}
+enum {SPELLSLOT_LEVEL_ADD, SPELLSLOT_LEVEL_REMOVE, SPELLSLOT_OTHER}
 
 func get_token():
 	emit_get_token_request_after_delay()
@@ -440,21 +442,154 @@ func remove_spell_from_spellbook(spell_dict, spellbook_name):
 		spellbooks[spellbook_name]["spells"].erase(spell_dict)
 		emit_signal("spellbook_spells_changed", spellbook_name)
 
-func add_spell_to_prepared(spell, spell_slot_index, spellbook_name):
+func add_spell_to_prepared(spell, spellbook_name, spell_level = null, spell_slot_index = null):
+	#check if data is fine
 	if spell == null:
 		print("spell is null !!!")
 		return
+	if not spellbooks.has(spellbook_name):
+		print("no spellbook: ", spellbook_name, " !!!")
+		return
+	if not spellbooks[spellbook_name].has("spell_slots"):
+		spellbooks[spellbook_name]["spell_slots"]=[]
+		print("no spellslots !!!")
+		return #no slots
+	if spell_level == null:
+		spell_level = spell["spell_level"]
+	if spell["spell_level"] < spell_level:
+		return
+	elif spell["spell_level"] > spell_level:
+		if not spellbooks[spellbook_name]["allow_spells_in_higher_slots"]:
+			return
+	if spellbooks[spellbook_name]["spell_slots"].size() < spell_level-1:
+		print("no spellslots for level: " + spell_level-1 + " !!!")
+		return
+	#add spell to prepared 
 	if spell_slot_index == null: #add spell to the firts free slot for the spell level
 		var slot_index = 0
-		for spell_slot in spellbooks[spellbook_name]["spell_slots"][spell["level"]]:
-			if spell_slot[SPELL_RES] == null: #free slot found
-				spell_slot[SPELL_RES] = spell
-				self.emit_signal("spell_slot_changed", spellbook_name, spell["level"], slot_index)
+		for spell_slot in spellbooks[spellbook_name]["spell_slots"][spell_level-1]:
+			if spell_slot[SPELL_SLOT_DICT] == null: #free slot found
+				spell_slot[SPELL_SLOT_DICT] = spell
+				self.emit_signal("spell_slot_changed", spellbook_name, spell_level, slot_index)
 				return
 			slot_index += 1
 	else: #specific spell slot - replace spell
-		spellbooks[spellbook_name]["spell_slots"][spell["level"]][spell_slot_index][SPELL_RES] = spell
-		self.emit_signal("spell_slot_changed", spellbook_name, spell["level"], spell_slot_index)
+		spellbooks[spellbook_name]["spell_slots"][spell_level-1][spell_slot_index][SPELL_SLOT_DICT] = spell
+		self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
 
+func add_spell_slot_level(spellbook_name):
+	if spellbooks.has(spellbook_name):
+		if not spellbooks[spellbook_name].has("spell_slots"):
+			spellbooks[spellbook_name]["spell_slots"] = []
+		spellbooks[spellbook_name]["spell_slots"].append([])
+		print("adding spellslot one")
+		self.emit_signal("spell_slots_changed", spellbook_name, spellbooks[spellbook_name]["spell_slots"].size(), SPELLSLOT_LEVEL_ADD)
 
+func remove_spell_slot_level(spellbook_name):
+	if spellbooks.has(spellbook_name):
+		if not spellbooks[spellbook_name].has("spell_slots"):
+			spellbooks[spellbook_name]["spell_slots"] = []
+		spellbooks[spellbook_name]["spell_slots"].pop_back()
+		print(spellbooks[spellbook_name]["spell_slots"])
+		self.emit_signal("spell_slots_changed", spellbook_name, spellbooks[spellbook_name]["spell_slots"].size() + 1, SPELLSLOT_LEVEL_REMOVE)
+
+func add_spell_slot(spellbook_name, spell_slot_level):
+	if spellbooks.has(spellbook_name):
+		if not spellbooks[spellbook_name].has("spell_slots"):
+			spellbooks[spellbook_name]["spell_slots"] = []
+			return #no spell slot levels to add spell_slot to?
+		if spellbooks[spellbook_name]["spell_slots"].size() < spell_slot_level:
+			return #no spell slot level to add spell_slot to?
+		spellbooks[spellbook_name]["spell_slots"][spell_slot_level-1].append([null, false]) # [spell_dict, already_cast_bool]
+		self.emit_signal("spell_slots_changed", spellbook_name, spell_slot_level, SPELLSLOT_OTHER)
+		
+func remove_spell_slot(spellbook_name, spell_slot_level):
+	if spellbooks.has(spellbook_name):
+		if not spellbooks[spellbook_name].has("spell_slots"):
+			spellbooks[spellbook_name]["spell_slots"] = []
+			return #no spell slot levels to add spell_slot to?
+		if spellbooks[spellbook_name]["spell_slots"].size() < spell_slot_level:
+			return #no spell slot level to add spell_slot to?
+		spellbooks[spellbook_name]["spell_slots"][spell_slot_level-1].pop_back()
+		self.emit_signal("spell_slots_changed", spellbook_name, spell_slot_level, SPELLSLOT_OTHER)
+		
+func cast_spell (spellbook_name = null, spell_level = null, spell_slot_index = null, spell_dict = null):
+	print("casting spell")
+	if spellbook_name != null and spell_level != null and spell_slot_index != null: #cast spell from spell_slot_arr
+		if spellbooks.has(spellbook_name):
+			if spellbooks[spellbook_name].has("spell_slots"):
+				if spellbooks[spellbook_name]["spell_slots"].size() >= spell_level:
+					if spellbooks[spellbook_name]["spell_slots"][spell_level-1].size() > spell_slot_index:
+						var spell_slot_arr = spellbooks[spellbook_name]["spell_slots"][spell_level-1][spell_slot_index]
+						if spell_slot_arr[SPELL_SLOT_CAST] == false and spell_slot_arr[SPELL_SLOT_DICT] != null:
+							spell_slot_arr[SPELL_SLOT_CAST] = true
+							self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
+							Globals.roll_panel.cast_spell(spell_slot_arr[SPELL_SLOT_DICT], self)
+							print("spell cast from spell_slot")
+							return
+	elif spellbook_name != null and spell_dict != null: #cast from spellcard
+		if spellbooks.has(spellbook_name):
+			if spellbooks[spellbook_name]["spontaneous_spellcaster"]: # spontaneous spellcaster try to find free spell_slot
+				if spellbooks[spellbook_name].has("spell_slots"):
+					if spellbooks[spellbook_name]["spell_slots"].size() >= spell_dict["spell_level"]:
+						for spell_slot_arr in spellbooks[spellbook_name]["spell_slots"][spell_dict["spell_level"] - 1]:
+							if not spell_slot_arr[SPELL_SLOT_CAST]:
+								spell_slot_arr[SPELL_SLOT_CAST] = true
+								self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
+								Globals.roll_panel.cast_spell(spell_dict, self)
+								print("spell cast as spontaneous")
+								return
+						#no spellslot of said level found - check if allowed to cast in higher level slots
+						if spellbooks[spellbook_name]["allow_spells_in_higher_slots"]:
+							for i in range(spell_dict["spell_level"], spellbooks[spellbook_name]["spell_slots"].size()):
+								for spell_slot_arr in spellbooks[spellbook_name]["spell_slots"][i]:
+									if not spell_slot_arr[SPELL_SLOT_CAST]:
+										spell_slot_arr[SPELL_SLOT_CAST] = true
+										self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
+										Globals.roll_panel.cast_spell(spell_dict, self)
+										print("spell cast as spontaneous from higher level")
+										return
+	if spell_dict == null:
+		return
+	#no good slot found
+	#print WARNING and cast the spell without using any spellslot
+	var label = Label.new()
+	label.text = "WARNING the following spell does not have any slot available"
+	label.modulate = Color.RED
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Globals.roll_panel.add_node_to_rollpanel(label)
+	Globals.roll_panel.cast_spell(spell_dict, self)
+	
+#recover all spell_slots for spell_book
+func rest_spells(spellbook_name):
+	if spellbooks.has(spellbook_name):
+		if spellbooks[spellbook_name].has("spell_slots"):
+			var i = 1
+			for spell_slot_level in spellbooks[spellbook_name]["spell_slots"]:
+				var j = 0
+				for spell_arr in spell_slot_level:
+					spell_arr[SPELL_SLOT_CAST] = false
+					self.emit_signal("spell_slot_changed", spellbook_name, i, j)
+					j += 1
+				i += 1
+		
+func remove_spell_from_spellslot(spellbook_name, spell_level, spell_slot_index):
+	if spellbook_name != null and spell_level != null and spell_slot_index != null:
+		if spellbooks.has(spellbook_name):
+			if spellbooks[spellbook_name].has("spell_slots"):
+				if spellbooks[spellbook_name]["spell_slots"].size() >= spell_level:
+					if spellbooks[spellbook_name]["spell_slots"][spell_level-1].size() > spell_slot_index:
+						var spell_slot_arr = spellbooks[spellbook_name]["spell_slots"][spell_level-1][spell_slot_index]
+						spell_slot_arr[SPELL_SLOT_DICT] = null
+						self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
+
+func mark_spell_as_cast_or_not_cast(spellbook_name, spell_level, spell_slot_index):
+	if spellbook_name != null and spell_level != null and spell_slot_index != null:
+		if spellbooks.has(spellbook_name):
+			if spellbooks[spellbook_name].has("spell_slots"):
+				if spellbooks[spellbook_name]["spell_slots"].size() >= spell_level:
+					if spellbooks[spellbook_name]["spell_slots"][spell_level-1].size() > spell_slot_index:
+						var spell_slot_arr = spellbooks[spellbook_name]["spell_slots"][spell_level-1][spell_slot_index]
+						spell_slot_arr[SPELL_SLOT_CAST] = not spell_slot_arr[SPELL_SLOT_CAST]
+						self.emit_signal("spell_slot_changed", spellbook_name, spell_level, spell_slot_index)
 #endregion

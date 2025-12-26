@@ -5,7 +5,6 @@
 extends Control
 
 var token_comp = preload("res://components/token.tscn") #token component
-@onready var dr = $"../.." #to get before canvas layer for get_global_mouse_position()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -25,10 +24,12 @@ func _drop_data(position, data):
 	Globals.drag_drop_canvas_layer.layer = -1
 	if Globals.draw_layer == null:
 		return
-	print(data)
 	if data.has_meta("character"): #dropping character - create token
 		var token = token_comp.instantiate()
-		token.get_child(0).position = dr.get_global_mouse_position() #set position of image - UI will follow via remote transform
+		if Globals.snapping:
+			token.get_child(0).position = Globals.draw_comp.get_global_mouse_position().snapped(Vector2(Globals.snappingNearestSize, Globals.snappingNearestSize))
+		else:
+			token.get_child(0).position = Globals.draw_comp.get_global_mouse_position() #set position of image - UI will follow via remote transform
 		var character = data.get_meta("character")
 		if character.singleton: #character with linked attributes
 			token.character = character
@@ -65,8 +66,8 @@ func _drop_data(position, data):
 			elif data.has_meta("item_container"):
 				Globals.draw_comp.synch_object_inventory_remove.rpc(Globals.draw_comp.get_path_to(data.get_meta("item_container")), item_dict, item_pos)
 				data.get_meta("item_container").emit_signal("inv_changed")
-		var mouse_pos = dr.get_global_mouse_position()
-		var clicked = dr.get_clicked(mouse_pos)
+		var mouse_pos = Globals.draw_comp.get_global_mouse_position()
+		var clicked = Globals.draw_comp.get_clicked(mouse_pos)
 		print(clicked)
 		if clicked != null:
 			print("clicked found")

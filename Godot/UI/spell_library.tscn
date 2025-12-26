@@ -130,6 +130,15 @@ option_count = 2
 option_0/name = "Replace existing spells (Must be the same)"
 option_1/name = "Replace existing spells (Must be the same + may have more elements)"
 
+[node name="ExportFileDialog" type="FileDialog" parent="."]
+oversampling_override = 1.0
+title = "Export database to a CSV File"
+initial_position = 1
+display_mode = 1
+access = 2
+option_count = 1
+option_0/name = "Export only filtered spells"
+
 [node name="SpellcardFileDialog" type="FileDialog" parent="."]
 oversampling_override = 1.0
 title = "Open a File"
@@ -252,6 +261,7 @@ oversampling_override = 1.0
 title = "Choose Filter Preset"
 initial_position = 2
 size = Vector2i(300, 150)
+visible = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LoadFilterPresetDiag"]
 anchors_preset = 8
@@ -291,6 +301,7 @@ text = "Load Preset"
 [connection signal="pressed" from="VBoxContainer/HBoxContainer2/CustomSQLBtn" to="." method="_on_custom_sql_btn_pressed"]
 [connection signal="canceled" from="ImportFileDialog" to="." method="_on_file_dialog_canceled"]
 [connection signal="file_selected" from="ImportFileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="confirmed" from="ExportFileDialog" to="." method="_on_export_file_dialog_confirmed"]
 [connection signal="file_selected" from="SpellcardFileDialog" to="." method="_on_spellcard_file_dialog_file_selected"]
 [connection signal="canceled" from="SpellcardOverwriteConfirmationDialog" to="." method="_on_spellcard_overwrite_confirmation_dialog_canceled"]
 [connection signal="confirmed" from="SpellcardOverwriteConfirmationDialog" to="." method="_on_spellcard_overwrite_confirmation_dialog_confirmed"]

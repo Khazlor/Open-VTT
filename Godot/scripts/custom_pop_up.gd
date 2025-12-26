@@ -25,9 +25,7 @@ func _ready() -> void:
 	self.popup()
 	self.hide() #need to repopup - otherwise black
 	self.popup()
-
-func _process(delta: float) -> void:
-	print(delta)
+	
 
 func _on_close_requested() -> void:
 	self.hide()

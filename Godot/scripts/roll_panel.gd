@@ -4,6 +4,7 @@
 
 extends Control
 
+const spell_card_comp = preload("res://components/spell_card.tscn")
 const roll_panel_item_template = preload("res://components/roll_panel_item.tscn")
 var roll_panel_item: Control
 #bools for determining roll parameters
@@ -18,7 +19,7 @@ var expression = ""		#variable for composing parts of expression (x, y, z from a
 var final_expression_part = "" #variable for input of individual rolls before rolling (2d20)
 var final_expression = "" #variable for final expression after rolls (2d20+5 -> 23+5)
 var roll_hint = "" #string with individually rolled dice - for roll hint
-var result_node
+var result_node: Roll_Panel_Item_Result
 
 var results = []
 var roll_hints = []
@@ -33,7 +34,7 @@ var query_or_cond_regex
 var assign_start_regex
 var inner_regex
 
-@onready var scroll_bar = $MarginContainer/VBoxContainer/ScrollContainer.get_v_scroll_bar()
+@onready var scroll_bar: VScrollBar = $MarginContainer/VBoxContainer/ScrollContainer.get_v_scroll_bar()
 @onready var textEdit = $MarginContainer/VBoxContainer/HBoxContainer/TextEdit
 @onready var query_diag = $QueryDialog
 @onready var query_diag_opt = $QueryDialog/VBoxContainer/OptionButton
@@ -66,7 +67,8 @@ func _ready():
 	
 #handles scroll to bottom on expand
 func on_scroll_bar_changed():
-	scroll_bar.value = scroll_bar.max_value
+	print("max value changed")
+	$MarginContainer/VBoxContainer/ScrollContainer.scroll_to_bottom(0.1)
 
 
 func _on_text_edit_gui_input(event):
@@ -92,6 +94,7 @@ func create_roll_panel(text_in: String, DM = Globals.lobby.check_is_server(), se
 	var result_node_local = roll_panel_item_local.get_node("VBoxContainer/Result")
 	add_node_to_rollpanel(roll_panel_item_local)
 	if set_global:
+		roll_panel_item = roll_panel_item_local
 		result_node = result_node_local
 	return result_node_local
 
@@ -341,7 +344,6 @@ func execute_macro(text_in: String, character: Character = null, targets = []):
 					
 func execute_roll(text_in: String, character: Character = null, target: Character = null):
 	print("target = ", target)
-	
 	create_roll_panel(text_in)
 	var text_in_arr = [text_in + "  "] #array passed by reference
 	await resolve_inner(text_in_arr, 0, "", character, target)
@@ -929,3 +931,49 @@ func _on_help_button_pressed():
 
 func _on_window_close_requested():
 	$Window.hide()
+
+
+func print_spell(spelldict):
+	if spelldict == null:
+		return
+	var print_spellcard = spell_card_comp.instantiate()
+	print_spellcard.print = true
+	print_spellcard.spell_dict = spelldict
+	self.add_node_to_rollpanel(print_spellcard)
+	
+func cast_spell(spelldict, character):
+	if spelldict == null:
+		return
+	var cast_spellcard = spell_card_comp.instantiate()
+	cast_spellcard.cast = true
+	cast_spellcard.spell_dict = spelldict
+	self.add_node_to_rollpanel(cast_spellcard)
+	#resolve those that get printed to spellcard
+	for macro_node:RichTextLabel in cast_spellcard.macro_nodes:
+		print("macro: ", macro_node.text)
+		await execute_roll(macro_node.text, character, null)
+		#grab results from result item and delete it
+		result_node.get_parent().remove_child(result_node)
+		#result_node.position = macro_node.position
+		result_node.position = macro_node.position
+		result_node.size = macro_node.size
+		result_node.add_theme_color_override("font_color", macro_node.get_theme_color("font_color"))
+		var style = StyleBoxFlat.new()
+		var style_old: StyleBoxFlat = macro_node.get_theme_stylebox("normal")
+		style.bg_color = style_old.bg_color
+		style.border_color = style_old.border_color
+		style.set_border_width_all(style_old.border_width_bottom)
+		result_node.add_theme_stylebox_override("normal", style)
+		result_node.add_theme_font_size_override("font_size", macro_node.get_theme_font_size("font_size"))
+		result_node.vertical_alignment = macro_node.vertical_alignment
+		result_node.horizontal_alignment = macro_node.horizontal_alignment
+		result_node.set_meta("dict", macro_node.get_meta("dict"))
+		result_node.z_index = 1
+		macro_node.add_sibling(result_node)
+		macro_node.queue_free()
+		roll_panel_item.queue_free()
+	#resolve macros that get executed in individual rollpanel items
+	for macro in cast_spellcard.macros_not_in_card:
+		if macro != "":
+			await execute_macro(macro, character)
+		

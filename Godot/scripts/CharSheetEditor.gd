@@ -316,6 +316,8 @@ func _input(event):
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
+		if get_mouse_position().x > scroll.size.x: #mouse in toolbar
+			return
 		if Input.is_action_just_pressed("mouseleft"): #begin drawing
 			var mouse_pos = get_canvas_mouse_pos()
 			if tool == Tools.SELECT:
@@ -617,7 +619,7 @@ func select_selection():
 		print("shift held ", selected_objects)
 	for object in node.get_children():
 		if object is Control:
-			print(object.name)
+			#print(object.name)
 			if object.position.x >= select_pos_local.x and \
 			object.position.y >= select_pos_local.y and \
 			object.position.x + object.size.x <= select_pos_local.x + select_box.size.x and \
@@ -630,7 +632,7 @@ func select_selection():
 		for object in node.get_children():
 			if object is Control:
 				var mouse_pos = get_canvas_mouse_pos()
-				print(object.name)
+				#print(object.name)
 				if object.position.x <= mouse_pos.x and \
 				object.position.y <= mouse_pos.y and \
 				object.position.x + object.size.x >= mouse_pos.x and \
@@ -645,6 +647,7 @@ func select_selection():
 
 func recalculate_select_box():
 	if selected_objects.is_empty():
+		select_box.size = Vector2(0,0)
 		return
 	var max_x = selected_objects[0].position.x
 	var max_y = selected_objects[0].position.y
@@ -860,11 +863,13 @@ func load_image_opt(dict, reload_image = false):
 func _on_canvas_size_x_spin_box_value_changed(value):
 	canvas.custom_minimum_size.x = value
 	char_sheet_arr[0].x = value
+	apply_zoom()
 
 
 func _on_canvas_size_y_spin_box_value_changed(value):
 	canvas.custom_minimum_size.y = value
 	char_sheet_arr[0].y = value
+	apply_zoom()
 
 func _on_pos_x_spin_box_value_changed(value):
 	if loading:

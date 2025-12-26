@@ -58,6 +58,7 @@ var flip_y = false
 var oposite_corner_pos_in_world = null
 
 var targeting = false #targeting bool
+var targeting_moved = false
 var targeting_shape = null
 var targeting_origin = null #vector2 or null
 var targeting_point_radius = -1
@@ -105,14 +106,19 @@ func _unhandled_input(event):
 		if Globals.draw_layer == null: #check if layer is selected
 			return
 		mouse_pos = get_global_mouse_position()
-		if Globals.snapping == true:
-			mouse_pos = round(mouse_pos/(Globals.snappingNearestSize))*(Globals.snappingNearestSize) #snap to grid
-		if targeting and Input.is_action_just_pressed("mouseleft"): #targeting end
-			end_targeting()
-			return
+		if targeting and (Input.is_action_just_pressed("mouseleft")): #targeting end
+			if targeting_moved:
+				print("targeting end")
+				end_targeting()
+				return
+			else:
+				print("targeting end - not moved - ignoring")
 		if targeting and event is InputEventMouseMotion: #targeting moved mouse
+			targeting_moved = true
 			update_targeting()
 			return
+		if Globals.snapping == true:
+			mouse_pos = round(mouse_pos/(Globals.snappingNearestSize))*(Globals.snappingNearestSize) #snap to grid
 		#double click - open character sheet if selected
 		if Globals.tool == "select" and event is InputEventMouseButton and event.double_click:
 			if selected.size() == 1:
@@ -2074,7 +2080,8 @@ func get_object_center(object):
 func create_targeting(targeting_data):
 	print("targeting data: ", targeting_data)
 	targeting = true
-	
+	targeting_moved = false
+	get_window().grab_focus()
 	if selected.size() > 0: #get macro start position
 		targeting_origin = get_object_center(selected[0])
 	
@@ -2195,13 +2202,11 @@ func end_targeting():
 				targeting_shape.center = targeting_origin
 			else:
 				targeting_shape.position = targeting_origin
-		return
 	#has shape - get characters inside shape
 	var rotated_polygon = [] #rotated polygon of shape object
 	if not targeting_shape is CustomCircle: #not needed for circle
 		for point in targeting_shape.polygon:
 			rotated_polygon.append(point.rotated(targeting_shape.rotation))
-	
 	var lines_children = Globals.draw_layer.get_children()
 	for child in lines_children:
 		if child.is_class("Node2D"): #inherits from Node2D

@@ -1,9 +1,28 @@
-[gd_scene load_steps=2 format=3 uid="uid://brg0p3cdksskk"]
+[gd_scene load_steps=3 format=3 uid="uid://brg0p3cdksskk"]
 
 [ext_resource type="Script" uid="uid://drm32on00ssvp" path="res://scripts/spell_slot.gd" id="1_1qhgw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7oet8"]
+bg_color = Color(0.32915837, 0.3291584, 0.3291584, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="SpellSlot" type="PanelContainer"]
 custom_minimum_size = Vector2(64, 64)
 offset_right = 64.0
 offset_bottom = 64.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_7oet8")
 script = ExtResource("1_1qhgw")
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(60, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 1
+clip_text = true
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]

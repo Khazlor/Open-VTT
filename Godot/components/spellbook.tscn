@@ -74,6 +74,10 @@ mouse_filter = 1
 icon = ExtResource("3_l5b10")
 flat = true
 
+[node name="RestBtn" type="Button" parent="HSplitContainer/SidePanel"]
+layout_mode = 2
+text = "Rest"
+
 [node name="OpenSpellLibBtn" type="Button" parent="HSplitContainer/SidePanel"]
 layout_mode = 2
 text = "Open Spell Library"
@@ -83,4 +87,5 @@ layout_mode = 2
 
 [connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelLess" to="." method="_on_level_less_pressed"]
 [connection signal="pressed" from="HSplitContainer/SidePanel/ScrollContainer/Prepared/HBoxContainer/LevelMore" to="." method="_on_level_more_pressed"]
+[connection signal="pressed" from="HSplitContainer/SidePanel/RestBtn" to="." method="_on_rest_btn_pressed"]
 [connection signal="pressed" from="HSplitContainer/SidePanel/OpenSpellLibBtn" to="." method="_on_open_spell_lib_btn_pressed"]

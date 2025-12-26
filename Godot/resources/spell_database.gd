@@ -112,18 +112,26 @@ func create_spell_db():
 
 	database.create_table("presets", table_dict)
 
-func add_spell_to_db(spell_dict, keyword_array):
+func add_spell_to_db(spell_dict: Dictionary, keyword_array):
 	print("add spell: ", spell_dict, " " ,keyword_array)
 	if database == null:
 		print("no spell database opened")
 		return
-	database.insert_row("spells" ,spell_dict)
-	var spell_id = database.last_insert_rowid
+	var spell_id
+	if spell_dict.has("spell_id"):
+		print("spell_exists")
+		spell_id = spell_dict["spell_id"]
+		edit_spell_in_db(spell_id, spell_dict)
+		remove_all_spell_keywords_from_db(spell_id)
+	else:
+		database.insert_row("spells" ,spell_dict)
+		spell_id = database.last_insert_rowid
 	for keyword in keyword_array:
 		add_spell_keyword_to_db(spell_id, keyword)
 		
 func edit_spell_in_db(spell_db_id, spell_dict):
-	database.update_rows("spells", "id = " + str(spell_db_id), spell_dict)
+	var success = database.update_rows("spells", "spell_id = " + str(spell_db_id), spell_dict)
+	print("replace successful: ", success)
 
 func add_spell_keyword_to_db(spell_db_id, keyword):
 	if not has_keyword_in_db(keyword):
@@ -139,6 +147,9 @@ func has_keyword_in_db(keyword):
 	
 func remove_spell_keyword_from_db(spell_db_id, keyword):
 	database.delete_rows("spell_keywords", "spell_id = " + str(spell_db_id) + " and keyword_name == \'" + keyword + "\'")
+	
+func remove_all_spell_keywords_from_db(spell_db_id):
+	database.delete_rows("spell_keywords", "spell_id = " + str(spell_db_id))
 
 func add_color_to_keyword_in_db(keyword, color: Color, priority: int = 0):
 	if not has_keyword_in_db(keyword):
@@ -187,6 +198,9 @@ func get_spells_from_database(must_have_all_keywords_array, must_have_one_keywor
 	if calling_object != null:
 		calling_object.last_database_query = query
 	return result
+	
+func get_all_keywords_of_spell(spell_id):
+	return database.select_rows("spell_keywords", "spell_id = " + str(spell_id), ["keyword_name"])
 	
 func custom_select_query(query, calling_object = null):
 	database.query(query)

@@ -156,7 +156,8 @@ func update_bars(attr: StringName, remote = false):
 		if bar_data["attr2"] == attr:
 			var bar = bars.get_child(i)
 			bar.max_value = character.attributes[attr][1].to_float()
-			bar.value = character.attributes[bar_data["attr1"]][1].to_float()
+			if character.attributes.has(bar_data["attr1"]):
+				bar.value = character.attributes[bar_data["attr1"]][1].to_float()
 			bar.get_child(0).text = str(character.attributes[attr][1].to_float()) + "/" + str(bar.max_value) #label
 			bar.get_child(0).set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 			UI_set_position()
