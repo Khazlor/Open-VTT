@@ -102,13 +102,18 @@ func add_node_to_rollpanel(node):
 	$MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer.add_child(node)
 
 func evaluate_roll(roll_section: String):
-	#print("roll: ", roll_section)
+	print("roll: ", roll_section)
+	var ignore_floating_point = false
 	roll_section += " "#adding char to end of expression - to trigger roll if untriggered at end
 	for character in roll_section:
 		final_expression_part += character
 		if character.is_valid_int(): #char is number
-			expression += character
-		elif character == 'd': #char is	'd' -> determining which d it is (xDyDz)
+			if not ignore_floating_point:
+				expression += character
+			continue
+		elif ignore_floating_point:
+			ignore_floating_point = false
+		if character == 'd': #char is	'd' -> determining which d it is (xDyDz)
 			if number_of_dice == 0: # xDy -> first d - preceding number is number of dice to be rolled
 				if expression.length() == 0: # dy - number of dice was not entered -> 1 dice
 					number_of_dice = 1
@@ -197,6 +202,9 @@ func evaluate_roll(roll_section: String):
 				result_node.append_text(final_expression_part)
 				clear_dice()
 				continue
+		elif character == ".":
+			#ignore floating point part
+			ignore_floating_point = true
 		else: #other char - roll dice
 			if number_of_dice == 0: # only number was entered
 				final_expression += final_expression_part
@@ -434,7 +442,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 		if text_in[0].substr(i, closing_len) == closing_str:
 			last = true #will do one more - then break
 		var char = text_in[0][i]
-		print(char)
+		#print(char)
 #		print(i)
 		if ignore != 0: #resolving either "" or ''
 			if ignore == 1: # inside ""
@@ -463,7 +471,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 			i = n - 1
 			print(i, " ", text_in[0][i], " ", text_in[0][i + 1])
 		elif is_attr:
-			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?":
+			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?" and char != "(" and char != ")":
 				attr += char
 			else:
 				print("attr end : ", attr)
@@ -481,7 +489,7 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 						i = n
 					print("attr end i ", i, " ", text_in[0][i])
 		elif is_macro:
-			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?": #add char
+			if char != " " and char != "=" and char != ";" and char != "|" and char != "/" and char != ":" and char != "]" and char != "}" and char != "?" and char != "(" and char != ")": #add char
 				attr += char
 			else: #replace macro with macro value + return to start
 				print("macro end : ", attr)
@@ -510,6 +518,9 @@ func resolve_inner(text_in, i: int, closing_str: String, character: Character, t
 			print("cond or query")
 			i -= 1
 			await condition_or_query(text_in, i + 3, character, target)
+		elif char == "(":
+			print("entering ()")
+			resolve_parenthesis(text_in, i + 1, character, target)
 		if not last:
 			i += 1
 	print("inner return")
@@ -689,6 +700,27 @@ func assign_attributes(text_in: String, character: Character, target: Character)
 				else:
 					target.attributes[attr][0] = new_var
 				target.emit_signal("attr_updated", attr, false)
+	
+#text_in = array with single string - pass by reference
+func resolve_parenthesis(text_in, i: int, character: Character = null, target: Character = null):
+	print("parenthesis")
+	var n = await resolve_inner(text_in, i, ")", character, target)
+	print("substr: ", text_in[0].substr(i, n-i+1))
+	#remove "\u001A" sequence - char marking place for hint
+	var sub_str = [text_in[0].substr(i, n-i+1)]
+	n -= remove_marks(sub_str)
+	var res = evaluate_parenthesis(sub_str[0])
+	if res != null:
+		replace_text(text_in, res, i-1, n-i+3)
+	
+func evaluate_parenthesis(expression_str: String):
+	var expression = Expression.new()
+	expression.parse(expression_str)
+	var result = expression.execute()
+	if expression.has_execute_failed():
+		return null
+	return str(result)
+	
 	
 #text_in = array with single string - pass by reference
 func roll(text_in, i: int, character: Character = null, target: Character = null):
