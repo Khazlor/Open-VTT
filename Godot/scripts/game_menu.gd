@@ -8,8 +8,7 @@ var action_remap_btn_res = preload("res://addons/input_map_demo/ActionRemapButto
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	if not Globals.lobby.check_is_server():
-		$VBoxContainer/MapsBtn.disabled = true
+	pass
 
 
 func _on_window_input(event: InputEvent) -> void:

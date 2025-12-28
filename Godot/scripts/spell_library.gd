@@ -106,10 +106,7 @@ func _on_context_menu_item_pressed(item_index: Variant) -> void:
 	elif item_index == 1: #print spell
 		if current_spellcard == null:
 			return
-		var print_spellcard = spell_card_comp.instantiate()
-		print_spellcard.print = true
-		print_spellcard.spell_dict = current_spellcard.spell_dict
-		Globals.roll_panel.add_node_to_rollpanel(print_spellcard)
+		Globals.roll_panel.print_spell(current_spellcard.spell_dict)
 		
 	else:
 		if character != null:

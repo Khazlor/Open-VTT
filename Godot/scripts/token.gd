@@ -408,4 +408,23 @@ func synch_rename_attr_on_other_peers(old_name, new_name):
 func synch_char_sheet_text_on_other_peers(new_text):
 	character.char_sheet_text = new_text
 	character.emit_signal("char_sheet_text_changed", null)
+	
+@rpc("any_peer", "call_remote", "reliable")
+func call_character_function_on_remote_peers(func_name, args):
+	character.callv(func_name, args)
+	
+#@rpc("any_peer", "call_remote", "reliable")
+#func synch_char_spellslot_on_other_peers(new_text):
+	#character.char_sheet_text = new_text
+	#character.emit_signal("char_sheet_text_changed", null)
+	#
+#@rpc("any_peer", "call_remote", "reliable")
+#func synch_char_spellslots_on_other_peers(new_text):
+	#character.char_sheet_text = new_text
+	#character.emit_signal("char_sheet_text_changed", null)
+	#
+#@rpc("any_peer", "call_remote", "reliable")
+#func synch_char_spellbooks_on_other_peers(new_text):
+	#character.char_sheet_text = new_text
+	#character.emit_signal("char_sheet_text_changed", null)
 #endregion

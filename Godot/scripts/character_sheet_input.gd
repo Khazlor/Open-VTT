@@ -25,8 +25,8 @@ func _on_input_changed():
 	character.emit_signal("attr_updated", attr, false)
 
 func _input_on_attr_changed(attr, tooltip):
-	print("input attr changed")
 	if attr == self.get_meta("dict")["attr"]:
+		print("input attr changed ", attr)
 		self.tooltip_text = attr + ": " + tooltip
 		if not self.has_focus():
 			self.text = character.attributes[attr][1]

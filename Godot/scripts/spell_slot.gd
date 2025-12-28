@@ -48,6 +48,7 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
 		print("invalid spellslot for dropped spell")
 		return
 	spellbook.character.add_spell_to_prepared(data, spellbook.spellbook_name, spell_level, spell_slot_index)
+	#spellbook.character.call_character_function_on_remote_peers_through_token("add_spell_to_prepared", data, spellbook.spellbook_name, spell_level, spell_slot_index)
 
 func _on_spell_slot_changed(spellbook_name, signal_spell_level, signal_spell_slot_index):
 	if spellbook_name == spellbook.spellbook_name and signal_spell_level == spell_level and signal_spell_slot_index == spell_slot_index:

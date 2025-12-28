@@ -350,14 +350,25 @@ func execute_macro(text_in: String, character: Character = null, targets = []):
 			await execute_roll(split_text[0], character, target)
 					
 					
-func execute_roll(text_in: String, character: Character = null, target: Character = null):
+func execute_roll(text_in: String, character: Character = null, target: Character = null, rollpanel_results_node = null):
+	results.clear()
+	roll_hints.clear()
+	roll_hint = ""
 	print("target = ", target)
-	create_roll_panel(text_in)
+	if rollpanel_results_node == null:
+		create_roll_panel(text_in)
+	else:
+		result_node = rollpanel_results_node
+		result_node.text = ""
+		result_node.mouse_filter = Control.MOUSE_FILTER_PASS
 	var text_in_arr = [text_in + "  "] #array passed by reference
 	await resolve_inner(text_in_arr, 0, "", character, target)
 	print("text_in_arr ", text_in_arr, " ||| ", roll_hints)
-	synch_roll_panel_to_other_peers.rpc(text_in, text_in_arr, Globals.lobby.check_is_server(), roll_hints, results)
-	append_text(text_in_arr, roll_hints)
+	if rollpanel_results_node == null:
+		synch_roll_panel_to_other_peers.rpc(text_in, text_in_arr, Globals.lobby.check_is_server(), roll_hints, results)
+	var text_in_arr_dupl = text_in_arr.duplicate_deep()
+	append_text(text_in_arr, roll_hints, result_node)
+	return text_in_arr_dupl
 	
 @rpc("any_peer", "call_remote", "reliable")
 func synch_roll_panel_to_other_peers(text_in, text_in_arr, DM, roll_hints_arr, results_arr):
@@ -972,8 +983,16 @@ func print_spell(spelldict):
 	print_spellcard.print = true
 	print_spellcard.spell_dict = spelldict
 	self.add_node_to_rollpanel(print_spellcard)
+	synch_spell_card_to_other_peers.rpc(false, spelldict)
 	
-func cast_spell(spelldict, character):
+func cast_spell(spelldict, character, tracked = true):
+	if not tracked:
+		#print WARNING and cast the spell without using any spellslot
+		var label = Label.new()
+		label.text = "WARNING the following spell is cast without any spellslot"
+		label.modulate = Color.RED
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		Globals.roll_panel.add_node_to_rollpanel(label)
 	if spelldict == null:
 		return
 	var cast_spellcard = spell_card_comp.instantiate()
@@ -981,31 +1000,52 @@ func cast_spell(spelldict, character):
 	cast_spellcard.spell_dict = spelldict
 	self.add_node_to_rollpanel(cast_spellcard)
 	#resolve those that get printed to spellcard
-	for macro_node:RichTextLabel in cast_spellcard.macro_nodes:
+	var text_in_arr_arr = []
+	var roll_hints_arr_arr = []
+	var results_arr_arr = []
+	for macro_node:Roll_Panel_Item_Result in cast_spellcard.macro_nodes:
 		print("macro: ", macro_node.text)
-		await execute_roll(macro_node.text, character, null)
-		#grab results from result item and delete it
-		result_node.get_parent().remove_child(result_node)
-		#result_node.position = macro_node.position
-		result_node.position = macro_node.position
-		result_node.size = macro_node.size
-		result_node.add_theme_color_override("font_color", macro_node.get_theme_color("font_color"))
-		var style = StyleBoxFlat.new()
-		var style_old: StyleBoxFlat = macro_node.get_theme_stylebox("normal")
-		style.bg_color = style_old.bg_color
-		style.border_color = style_old.border_color
-		style.set_border_width_all(style_old.border_width_bottom)
-		result_node.add_theme_stylebox_override("normal", style)
-		result_node.add_theme_font_size_override("font_size", macro_node.get_theme_font_size("font_size"))
-		result_node.vertical_alignment = macro_node.vertical_alignment
-		result_node.horizontal_alignment = macro_node.horizontal_alignment
-		result_node.set_meta("dict", macro_node.get_meta("dict"))
-		result_node.z_index = 1
-		macro_node.add_sibling(result_node)
-		macro_node.queue_free()
-		roll_panel_item.queue_free()
+		var text = macro_node.text
+		macro_node.text = ""
+		var text_arr = await execute_roll(text, character, null, macro_node)
+		text_in_arr_arr.append(text_arr)
+		roll_hints_arr_arr.append(roll_hints.duplicate_deep())
+		results_arr_arr.append(results.duplicate_deep())
+		#append_text(text, roll_hints, macro_node, results)
+	synch_spell_card_to_other_peers.rpc(true, spelldict, text_in_arr_arr, roll_hints_arr_arr, results_arr_arr, tracked)
+		
 	#resolve macros that get executed in individual rollpanel items
 	for macro in cast_spellcard.macros_not_in_card:
 		if macro != "":
 			await execute_macro(macro, character)
 		
+@rpc("any_peer", "call_remote", "reliable")
+func synch_spell_card_to_other_peers(cast, spelldict, text_in_arr_arr = null, roll_hints_arr_arr = null, results_arr_arr = null, tracked = true):
+	if not tracked:
+		#print WARNING and cast the spell without using any spellslot
+		var label = Label.new()
+		label.text = "WARNING the following spell is cast without any spellslot"
+		label.modulate = Color.RED
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		Globals.roll_panel.add_node_to_rollpanel(label)
+	if spelldict == null:
+		return
+	if cast:
+		var cast_spellcard = spell_card_comp.instantiate()
+		cast_spellcard.cast = true
+		cast_spellcard.spell_dict = spelldict
+		self.add_node_to_rollpanel(cast_spellcard)
+		#resolve those that get printed to spellcard
+		if text_in_arr_arr.size() != cast_spellcard.macro_nodes.size() or roll_hints_arr_arr.size() != cast_spellcard.macro_nodes.size() or results_arr_arr.size() != cast_spellcard.macro_nodes.size():
+			return
+		var i = 0
+		for macro_node:Roll_Panel_Item_Result in cast_spellcard.macro_nodes:
+			print("macro: ", macro_node.text)
+			var text = macro_node.text
+			macro_node.text = ""
+			append_text(text_in_arr_arr[i], roll_hints_arr_arr[i], macro_node, results_arr_arr[i])
+	else:
+		var print_spellcard = spell_card_comp.instantiate()
+		print_spellcard.print = true
+		print_spellcard.spell_dict = spelldict
+		self.add_node_to_rollpanel(print_spellcard)

@@ -48,6 +48,7 @@ func _on_right_mouse_button_pressed() -> void:
 func _on_middle_mouse_button_pressed() -> void:
 	print("middle")
 	spellbook.character.add_spell_to_prepared(spell_dict, spellbook.spellbook_name)
+	#spellbook.character.call_character_function_on_remote_peers_through_token("add_spell_to_prepared", spell_dict, spellbook.spellbook_name)
 
 
 func _get_drag_data(at_position: Vector2) -> Variant:
@@ -133,6 +134,7 @@ func replace_text_by_macro(text):
 func load_label_from_dict(dict):
 	var label = Label.new()
 	var text: String = dict["text"]
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if text.begins_with("##"): #macro that gets rolled in new rollpanel item
 		text = replace_text_by_macro(text.substr(2))
 		macros_not_in_card.append(text)
@@ -145,6 +147,7 @@ func load_label_from_dict(dict):
 			label.fit_content = true
 			label.scroll_active = false
 			label.bbcode_enabled = true
+			label.mouse_filter = Control.MOUSE_FILTER_PASS
 		text = replace_text_by_macro(text.substr(1))
 		if text != "":
 			macro_nodes.append(label)
@@ -152,7 +155,6 @@ func load_label_from_dict(dict):
 	else:
 		text = replace_attributes_in_text(text)
 		label.text = text
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.position = dict["pos"]
 	label.size = dict["size"]
 	if label is Label:

@@ -90,15 +90,13 @@ func _on_open_spell_lib_btn_pressed() -> void:
 func _on_context_menu_item_pressed(item_index: Variant) -> void:
 	if item_index == 0: #prepare spell
 		character.add_spell_to_prepared(current_spellcard.spell_dict, spellbook_name)
+		#character.call_character_function_on_remote_peers_through_token("add_spell_to_prepared", current_spellcard.spell_dict, spellbook_name)
 	elif item_index == 1: #cast
 		character.cast_spell(spellbook_name, null, null, current_spellcard.spell_dict)
 	else: #print
 		if current_spellcard == null:
 			return
-		var print_spellcard = spell_card_comp.instantiate()
-		print_spellcard.print = true
-		print_spellcard.spell_dict = current_spellcard.spell_dict
-		Globals.roll_panel.add_node_to_rollpanel(print_spellcard)
+		Globals.roll_panel.print_spell(current_spellcard.spell_dict)
 
 func _on_spell_slots_changed(signal_spellbook_name, spell_slot_level, status = Character.SPELLSLOT_OTHER):
 	if status == Character.SPELLSLOT_LEVEL_ADD and signal_spellbook_name == self.spellbook_name:
