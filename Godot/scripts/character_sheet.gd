@@ -692,11 +692,16 @@ func on_character_spellbooks_changed(spellbook_name, state):
 		new_spellbook.spellbook_name = spellbook_name;
 		$TabContainer.add_child(new_spellbook)
 		new_spellbook.name = spellbook_name
+		if $SpellBookSettingsWindow.visible:
+			load_spellbooks_settings_list()
 	elif state == character.SPELLBOOK_REMOVE:
 		var tab = $TabContainer.find_child(spellbook_name)
 		if tab != null:
 			tab.visible = false
 			tab.queue_free()
+		if $SpellBookSettingsWindow.visible:
+			load_spellbooks_settings_list()
+			_on_back_to_spell_book_settings_selection_pressed()
 
 
 func _on_remove_spell_book_pressed() -> void:
@@ -704,7 +709,11 @@ func _on_remove_spell_book_pressed() -> void:
 
 
 func _on_remove_spellbook_confirmation_dialog_confirmed() -> void:
-	character.remove_spellbook($TabContainer.current_tab.name)
+	for child in $TabContainer.get_children():
+		if child.name == spellbook_settings_selection:
+			child.queue_free()
+			break
+	character.remove_spellbook(spellbook_settings_selection)
 
 
 func _on_remove_spellbook_confirmation_dialog_canceled() -> void:

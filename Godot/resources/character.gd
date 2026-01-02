@@ -61,8 +61,8 @@ signal unequip_item_from_slot(slot)
 signal attr_modifier_applied(attr: StringName, tooltip: String)
 signal inv_changed()
 
-signal spellbooks_changed(spellbook_name)
-signal spellbook_spells_changed(spellbook_name)
+signal spellbooks_changed(spellbook_name, status)
+signal spellbook_spells_changed(spellbook_name, spell_dict, status)
 signal spell_slots_changed(spellbook_name, level, status)
 signal spell_slot_changed(spellbook_name, level, slot_index)
 
@@ -74,6 +74,7 @@ signal equip_slot_synched()
 
 enum {SPELL_SLOT_DICT, SPELL_SLOT_CAST}
 enum {SPELLBOOK_ADD, SPELLBOOK_REMOVE, CHANGE_SETTINGS}
+enum {SPELL_ADD, SPELL_REMOVE, SPELL_CHANGE}
 enum {SPELLSLOT_LEVEL_ADD, SPELLSLOT_LEVEL_REMOVE, SPELLSLOT_OTHER}
 
 func get_token():
@@ -460,14 +461,14 @@ func remove_spellbook(spellbook_name, remote = false):
 func add_spell_to_spellbook(spell_dict, spellbook_name, remote = false):
 	if spell_dict != null and spellbooks.has(spellbook_name):
 		spellbooks[spellbook_name]["spells"].append(spell_dict)
-		emit_signal("spellbook_spells_changed", spellbook_name)
+		emit_signal("spellbook_spells_changed", spellbook_name, spell_dict, SPELL_ADD)
 		if not remote: #sync to other peers
 			call_character_function_on_remote_peers_through_token("add_spell_to_spellbook", spell_dict, spellbook_name, true)
 		
 func remove_spell_from_spellbook(spell_dict, spellbook_name, remote = false):
 	if spellbooks.has(spellbook_name):
 		spellbooks[spellbook_name]["spells"].erase(spell_dict)
-		emit_signal("spellbook_spells_changed", spellbook_name)
+		emit_signal("spellbook_spells_changed", spellbook_name, spell_dict, SPELL_REMOVE)
 		if not remote: #sync to other peers
 			call_character_function_on_remote_peers_through_token("remove_spell_from_spellbook", spell_dict, spellbook_name, true)
 

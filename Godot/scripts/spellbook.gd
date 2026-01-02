@@ -30,7 +30,7 @@ func _ready() -> void:
 		return
 	var spellbook_dict = character.spellbooks[spellbook_name]
 	if spellbook_dict["know_all_spells"]:
-		spell_array = Globals.spell_database.get_spells_from_database(spellbook_dict["allowed_spell_categories_all"], spellbook_dict["allowed_spell_categories_one"])
+		spell_array = Globals.spell_database.get_spells_from_database(spellbook_dict["allowed_spell_categories_all"], spellbook_dict["allowed_spell_categories_one"], self)
 		spell_array.append_array(spellbook_dict["spells"])
 	else:
 		spell_array = spellbook_dict["spells"]
@@ -50,9 +50,9 @@ func _ready() -> void:
 				
 		spell_libraries[spell_level].add_spell_to_library(spell)
 	character.connect("spell_slots_changed", _on_spell_slots_changed)
+	character.connect("spellbook_spells_changed", _on_spellbook_spells_changed)
 	load_spell_slots()
 	
-
 func load_spell_slots():
 	var spellbook_dict = character_sheet.character.spellbooks[spellbook_name]
 	if spellbook_dict.has("spell_slots"):
@@ -64,8 +64,6 @@ func load_spell_slots():
 			new_spell_level.spellbook = self
 			spells_prepared.add_child(new_spell_level)
 		
-
-
 
 func _on_level_more_pressed() -> void:
 	character_sheet.character.add_spell_slot_level(spellbook_name)
@@ -117,6 +115,29 @@ func _on_spell_slots_changed(signal_spellbook_name, spell_slot_level, status = C
 					child.queue_free()
 			load_spell_slots()
 
+func _on_spellbook_spells_changed(signal_spellbook_name, spell_dict, status):
+	if signal_spellbook_name == self.spellbook_name:
+		if spell_dict == null:
+			return
+		if status == Character.SPELL_ADD:
+			var max_level = spell_libraries.size()
+			var spell_level = spell_dict["spell_level"]
+			if spell_level > max_level: #create spell library containers
+				for i in range(max_level, spell_level + 1):
+					print("GENERATING SPELLBOOK LEVEL " , i)
+					var new_spell_level_library = spell_level_library_comp.instantiate()
+					new_spell_level_library.spell_level = i
+					new_spell_level_library.spellbook = self
+					new_spell_level_library.name = "Lvl " + str(i)
+					spell_libraries_container.add_child(new_spell_level_library)
+					spell_libraries.append(new_spell_level_library)
+			spell_libraries[spell_level].add_spell_to_library(spell_dict)
+		if status == Character.SPELL_REMOVE:
+			var max_level = spell_libraries.size()
+			var spell_level = spell_dict["spell_level"]
+			if max_level < spell_level:
+				return
+			spell_libraries[spell_level].remove_spell_from_library(spell_dict)
 
 func _on_rest_btn_pressed() -> void:
 	character.rest_spells(spellbook_name)

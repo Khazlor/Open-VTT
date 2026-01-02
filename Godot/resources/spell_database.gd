@@ -184,7 +184,7 @@ func get_preset_from_db(preset_name):
 	return result_array[0]
 	
 func get_all_presets_from_db():
-	var result_array = database.select_rows("presets", "", ["*"])
+	var result_array = database.select_rows("presets", "", ["preset_name"])
 	if result_array.is_empty():
 		return null
 	return result_array

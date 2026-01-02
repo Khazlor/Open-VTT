@@ -14,6 +14,11 @@ func add_spell_to_library(spell_dict: Dictionary):
 	spellcard.spellbook = spellbook
 	spell_card_container.add_child(spellcard)
 	
+func remove_spell_from_library(spell_dict: Dictionary):
+	for spellcard in spell_card_container.get_children():
+		if spellcard.spell_dict == spell_dict:
+			spellcard.queue_free()
+	
 func clear_library():
 	for child in spell_card_container.get_children():
 		child.queue_free()

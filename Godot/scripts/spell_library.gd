@@ -25,6 +25,7 @@ func _ready() -> void:
 	$VBoxContainer/HBoxContainer/AllowedSpellsAll.text = var_to_str(spells_all_arr)
 	$VBoxContainer/HBoxContainer/AllowedSpellsOne.text = var_to_str(spells_one_arr)
 	var spell_array = Globals.spell_database.get_spells_from_database(spells_all_arr, spells_one_arr, self)
+	print("test ", last_database_query)
 	fill_spell_library(spell_array)
 
 
@@ -124,6 +125,7 @@ func _on_save_preset_btn_pressed() -> void:
 
 func _on_save_preset_diag_btn_pressed() -> void:
 	var preset_name = $SaveFilterPresetNameDiag/VBoxContainer/LineEdit.text
+	print(preset_name, last_database_query)
 	if preset_name == "":
 		return
 	if Globals.spell_database.get_preset_from_db(preset_name) == null:
@@ -136,11 +138,16 @@ func _on_save_filter_preset_name_diag_close_requested() -> void:
 	$SaveFilterPresetNameDiag.hide()
 
 func _on_load_preset_btn_pressed() -> void:
+	var result_arr = Globals.spell_database.get_all_presets_from_db()
+	if result_arr == null:
+		return
+	for preset in result_arr:
+		$LoadFilterPresetDiag/VBoxContainer/OptionButton.add_item(preset["preset_name"])
 	$LoadFilterPresetDiag.popup()
 
 func _on_load_filter_preset_diag_btn_pressed() -> void:
 	var preset_name = $LoadFilterPresetDiag/VBoxContainer/OptionButton.get_item_text($LoadFilterPresetDiag/VBoxContainer/OptionButton.get_selected_id())
-	var query = Globals.spell_database.get_preset_from_db(preset_name)[1]
+	var query = Globals.spell_database.get_preset_from_db(preset_name)["preset_query"]
 	var result_arr = Globals.spell_database.custom_select_query(query, self)
 	clear_spell_library()
 	fill_spell_library(result_arr)
