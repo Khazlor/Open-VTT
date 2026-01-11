@@ -9,7 +9,7 @@ var base_dir_path # project folder for saving, res:// does not work in exported 
 var icon_opened = preload("res://icons/Collapse.svg")
 var icon_folded = preload("res://icons/Forward.svg")
 
-var enet_peer = null #for multiplayer
+var enet_peer: ENetMultiplayerPeer = null #for multiplayer
 var lobby: Node2D = null
 var ip = ""
 var port = 7000
@@ -67,7 +67,12 @@ var spell_database: SpellDB
 func _enter_tree() -> void:
 	#set base path for all files
 	if OS.is_debug_build():
-		Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+		var args = OS.get_cmdline_args()
+		var is_server = "--server" in args
+		if is_server:
+			Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+		else:
+			Globals.base_dir_path = "res://player_test" #player instance folder
 	elif OS.has_feature("android"):
 		Globals.base_dir_path = "user:/"
 	else:
@@ -77,7 +82,7 @@ func _enter_tree() -> void:
 #texture loading during runtime, supports resizing to specific size
 func load_texture(file_path, resize_to = -1 ):
 	if not FileAccess.file_exists(file_path):
-		print("load texture - file does not exist")
+		print("load texture - file does not exist ", file_path)
 		return null
 	var image = Image.load_from_file(file_path)
 	if resize_to != -1:
@@ -88,6 +93,11 @@ func load_texture(file_path, resize_to = -1 ):
 	else:
 		return null
 	return texture
+	
+	
+func get_full_texture_path(file_name: String):
+	return base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + file_name
+
 
 func on_server_disconnected(): #handles closing of server on client side
 	print("server connetion lost: ", multiplayer.multiplayer_peer.get_connection_status())
@@ -115,3 +125,15 @@ func on_server_disconnected(): #handles closing of server on client side
 		await get_tree().create_timer(0.5).timeout
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 	
+func comma_separeted_string_to_array(input: String):
+	var string_array = input.split(",")
+	var output_string_array: PackedStringArray = []
+	for string in string_array:
+		string = string.strip_edges()
+		output_string_array.append(string)
+	return output_string_array
+	
+func string_array_to_comma_separeted_string(string_array: PackedStringArray):
+	var output = ""
+	output = ", ".join(string_array)
+	return output

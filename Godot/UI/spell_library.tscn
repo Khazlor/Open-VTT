@@ -27,13 +27,12 @@ text = "Spell Categories Filter"
 [node name="AllowedSpellsAll" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "please enter as comma separated array:
-[\"wizard\", \"dnd2e\"]
-this will filter all spells from database that have all of these categories
-[\"wizard\", \"dnd2e\"] - will grab all wizard spells from dnd2e
+tooltip_text = "this will filter all spells from database that have all of these categories
+
+wizard, dnd2e - will grab all wizard spells from dnd2e
 
 - allow all when empty"
-placeholder_text = "[\"wizard\", \"dnd2e\"]"
+placeholder_text = "wizard, ruleset - must have all of these"
 
 [node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -42,13 +41,11 @@ text = "Spell Categories Search"
 [node name="AllowedSpellsOne" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "please enter as comma separated array:
-[\"invocation\", \"illusion\", \"conjuration\"]
-this will filter all spells from database that have at least one of these categories
-[\"invocation\", \"illusion\", \"conjuration\"] - will grab all invocation, illusion and conjuration spells from filtered spell list
+tooltip_text = "this will filter all spells from database that have at least one of these categories
+invocation, illusion, conjuration - will grab all invocation, illusion and conjuration spells from filtered spell list
 
 - allow all when empty"
-placeholder_text = "[\"invocation\", \"illusion\", \"conjuration\"]"
+placeholder_text = "invocation, illusion - must have at least one"
 
 [node name="SearchButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2

@@ -3,6 +3,16 @@ class_name SpellDB
 
 var database: SQLite
 
+static func get_spellDB_path():
+	if Globals.lobby == null or Globals.lobby.check_is_server():
+		if Globals.settings == null: #should never happen, just in case
+			Globals.settings = Settings_res.new()
+			Globals.settings.load_settings()
+			Globals.settings.apply_settings()
+		return Globals.base_dir_path + "/" + Globals.settings.settings_dict["spellDB"]
+	else:
+		return Globals.base_dir_path + "/multiplayer_spells.db"
+
 func test_db():
 	create_spell_db()
 	
@@ -54,19 +64,22 @@ func test_db():
 	
 
 func open_spell_db():
-	if FileAccess.file_exists(Globals.base_dir_path + "/spells.db"):
+	if database != null:
+		database.close_db()
+	if FileAccess.file_exists(get_spellDB_path()):
 		database = SQLite.new()
-		database.path = Globals.base_dir_path + "/spells.db"
+		database.path = get_spellDB_path()
 		database.foreign_keys = true
 		database.open_db()
+		
 	else:
 		create_spell_db()
 
 func create_spell_db():
-	DirAccess.remove_absolute(Globals.base_dir_path + "/spells.db")
+	DirAccess.remove_absolute(get_spellDB_path())
 	
 	database = SQLite.new()
-	database.path = Globals.base_dir_path + "/spells.db"
+	database.path = get_spellDB_path()
 	database.foreign_keys = true
 	database.open_db()
 	
@@ -191,6 +204,8 @@ func get_all_presets_from_db():
 	
 func get_spells_from_database(must_have_all_keywords_array, must_have_one_keyword_array, calling_object = null):
 	var query = construct_query(must_have_all_keywords_array, must_have_one_keyword_array)
+	print(must_have_all_keywords_array, must_have_one_keyword_array)
+	print("query: ", query)
 	database.query(query)
 	var result = database.query_result
 	for spell in result:

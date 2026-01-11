@@ -677,32 +677,30 @@ vertical_alignment = 1
 
 [node name="AllowedSpellsAll" type="LineEdit" parent="SpellBookSettingsWindow/SpellbookSettings"]
 layout_mode = 2
-tooltip_text = "please enter as comma separated array:
-[\"wizard\", \"dnd2e\"]
-this will filter all spells from database that have all of these categories
-[\"wizard\", \"dnd2e\"] - will grab all wizard spells from dnd2e
+tooltip_text = "this will filter all spells from database that have all of these categories
+
+wizard, dnd2e\"] - will grab all wizard spells from dnd2e
 
 - allow all when empty"
-placeholder_text = "[\"wizard\", \"dnd2e\"]"
+placeholder_text = "wizard, ruleset"
 
 [node name="HSeparator3" type="HSeparator" parent="SpellBookSettingsWindow/SpellbookSettings"]
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="SpellBookSettingsWindow/SpellbookSettings"]
 layout_mode = 2
-text = "Allowed Spell Categories - one of these must be present"
+text = "Allowed Spell Categories - spells must have one of these"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="AllowedSpellsOne" type="LineEdit" parent="SpellBookSettingsWindow/SpellbookSettings"]
 layout_mode = 2
-tooltip_text = "please enter as comma separated array:
-[\"invocation\", \"illusion\", \"conjuration\"]
-this will filter all spells from database that have at least one of these categories
-[\"invocation\", \"illusion\", \"conjuration\"] - will grab all invocation, illusion and conjuration spells from filtered spell list
+tooltip_text = "this will filter all spells from database that have at least one of these categories
+
+invocation, illusion, conjuration - will grab all invocation, illusion and conjuration spells from filtered spell list
 
 - allow all when empty"
-placeholder_text = "[\"invocation\", \"illusion\", \"conjuration\"]"
+placeholder_text = "invocation, illusion, conjuration"
 
 [node name="AddSpellBookPopup" type="Window" parent="SpellBookSettingsWindow"]
 oversampling_override = 1.0

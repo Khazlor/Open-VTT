@@ -1601,7 +1601,7 @@ func on_files_dropped(files):
 		var tex: Texture2D
 		var tex_size
 		if FileAccess.file_exists(file_path):
-			print("file already exists")
+			print("file already exists", Globals.lobby.check_is_server())
 			#file exists - load and assign:
 			tex = Globals.load_texture(file_path)
 			if tex == null:
@@ -2276,14 +2276,14 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		if object_data_arr[0][5].size() == 1: #texture:
 			print("texture rect on peer")
 			style = StyleBoxTexture.new()
-			var texture = Globals.load_texture(object_data_arr[0][5][0])
+			var texture = Globals.load_texture(Globals.get_full_texture_path(object_data_arr[0][5][0]))
 			if texture != null:
-				texture.set_meta("image_path", object_data_arr[0][5][0])
+				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
 				style.texture = texture
 			else: #file not on client - check server
 				print("check for file on server")
 				texture = Texture2D.new()
-				texture.set_meta("image_path", object_data_arr[0][5][0])
+				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
 				var file_name = object_data_arr[0][5][0].get_file()
 				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
 				if not Globals.lobby.check_is_server():
@@ -2487,7 +2487,7 @@ func serialize_object_for_rpc(node):
 		if style is StyleBoxFlat:
 			style_arr = [style.bg_color, style.border_color, style.border_width_left]
 		elif style is StyleBoxTexture:
-			style_arr = [style.texture.get_meta("image_path")]
+			style_arr = [style.texture.get_meta("image_path").get_file()]
 		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "line":
 		var line

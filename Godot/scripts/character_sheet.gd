@@ -732,8 +732,8 @@ func _on_spellbook_settings_button_pressed(spellbook_name = ""):
 	$SpellBookSettingsWindow/SpellbookSettings/SpellBookNameHbox/SpellBookName.text = spellbook["spellbook_name"]
 	$SpellBookSettingsWindow/SpellbookSettings/AllowHighLevel.button_pressed = spellbook["allow_spells_in_higher_slots"]
 	$SpellBookSettingsWindow/SpellbookSettings/Spontaneous.button_pressed = spellbook["spontaneous_spellcaster"]
-	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text = var_to_str(spellbook["allowed_spell_categories_all"])
-	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text = var_to_str(spellbook["allowed_spell_categories_one"])
+	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text = Globals.string_array_to_comma_separeted_string(spellbook["allowed_spell_categories_all"])
+	$SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text = Globals.string_array_to_comma_separeted_string(spellbook["allowed_spell_categories_one"])
 	$SpellBookSettingsWindow/SpellbookSettings/KnowAll.button_pressed = spellbook["know_all_spells"]
 	
 	$SpellBookSettingsWindow/SpellbookSettings/Label.text = "Filter Spell Categories - spells must have all of these"
@@ -762,23 +762,23 @@ func _on_spellbook_settings_apply_pressed() -> void:
 	var spell_list_all = []
 	var spell_list_one = []
 	if $SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text != "":
-		spell_list_all = str_to_var($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text)
-		if spell_list_all == null or not spell_list_all is Array :
-			$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not Array "
-			return
-		for str in spell_list_all:
-			if not str is String:
-				$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not String "
-				return
+		spell_list_all = Globals.comma_separeted_string_to_array($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsAll.text)
+		#if spell_list_all == null or not spell_list_all is Array :
+			#$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not Array "
+			#return
+		#for str in spell_list_all:
+			#if not str is String:
+				#$SpellBookSettingsWindow/SpellbookSettings/Label.text += "\n WRONG INPUT - Aborting Apply - not String "
+				#return
 	if $SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text != "":
-		spell_list_one = str_to_var($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text)
-		if spell_list_one == null or not spell_list_one is Array :
-			$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not Array "
-			return
-		for str in spell_list_one:
-			if not str is String:
-				$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not String "
-				return
+		spell_list_one = Globals.comma_separeted_string_to_array($SpellBookSettingsWindow/SpellbookSettings/AllowedSpellsOne.text)
+		#if spell_list_one == null or not spell_list_one is Array :
+			#$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not Array "
+			#return
+		#for str in spell_list_one:
+			#if not str is String:
+				#$SpellBookSettingsWindow/SpellbookSettings/Label2.text += "\n WRONG INPUT - Aborting Apply - not String "
+				#return
 	#inputs are fine, apply changes
 	spellbook["spellbook_name"] = new_spellbook_name
 	spellbook["allow_spells_in_higher_slots"] = $SpellBookSettingsWindow/SpellbookSettings/AllowHighLevel.button_pressed

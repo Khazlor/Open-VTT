@@ -15,6 +15,9 @@ func _ready():
 		Globals.settings.apply_settings()
 	
 	multiplayer.multiplayer_peer = null #end multiplayer if multiplayer was in progress
+	if Globals.enet_peer != null:
+		Globals.enet_peer.close()
+	Globals.enet_peer = null
 	Globals.client = false
 		
 	#open spell db

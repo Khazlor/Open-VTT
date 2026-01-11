@@ -22,8 +22,8 @@ var current_spellcard
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	$VBoxContainer/HBoxContainer/AllowedSpellsAll.text = var_to_str(spells_all_arr)
-	$VBoxContainer/HBoxContainer/AllowedSpellsOne.text = var_to_str(spells_one_arr)
+	$VBoxContainer/HBoxContainer/AllowedSpellsAll.text = Globals.string_array_to_comma_separeted_string(spells_all_arr)
+	$VBoxContainer/HBoxContainer/AllowedSpellsOne.text = Globals.string_array_to_comma_separeted_string(spells_one_arr)
 	var spell_array = Globals.spell_database.get_spells_from_database(spells_all_arr, spells_one_arr, self)
 	print("test ", last_database_query)
 	fill_spell_library(spell_array)
@@ -34,8 +34,8 @@ func _on_search_button_pressed() -> void:
 	var spell_list_all = []
 	var spell_list_one = []
 	if $VBoxContainer/HBoxContainer/AllowedSpellsAll.text != "":
-		spell_list_all = str_to_var($VBoxContainer/HBoxContainer/AllowedSpellsAll.text)
-		if spell_list_all == null or not spell_list_all is Array :
+		spell_list_all = Globals.comma_separeted_string_to_array($VBoxContainer/HBoxContainer/AllowedSpellsAll.text)
+		if spell_list_all == null or not spell_list_all is PackedStringArray :
 			$AcceptDialog.dialog_text = "Aborting Search - Spell Filter not Array"
 			$AcceptDialog.popup()
 			return
@@ -45,8 +45,8 @@ func _on_search_button_pressed() -> void:
 				$AcceptDialog.popup()
 				return
 	if $VBoxContainer/HBoxContainer/AllowedSpellsOne.text != "":
-		spell_list_one = str_to_var($VBoxContainer/HBoxContainer/AllowedSpellsOne.text)
-		if spell_list_one == null or not spell_list_one is Array :
+		spell_list_one = Globals.comma_separeted_string_to_array($VBoxContainer/HBoxContainer/AllowedSpellsOne.text)
+		if spell_list_one == null or not spell_list_one is PackedStringArray :
 			$AcceptDialog.dialog_text = "Aborting Search - Spell Search not Array"
 			$AcceptDialog.popup()
 			return
@@ -193,7 +193,7 @@ func _on_file_dialog_file_selected(path: String) -> void:
 		$AcceptDialog.popup()
 		return
 	#backup old spell library
-	DirAccess.copy_absolute(Globals.base_dir_path + "/spells.db", Globals.base_dir_path + "/spells_backup.db")
+	DirAccess.copy_absolute(SpellDB.get_spellDB_path(), Globals.base_dir_path + "/spells_backup.db")
 	var spells_missing_name = false
 	var spells_missing_spell_level = false
 	var spells_wrong_spell_level = false
@@ -249,17 +249,6 @@ func _on_file_dialog_file_selected(path: String) -> void:
 	if spells_missing_name or spells_missing_spell_level or spells_wrong_spell_level:
 		$AcceptDialog.popup()
 		
-		
-		
-		
-				
-				
-					
-				
-					
-					
-					 
-
 
 func _on_file_dialog_canceled() -> void:
 	pass # Replace with function body.

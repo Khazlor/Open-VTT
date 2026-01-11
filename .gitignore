@@ -11,3 +11,5 @@ Godot/keymaps.dat
 *.tmp
 *.csv
 *.csv.import
+*.cfg
+player_test

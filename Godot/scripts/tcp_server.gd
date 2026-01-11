@@ -122,7 +122,9 @@ func process_data(data: PackedByteArray, peer):
 		#response with new name - done in rpc
 		#peer.put_data(name)
 		#TODO received file on server - check waiting objects, notify peers
-		emit_signal("recv_file", data_arr[1])
+		print("tcp server emitting signal - recv_file, ",data_arr[1])
+		Globals.lobby.call_deferred("on_tcp_server_recv_file", (data_arr[1]))
+		#emit_signal("recv_file", data_arr[1])
 
 
 func send_data(data: PackedByteArray, peer):
@@ -132,7 +134,7 @@ func send_data(data: PackedByteArray, peer):
 	var data_print = data.slice(0, 50)
 	print("sending data :", data_print)
 	var err = peer.put_data(data)
-	print("send err = ", err)
+	print("server send err = ", err)
 	
 
 func rename_file(old_name):

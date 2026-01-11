@@ -214,5 +214,6 @@ size_flags_horizontal = 3
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/HostGameBtn" to="." method="_on_host_game_btn_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/JoinGameBtn" to="." method="_on_join_game_btn_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/CenterContainer/VBoxContainer/QuitBtn" to="." method="_on_quit_btn_pressed"]
+[connection signal="canceled" from="HostGameDialog" to="." method="_on_host_game_dialog_canceled"]
 [connection signal="confirmed" from="HostGameDialog" to="." method="_on_host_game_dialog_confirmed"]
 [connection signal="confirmed" from="JoinGameDialog" to="." method="_on_join_game_dialog_confirmed"]

@@ -148,7 +148,7 @@ func store_char_data_to_buffer():
 	var file_path = Globals.base_dir_path + "/temp" #temp file for character - find availible file name
 	var i = 1
 	while FileAccess.file_exists(file_path):
-		file_path = Globals.base_dir_path + "/temp_" + str(2)
+		file_path = Globals.base_dir_path + "/temp_" + str(i)
 		i += 1
 	#var temp_charater_file = FileAccess.open(file_path, FileAccess.WRITE)
 	store_char_data(file_path)

@@ -20,7 +20,6 @@ var objects_waiting_for_file = {}
 
 signal file_check_done(upload, file_name, id)
 
-
 func _enter_tree():
 	Globals.lobby = self
 
@@ -40,6 +39,8 @@ func _ready():
 			if tcp_server == null:
 				tcp_server = tcp_server_comp.instantiate()
 				tcp_server.connect("recv_file", on_tcp_server_recv_file)
+				if tcp_server.is_connected("recv_file", on_tcp_server_recv_file):
+					print("tcp server connected to recv_file")
 				add_child(tcp_server)
 
 			map = map_comp.instantiate()
@@ -59,6 +60,12 @@ func _ready():
 			tcp_client.connect("recv_file", on_tcp_client_recv_file)
 			tcp_client.connect("connected", on_tcp_client_connected)
 			add_child(tcp_client)
+			if FileAccess.file_exists(SpellDB.get_spellDB_path()):
+				server_get_spellDB.rpc_id(1, FileAccess.get_md5(SpellDB.get_spellDB_path()))
+			else:
+				server_get_spellDB.rpc_id(1, null)
+			Globals.spell_database.open_spell_db()
+			
 	else: #singleplayer
 		map = map_comp.instantiate()
 		if has_node("Map"):
@@ -76,6 +83,7 @@ func on_tcp_client_connected(): #connected to server with loaded scene - load ma
 	server_get_map.rpc_id(1)
 
 func on_tcp_server_recv_file(file_name):
+	print("server got file ", file_name)
 	var file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + file_name
 	server_recvd_file.rpc(file_name) #notify all peers that new file was uploaded to server
 	on_tcp_client_recv_file(file_path) #check if any objects on server need file
@@ -95,6 +103,7 @@ func remove_map():
 
 func on_tcp_client_recv_file(file_path):
 	print("client got file - check waiting objects for file")
+	print(file_path)
 	var file_name = file_path.get_file()
 	if objects_waiting_for_file.has(file_name):
 		var texture: Texture2D = Globals.load_texture(file_path)
@@ -159,10 +168,10 @@ func client_set_map(server_map_file_buffer, file_buffer_size):
 	print(multiplayer.get_unique_id(), " client set map")
 	server_map_file_buffer = server_map_file_buffer.decompress(file_buffer_size)
 	var file = FileAccess.open(Globals.base_dir_path + "/temp.file", FileAccess.WRITE_READ)
-	file.store_var(server_map_file_buffer)
+	file.store_buffer(server_map_file_buffer)
 	file.flush()
 	print("set ", file.get_length())
-	file.seek(12)#skip buffer header probably created by FileAccess get_file_as_bytes or get_buffer
+	file.seek(0)
 	Globals.new_map = Map_res.new()
 	Globals.map = Globals.new_map
 	map = map_comp.instantiate()
@@ -249,20 +258,21 @@ func handle_file_transfer(file_path: String, set_image = true):
 			result = check_file_on_server(file_name, file_hash, id)
 		print("signal recvd")
 		var new_file_path = Globals.base_dir_path + "/images/" + Globals.campaign.campaign_name + "/" + result[1]
-		if result[0] == true: #upload
-			if tcp_client != null: #client
-				tcp_client.send_image(file_path)
-			elif tcp_server != null: #server
-				DirAccess.copy_absolute(file_path, new_file_path)
-				tcp_server.emit_signal("recv_file", result[1])
-			else: #local
-				DirAccess.copy_absolute(file_path, new_file_path)
 		if set_image: #set image locally
 			if not FileAccess.file_exists(new_file_path):
 				print("file does not exist - copy file")
 				DirAccess.copy_absolute(file_path, new_file_path)
 			else:
-				print("file already exists")
+				print("file already exists ", new_file_path)
+		if result[0] == true: #upload
+			if tcp_client != null: #client
+				tcp_client.send_image(new_file_path)
+			elif tcp_server != null: #server
+				DirAccess.copy_absolute(file_path, new_file_path)
+				tcp_server.emit_signal("recv_file", result[1])
+			else: #local
+				DirAccess.copy_absolute(file_path, new_file_path)
+		print("handle file transfer - new file path: ", new_file_path)
 		return new_file_path
 	else:
 		print("handle file transfer - file does not exist")
@@ -275,6 +285,31 @@ func add_to_objects_waiting_for_file(file_name: String, object):
 	else:
 		objects_waiting_for_file[file_name] = [object]
 	print("objects waiting: ", objects_waiting_for_file)
+	
+	
+@rpc("any_peer", "call_remote", "reliable")
+func server_get_spellDB(client_spell_db_hash):
+	if multiplayer.is_server(): #just to be sure
+		if client_spell_db_hash != null and client_spell_db_hash == FileAccess.get_md5(SpellDB.get_spellDB_path()):
+			return
+		var sender_id = multiplayer.get_remote_sender_id()
+		var file_buffer = FileAccess.get_file_as_bytes(SpellDB.get_spellDB_path())
+		var file_buffer_size = file_buffer.size()
+		file_buffer = file_buffer.compress()
+
+		client_set_spellDB.rpc_id(sender_id, file_buffer, file_buffer_size)
+		
+@rpc("authority", "call_remote", "reliable")
+func client_set_spellDB(server_spellDB_file_buffer: PackedByteArray, file_buffer_size):
+	server_spellDB_file_buffer = server_spellDB_file_buffer.decompress(file_buffer_size)
+	#backup old multiplayer spell db
+	if FileAccess.file_exists(Globals.base_dir_path + "/multiplayer_spells.db"):
+		DirAccess.copy_absolute(Globals.base_dir_path + "/multiplayer_spells.db", Globals.base_dir_path + "/multiplayer_spells_backup.db")
+	var file = FileAccess.open(Globals.base_dir_path + "/multiplayer_spells.db", FileAccess.WRITE_READ)
+	#file.store_var(server_spellDB_file_buffer.slice(12)) #skip buffer header probably created by FileAccess get_file_as_bytes or get_buffer
+	file.store_buffer(server_spellDB_file_buffer)
+	file.flush()
+	file.close()
 
 # ============================ UNDO / REDO ===============================
 

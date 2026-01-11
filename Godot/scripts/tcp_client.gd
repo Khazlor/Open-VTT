@@ -72,6 +72,7 @@ func send_image(file_path):
 	data.resize(len)
 	print("data header :", data)
 	data.append_array(FileAccess.get_file_as_bytes(file_path))
+	print("client send put")
 	send_data(data)
 
 #request file from server
@@ -95,7 +96,7 @@ func send_data(data: PackedByteArray):
 	var data_print = data.slice(0, 50)
 	print("sending data :", data_print)
 	var err = peer.put_data(data)
-	print("send err = ", err)
+	print("client send err = ", err)
 
 
 func _on_tree_exiting():

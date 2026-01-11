@@ -60,7 +60,8 @@ func load_spell_card():
 	if not spell_dict.has("spellcard_name"):
 		return
 	var card_dict = Globals.spell_database.get_spellcard_from_db(spell_dict["spellcard_name"])
-	
+	if card_dict == null:
+		return
 	card_comp_array = str_to_var(card_dict["spellcard_component_array"])
 	
 	$VBoxContainer/SpellCard/Title.text = spell_dict["spell_name"]
@@ -84,7 +85,7 @@ func load_spell_card():
 	#keyword color
 	if spell_dict.has("keyword_color") and spell_dict["keyword_color"] != null:
 		style.border_color = str_to_var(spell_dict["keyword_color"])
-		print(spell_dict["spell_name"], spell_dict["keyword_name"], spell_dict["keyword_color"], self.get_theme_stylebox("panel").border_color, card_comp_array[1])
+		#print(spell_dict["spell_name"], spell_dict["keyword_name"], spell_dict["keyword_color"], self.get_theme_stylebox("panel").border_color, card_comp_array[1])
 
 func load_spell_card_content():
 	content_loaded = true
