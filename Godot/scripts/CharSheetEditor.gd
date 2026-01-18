@@ -285,7 +285,7 @@ func load_image_from_dict(dict):
 	#TODO load image
 	var texture = load(current_sheet_folder + "/" + dict["image"]) 
 	if texture == null:
-		texture = load(Globals.base_dir_path + "/images/Placeholder-1479066.png")
+		texture = load("res://images/Placeholder-1479066.png")
 	image.texture = texture
 	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode = TextureRect.STRETCH_SCALE
@@ -428,7 +428,7 @@ func _unhandled_input(event):
 				print("created image")
 				var texture = load(current_sheet_folder + "/" + dict["image"]) 
 				if texture == null:
-					texture = load(Globals.base_dir_path + "/images/Placeholder-1479066.png")
+					texture = load("res://images/Placeholder-1479066.png")
 				created_object.texture = texture
 				created_object.set_meta("dict", dict)
 				char_sheet_arr[2].append(dict)
@@ -847,7 +847,7 @@ func load_image_opt(dict, reload_image = false):
 		if dict["image"] != "":
 			opt_image.get_node("Container/Image/TextureButton").texture_normal = load(current_sheet_folder + "/" + dict["image"])
 		else:
-			opt_image.get_node("Container/Image/TextureButton").texture_normal = load(Globals.base_dir_path + "/images/Placeholder-1479066.png")
+			opt_image.get_node("Container/Image/TextureButton").texture_normal = load("res://images/Placeholder-1479066.png")
 	opt_image.get_node("Container/CharCheckBox").button_pressed = dict["char"]
 	opt_image.get_node("Container/CharSheetCheckBox").button_pressed = not dict["char"]
 	if dict["char"]:

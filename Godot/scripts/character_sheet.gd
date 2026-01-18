@@ -330,7 +330,7 @@ func load_image_from_dict(dict):
 	if texture == null:
 		texture = load(character.char_sheet_path + "/" + dict["image"]) 
 	if texture == null:
-		texture = load(Globals.base_dir_path + "/images/Placeholder-1479066.png")
+		texture = load("res://images/Placeholder-1479066.png")
 	image.texture = texture
 	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode = TextureRect.STRETCH_SCALE

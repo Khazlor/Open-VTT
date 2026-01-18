@@ -66,17 +66,20 @@ var spell_database: SpellDB
 
 func _enter_tree() -> void:
 	#set base path for all files
-	if OS.is_debug_build():
-		var args = OS.get_cmdline_args()
-		var is_server = "--server" in args
-		if is_server:
-			Globals.base_dir_path = "res:/" #project folder in debug - not working in export
-		else:
-			Globals.base_dir_path = "res://player_test" #player instance folder
-	elif OS.has_feature("android"):
-		Globals.base_dir_path = "user:/"
-	else:
+	#if OS.is_debug_build():
+		#Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+		#var args = OS.get_cmdline_args()
+		#var is_server = "--server" in args
+		#if is_server:
+			#Globals.base_dir_path = "res:/" #project folder in debug - not working in export
+		#else:
+			#Globals.base_dir_path = "res://player_test" #player instance folder
+	#elif OS.has_feature("android"):
+		#Globals.base_dir_path = "user:/"
+	if OS.has_feature("template"):
 		Globals.base_dir_path = OS.get_executable_path().get_base_dir() #executable file in export
+	else:
+		Globals.base_dir_path = "res:/" #project folder in debug - not working in export
 		#can be changed to user:// to use default user application folder based on OS
 	
 #texture loading during runtime, supports resizing to specific size

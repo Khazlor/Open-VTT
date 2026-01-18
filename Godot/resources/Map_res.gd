@@ -26,7 +26,7 @@ var token_comp = preload("res://components/token.tscn") #token component
 @export var fov_opacity = 0.3
 @export var fov_color = Color.BLACK
 #preview
-@export var image: String = Globals.base_dir_path + "/images/Placeholder-1479066.png"
+@export var image: String = "res://images/Placeholder-1479066.png"
 
 var tokens = []
 var singleton_token_chars = {}

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dlf01asesjieo"]
 
 [ext_resource type="Script" uid="uid://bplkgxfdj2pr4" path="res://scripts/spell_card.gd" id="1_n688e"]
-[ext_resource type="Texture2D" uid="uid://cxn4obecxdjgu" path="res://images/Campaign Name/Spell_fire_fireball02.webp.PNG" id="2_33o7o"]
+[ext_resource type="Texture2D" uid="uid://cxn4obecxdjgu" path="res://images/Spell_fire_fireball02.webp.PNG" id="2_syx12"]
 [ext_resource type="Texture2D" uid="uid://2sbeb2nihtia" path="res://icons/Forward.svg" id="3_46b20"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j8elw"]
@@ -66,7 +66,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 mouse_filter = 2
-texture = ExtResource("2_33o7o")
+texture = ExtResource("2_syx12")
 expand_mode = 4
 stretch_mode = 4
 
