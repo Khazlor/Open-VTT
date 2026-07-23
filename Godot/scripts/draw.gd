@@ -16,6 +16,7 @@ var control_groups = [[],[],[],[],[],[],[],[],[],[]]
 #drawing
 var pressed = false
 var draw_enable = true
+var drawing_straight_line = false
 var current_panel: Panel #rect
 var current_line: Line2D
 var current_rect: ColorRect
@@ -431,6 +432,47 @@ func _unhandled_input(event):
 					if min_max_x_y.w < pos.y: #max y
 						min_max_x_y.w = pos.y
 					current_line.add_point(pos)
+					
+			if Globals.tool == "lines-straight":
+				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					pressed = event.pressed
+					#just pressed - create objects / add point
+					if pressed:
+						if not drawing_straight_line:
+							drawing_straight_line = true
+							current_rect = ColorRect.new()
+							current_rect.light_mask = Globals.draw_layer.light_mask
+							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
+							current_rect.color = Color(0,0,0,0)
+							current_rect.set_meta("polygon", true)
+							current_line = Line2D.new()
+							current_line.light_mask = Globals.draw_layer.light_mask
+							current_line.default_color = Globals.colorLines
+							current_line.width = Globals.lineWidth
+							current_rect.set_meta("type", "line")
+							Globals.draw_layer.add_child(current_rect)
+							current_rect.set_owner(layers_root)
+							current_rect.add_child(current_line)
+							current_line.set_owner(layers_root)
+							var pos = mouse_pos
+							min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
+							current_line.add_point(pos)
+						else:
+							var pos = mouse_pos
+							for point in current_line.points:
+								if point.distance_squared_to(pos) < 100:
+									current_line.closed = true
+									straight_line_end()
+									return
+							if min_max_x_y.x > pos.x: #min x
+								min_max_x_y.x = pos.x
+							if min_max_x_y.y > pos.y: #min y
+								min_max_x_y.y = pos.y
+							if min_max_x_y.z < pos.x: #max x
+								min_max_x_y.z = pos.x
+							if min_max_x_y.w < pos.y: #max y
+								min_max_x_y.w = pos.y
+							current_line.add_point(pos)
 					
 			if Globals.tool == "circle":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -948,6 +990,9 @@ func _unhandled_input(event):
 			mouse_over_clear()
 			
 		elif Input.is_action_just_pressed("Escape"): #cancel selection or go back to map selection
+			if drawing_straight_line: #cancel draw straight line:
+				straight_line_end()
+				
 			if selected != null and select_box != null: #cancel selection
 				#remove select box
 				select_box.queue_free()
@@ -2653,3 +2698,20 @@ func update_other_peers_timer_start():
 
 func _on_tutorial_window_close_requested():
 	$TutorialWindow.hide()
+	
+func straight_line_end():
+	drawing_straight_line = false
+	if current_rect == null:
+		return
+	if min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
+		#lines.remove_child(current_rect)
+		current_rect.queue_free()
+		print("free")
+		return
+	#setting size of box around line for selection purposes
+	current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
+	current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
+	current_line.position = -current_rect.position
+	create_object_on_remote_peers(current_rect, true)
+	current_rect = null
+	return
