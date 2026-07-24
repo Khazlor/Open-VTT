@@ -85,33 +85,10 @@ func save_data_for_self_and_children(node, file: FileAccess):
 	#var is_token = false
 	var type = node.get_meta("type")
 	print("save object - ", type)
-	if type == "rect": #object is rectangle - panel
-		var style_arr = []
-		var style = node.get_theme_stylebox("panel")
-		print(style)
-		if style is StyleBoxFlat:
-			style_arr = [style.bg_color, style.border_color, style.border_width_left]
-		elif style is StyleBoxTexture:
-			if style.texture != null:
-				style_arr = [style.texture.get_meta("image_path")]
-			else:
-				style_arr = [Globals.colorBack, Globals.colorLines, Globals.lineWidth]
-		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
-	elif type == "line":
-		var line
-		for child in node.get_children():
-			if child is Line2D:
-				line = child
-				break
-		if line == null:
-			print("saving line - not line - need fix") 
-			return
-		var style_arr = [line.points, line.default_color, line.width]
-		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
-	elif type == "circle":
-		print("circle")
-		var style_arr = [node.line_color, node.back_color, node.line_width]
-		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
+	if type == "poly": #represents all drawn objects
+		print("poly")
+		var style_arr = [node.points, node.closed, node.colorLines, node.colorBG, node.lineWidth]
+		object_data_arr.append(["poly", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
 	elif type == "text":
 		var style_arr = [node.get_theme_font("font"), node.get_theme_font_size("font_size"), node.get_theme_color("font_color")]
 		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, node.name, style_arr])
@@ -128,6 +105,38 @@ func save_data_for_self_and_children(node, file: FileAccess):
 	elif type == "container":
 		var inventory = node.get_meta("inventory")
 		object_data_arr.append(["container", node.position, node.size, node.scale, node.rotation, inventory, node.name])
+	
+	elif type == "rect": #object is rectangle - panel
+		var style_arr = []
+		var style = node.get_theme_stylebox("panel")
+		print(style)
+		if style is StyleBoxFlat: #replaced by poly
+			style_arr = [style.bg_color, style.border_color, style.border_width_left]
+		elif style is StyleBoxTexture:
+			if style.texture != null:
+				style_arr = [style.texture.get_meta("image_path")]
+			else:
+				style_arr = [Globals.colorBack, Globals.colorLines, Globals.lineWidth]
+		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
+	
+	#region obsolete
+	#line circle were replaced by poly - left for backwards compatibility
+	elif type == "line":
+		var line
+		for child in node.get_children():
+			if child is Line2D:
+				line = child
+				break
+		if line == null:
+			print("saving line - not line - need fix") 
+			return
+		var style_arr = [line.points, line.default_color, line.width]
+		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
+	elif type == "circle":
+		print("circle")
+		var style_arr = [node.line_color, node.back_color, node.line_width]
+		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr, node.name])
+	#endregion obsolete
 
 	#light and shadow can be be on any object
 	if node.has_meta("light"):
@@ -206,71 +215,22 @@ func load_data_for_self_and_children(file: FileAccess):
 	#print("load object - ", object_data_arr)
 	var node = null
 	
-	if object_data_arr[0][0] == "rect": #object is rectangle - panel
-		var style
-		node = Panel.new()
-		if object_data_arr[0][5].size() == 1: #texture:
-			print("texture rect loading")
-			style = StyleBoxTexture.new()
-			var texture = Globals.load_texture(object_data_arr[0][5][0])
-			print("texture: texture")
-			if texture != null:
-				texture.set_meta("image_path", object_data_arr[0][5][0])
-				style.texture = texture
-			else: #file not on client - check server
-				print("check for file on server")
-				texture = Texture2D.new()
-				texture.set_meta("image_path", object_data_arr[0][5][0])
-				var file_name = object_data_arr[0][5][0].get_file()
-				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
-				if not Globals.lobby.check_is_server():
-					Globals.lobby.tcp_client.send_file_request(file_name)
-		elif object_data_arr[0][5].size() == 3: #flat
-			style = StyleBoxFlat.new()
-			style.bg_color = object_data_arr[0][5][0]
-			style.border_color = object_data_arr[0][5][1]
-			style.set_border_width_all(object_data_arr[0][5][2])
+	if object_data_arr[0][0] == "poly":
+		node = CustomPolygon.new()
 		node.position = object_data_arr[0][1]
 		node.size = object_data_arr[0][2]
 		node.scale = object_data_arr[0][3]
 		node.rotation = object_data_arr[0][4]
-		node.set_meta("type", "rect")
-		node.add_theme_stylebox_override("panel", style)
+		node.set_meta("type", "poly")
+		node.points = object_data_arr[0][5][0]
+		node.closed = object_data_arr[0][5][1]
+		node.colorLines = object_data_arr[0][5][2]
+		node.colorBG = object_data_arr[0][5][3]
+		node.lineWidth = object_data_arr[0][5][4]
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
 		node.name = object_data_arr[0][6]
-	elif object_data_arr[0][0] == "line":
-		node = ColorRect.new()
-		node.color = Color(0,0,0,0)
-		node.position = object_data_arr[0][1]
-		node.size = object_data_arr[0][2]
-		node.scale = object_data_arr[0][3]
-		node.rotation = object_data_arr[0][4]
-		node.set_meta("type", "line")
-		node.set_meta("polygon", true)
-		var line = Line2D.new()
-		line.points = object_data_arr[0][5][0]
-		line.default_color = object_data_arr[0][5][1]
-		line.width = object_data_arr[0][5][2]
-		line.position = -node.position
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		node.add_child(line)
-		Globals.draw_layer.add_child(node)
-		node.name = object_data_arr[0][6]
-	elif object_data_arr[0][0] == "circle":
-		node = CustomEllipse.new()
-		node.position = object_data_arr[0][1]
-		node.size = object_data_arr[0][2]
-		node.scale = object_data_arr[0][3]
-		node.rotation = object_data_arr[0][4]
-		node.line_color = object_data_arr[0][5][0]
-		node.back_color = object_data_arr[0][5][1]
-		node.line_width = object_data_arr[0][5][2]
-		node.set_meta("type", "circle")
-		node.set_meta("polygon", true)
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		Globals.draw_layer.add_child(node)
-		node.name = object_data_arr[0][6]
+	
 	elif object_data_arr[0][0] == "text":
 		node = Label.new()
 		node.position = object_data_arr[0][1]
@@ -345,10 +305,78 @@ func load_data_for_self_and_children(file: FileAccess):
 		Globals.draw_layer = node
 		if not object_data_arr[0][2] or not Globals.lobby.check_is_server() and object_data_arr[0][3]: #not visible or not server and is DM layer - hide layer
 			node.visible = false
-
-	elif object_data_arr[0] == "child_end": #put at end of children list
-		Globals.draw_layer = Globals.draw_layer.get_parent()
 		
+	elif object_data_arr[0][0] == "rect": #object is rectangle - panel
+		var style
+		node = Panel.new()
+		if object_data_arr[0][5].size() == 1: #texture:
+			print("texture rect loading")
+			style = StyleBoxTexture.new()
+			var texture = Globals.load_texture(object_data_arr[0][5][0])
+			print("texture: texture")
+			if texture != null:
+				texture.set_meta("image_path", object_data_arr[0][5][0])
+				style.texture = texture
+			else: #file not on client - check server
+				print("check for file on server")
+				texture = Texture2D.new()
+				texture.set_meta("image_path", object_data_arr[0][5][0])
+				var file_name = object_data_arr[0][5][0].get_file()
+				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
+				if not Globals.lobby.check_is_server():
+					Globals.lobby.tcp_client.send_file_request(file_name)
+		elif object_data_arr[0][5].size() == 3: #flat - replaced by poly
+			style = StyleBoxFlat.new()
+			style.bg_color = object_data_arr[0][5][0]
+			style.border_color = object_data_arr[0][5][1]
+			style.set_border_width_all(object_data_arr[0][5][2])
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "rect")
+		node.add_theme_stylebox_override("panel", style)
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.draw_layer.add_child(node)
+		node.name = object_data_arr[0][6]
+		
+	#region obsolete
+	#line circle replaced by poly - left for backwards compatibility
+	elif object_data_arr[0][0] == "line":
+		node = ColorRect.new()
+		node.color = Color(0,0,0,0)
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "line")
+		var line = Line2D.new()
+		line.points = object_data_arr[0][5][0]
+		line.default_color = object_data_arr[0][5][1]
+		line.width = object_data_arr[0][5][2]
+		line.position = -node.position
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.add_child(line)
+		Globals.draw_layer.add_child(node)
+		node.name = object_data_arr[0][6]
+	elif object_data_arr[0][0] == "circle":
+		node = CustomEllipse.new()
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.line_color = object_data_arr[0][5][0]
+		node.back_color = object_data_arr[0][5][1]
+		node.line_width = object_data_arr[0][5][2]
+		node.set_meta("type", "circle")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.draw_layer.add_child(node)
+		node.name = object_data_arr[0][6]
+	#endregion obsolete
+	
+	elif object_data_arr[0] is String and object_data_arr[0] == "child_end": #put at end of children list
+		Globals.draw_layer = Globals.draw_layer.get_parent()
+	
 	#load light and shadow for object:
 	if node != null and object_data_arr.size() > 1:
 		if "character" in node: #token
@@ -399,6 +427,8 @@ func load_data_for_self_and_children(file: FileAccess):
 			occluder.occluder.polygon = object_data_arr[1][1]
 			occluder.occluder.cull_mode = object_data_arr[1][2]
 			occluder.occluder_light_mask = Globals.draw_layer.light_mask
+			if node is CustomPolygon:
+				occluder.occluder.closed = node.closed
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
 			node.set_meta("shadow", true)
@@ -409,6 +439,8 @@ func load_data_for_self_and_children(file: FileAccess):
 				occluder.occluder.polygon = object_data_arr[2][1]
 				occluder.occluder.cull_mode = object_data_arr[2][2]
 				occluder.occluder_light_mask = Globals.draw_layer.light_mask
+				if node is CustomPolygon:
+					occluder.occluder.closed = node.closed
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)

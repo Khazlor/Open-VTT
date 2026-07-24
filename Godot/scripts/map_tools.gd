@@ -58,6 +58,8 @@ func _on_draw_pressed():
 	elif index == 1:
 		Globals.tool = "lines"
 	elif index == 2:
+		Globals.tool = "lines-straight"
+	elif index == 3:
 		Globals.tool = "circle"
 	Globals.tool_bar = draw
 

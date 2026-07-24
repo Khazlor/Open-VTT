@@ -18,14 +18,15 @@ var pressed = false
 var draw_enable = true
 var drawing_straight_line = false
 var current_panel: Panel #rect
+var current_polygon: CustomPolygon
 var current_line: Line2D
-var current_rect: ColorRect
+var current_rect: ColorRect #bounding box
 var current_label: Label
 var current_textedit: TextEdit
 var currently_editing_label: Label
 var currently_editing_textedit: TextEdit
 var current_circle: CustomCircle
-var current_ellipse: CustomEllipse
+#var current_ellipse: CustomEllipse
 var current_arc: CustomArc
 var current_measure = []
 var begin: Vector2
@@ -107,6 +108,8 @@ func _unhandled_input(event):
 		if Globals.draw_layer == null: #check if layer is selected
 			return
 		mouse_pos = get_global_mouse_position()
+		if Globals.tool != "lines-straight" and drawing_straight_line: #if tool was changed in the middle of drawing polygon
+			straight_line_end()
 		if targeting and (Input.is_action_just_pressed("mouseleft")): #targeting end
 			if targeting_moved:
 				print("targeting end")
@@ -144,19 +147,27 @@ func _unhandled_input(event):
 			pressed = false
 		#line drawing finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "lines":
-			if current_rect == null:
+			if current_polygon == null:
 				return
 			if min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
 				#lines.remove_child(current_rect)
-				current_rect.queue_free()
+				current_polygon.queue_free()
 				print("free")
 				return
 			#setting size of box around line for selection purposes
-			current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
-			current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
-			current_line.position = -current_rect.position
-			create_object_on_remote_peers(current_rect, true)
-			current_rect = null
+			#current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
+			#current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
+			#current_line.position = -current_rect.position
+			#create_object_on_remote_peers(current_rect, true)
+			#current_rect = null
+			
+			#shift points to match change in object position
+			var shift = current_polygon.position - Vector2(min_max_x_y.x, min_max_x_y.y)
+			current_polygon.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
+			current_polygon.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
+			current_polygon.shift_points(shift)
+			create_object_on_remote_peers(current_polygon, true)
+			
 
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "measure":
 			for child in current_measure:
@@ -341,19 +352,19 @@ func _unhandled_input(event):
 #endregion
 		#circle or rect drawing finished
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "rect":
-			if current_panel == null:
+			if current_polygon == null:
 				return
-			if current_panel.size.x == 0 or current_panel.size.y == 0:
-				current_panel.queue_free()
+			if current_polygon.size.x == 0 or current_polygon.size.y == 0:
+				current_polygon.queue_free()
 			else:
-				create_object_on_remote_peers(current_panel, true)
+				create_object_on_remote_peers(current_polygon, true)
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "circle":
-			if current_ellipse == null:
+			if current_polygon == null:
 				return
-			if current_ellipse.size.x == 0 or current_ellipse.size.y == 0:
-				current_ellipse.queue_free()
+			if current_polygon.size.x == 0 or current_polygon.size.y == 0:
+				current_polygon.queue_free()
 			else:
-				create_object_on_remote_peers(current_ellipse, true)
+				create_object_on_remote_peers(current_polygon, true)
 		#else button held -> drawing
 		if draw_enable:
 #region Draw Shapes
@@ -362,64 +373,81 @@ func _unhandled_input(event):
 					pressed = event.pressed
 					#just pressed - create objects
 					if pressed:
-						current_panel = Panel.new()
-						current_panel.light_mask = Globals.draw_layer.light_mask
-						current_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+						current_polygon = CustomPolygon.new()
+						current_polygon.light_mask = Globals.draw_layer.light_mask
+						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
-						current_panel.set_begin(begin)
-						current_panel.set_end(begin)
-						var style = StyleBoxFlat.new()
-						style.bg_color = Globals.colorBack
-						style.border_color = Globals.colorLines
-						style.set_border_width_all(Globals.lineWidth)
-						current_panel.add_theme_stylebox_override("panel", style)
-						current_panel.set_meta("type", "rect")
-						Globals.draw_layer.add_child(current_panel)
-						current_panel.set_owner(layers_root)
+						current_polygon.set_begin(begin)
+						current_polygon.set_end(begin)
+						current_polygon.fill_points_with_rect()
+						current_polygon.colorLines = Globals.colorLines
+						current_polygon.colorBG = Globals.colorBack
+						current_polygon.lineWidth = Globals.lineWidth
+						current_polygon.set_meta("type", "poly")
+						current_polygon.closed = true
+						Globals.draw_layer.add_child(current_polygon)
+						current_polygon.set_owner(layers_root)
 						
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var end = mouse_pos
 					if begin.x > end.x and begin.y > end.y:
-						current_panel.set_begin(end)
-						current_panel.set_end(begin)
+						current_polygon.set_begin(end)
+						current_polygon.set_end(begin)
 					elif begin.x > end.x:
-						current_panel.set_begin(Vector2(end.x, begin.y))
-						current_panel.set_end(Vector2(begin.x, end.y))
+						current_polygon.set_begin(Vector2(end.x, begin.y))
+						current_polygon.set_end(Vector2(begin.x, end.y))
 					elif begin.y > end.y:
-						current_panel.set_begin(Vector2(begin.x, end.y))
-						current_panel.set_end(Vector2(end.x, begin.y))
+						current_polygon.set_begin(Vector2(begin.x, end.y))
+						current_polygon.set_end(Vector2(end.x, begin.y))
 					else:
-						current_panel.set_begin(begin)
-						current_panel.set_end(end)
+						current_polygon.set_begin(begin)
+						current_polygon.set_end(end)
 					if Input.is_action_pressed("shift"):
-						if current_panel.size.x < current_panel.size.y:
-							current_panel.size.x = current_panel.size.y
+						if current_polygon.size.x < current_polygon.size.y:
+							current_polygon.size.x = current_polygon.size.y
 						else:
-							current_panel.size.y = current_panel.size.x
+							current_polygon.size.y = current_polygon.size.x
+					current_polygon.fill_points_with_rect()
 					
 			if Globals.tool == "lines":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
 					#just pressed - create objects
 					if pressed:
-						current_rect = ColorRect.new()
-						current_rect.light_mask = Globals.draw_layer.light_mask
-						current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
-						current_rect.color = Color(0,0,0,0)
-						current_rect.set_meta("polygon", true)
-						current_line = Line2D.new()
-						current_line.light_mask = Globals.draw_layer.light_mask
-						current_line.default_color = Globals.colorLines
-						current_line.width = Globals.lineWidth
-						current_rect.set_meta("type", "line")
-						Globals.draw_layer.add_child(current_rect)
-						current_rect.set_owner(layers_root)
-						current_rect.add_child(current_line)
-						current_line.set_owner(layers_root)
 						var pos = mouse_pos
+						current_polygon = CustomPolygon.new()
+						current_polygon.light_mask = Globals.draw_layer.light_mask
+						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+						begin = pos
+						current_polygon.set_begin(begin)
+						current_polygon.set_end(begin)
+						current_polygon.colorLines = Globals.colorLines
+						current_polygon.colorBG = Globals.colorBack
+						current_polygon.lineWidth = Globals.lineWidth
+						current_polygon.set_meta("type", "poly")
+						current_polygon.closed = false
+						Globals.draw_layer.add_child(current_polygon)
+						current_polygon.set_owner(layers_root)
+						current_polygon.add_point(pos)
 						min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
-						current_line.add_point(pos)
+						#current_rect = ColorRect.new()
+						#current_rect.light_mask = Globals.draw_layer.light_mask
+						#current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
+						#current_rect.color = Color(0,0,0,0)
+						#current_rect.set_meta("polygon", true)
+						#current_line = Line2D.new()
+						#current_line.light_mask = Globals.draw_layer.light_mask
+						#current_line.default_color = Globals.colorLines
+						#current_line.width = Globals.lineWidth
+						#current_rect.set_meta("type", "line")
+						#Globals.draw_layer.add_child(current_rect)
+						#current_rect.set_owner(layers_root)
+						#current_rect.add_child(current_line)
+						#current_line.set_owner(layers_root)
+						#var pos = mouse_pos
+						#min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
+						#current_line.add_point(pos)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var pos = mouse_pos
@@ -431,7 +459,7 @@ func _unhandled_input(event):
 						min_max_x_y.z = pos.x
 					if min_max_x_y.w < pos.y: #max y
 						min_max_x_y.w = pos.y
-					current_line.add_point(pos)
+					current_polygon.add_point(pos)
 					
 			if Globals.tool == "lines-straight":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -440,30 +468,28 @@ func _unhandled_input(event):
 					if pressed:
 						if not drawing_straight_line:
 							drawing_straight_line = true
-							current_rect = ColorRect.new()
-							current_rect.light_mask = Globals.draw_layer.light_mask
-							current_rect.mouse_filter = Control.MOUSE_FILTER_PASS
-							current_rect.color = Color(0,0,0,0)
-							current_rect.set_meta("polygon", true)
-							current_line = Line2D.new()
-							current_line.light_mask = Globals.draw_layer.light_mask
-							current_line.default_color = Globals.colorLines
-							current_line.width = Globals.lineWidth
-							current_rect.set_meta("type", "line")
-							Globals.draw_layer.add_child(current_rect)
-							current_rect.set_owner(layers_root)
-							current_rect.add_child(current_line)
-							current_line.set_owner(layers_root)
 							var pos = mouse_pos
+							current_polygon = CustomPolygon.new()
+							current_polygon.light_mask = Globals.draw_layer.light_mask
+							current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+							begin = pos
+							current_polygon.set_begin(begin)
+							current_polygon.set_end(begin)
+							current_polygon.colorLines = Globals.colorLines
+							current_polygon.colorBG = Globals.colorBack
+							current_polygon.lineWidth = Globals.lineWidth
+							current_polygon.set_meta("type", "poly")
+							current_polygon.closed = false
+							Globals.draw_layer.add_child(current_polygon)
+							current_polygon.set_owner(layers_root)
+							current_polygon.add_point(pos)
 							min_max_x_y = Vector4(pos.x, pos.y, pos.x, pos.y)
-							current_line.add_point(pos)
 						else:
 							var pos = mouse_pos
-							for point in current_line.points:
-								if point.distance_squared_to(pos) < 100:
-									current_line.closed = true
-									straight_line_end()
-									return
+							if current_polygon.position.distance_squared_to(pos) < 100:
+								current_polygon.closed = true
+								straight_line_end()
+								return
 							if min_max_x_y.x > pos.x: #min x
 								min_max_x_y.x = pos.x
 							if min_max_x_y.y > pos.y: #min y
@@ -472,41 +498,45 @@ func _unhandled_input(event):
 								min_max_x_y.z = pos.x
 							if min_max_x_y.w < pos.y: #max y
 								min_max_x_y.w = pos.y
-							current_line.add_point(pos)
+							current_polygon.add_point(pos)
 					
 			if Globals.tool == "circle":
 				if event is InputEventMouseButton and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					pressed = event.pressed
 					#just pressed - create objects
 					if pressed:
-						current_ellipse = CustomEllipse.new()
-						current_ellipse.light_mask = Globals.draw_layer.light_mask
-						current_ellipse.mouse_filter = Control.MOUSE_FILTER_PASS
-						current_ellipse.set_meta("polygon", true)
+						current_polygon = CustomPolygon.new()
+						current_polygon.light_mask = Globals.draw_layer.light_mask
+						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
-						current_ellipse.set_begin(begin)
-						current_ellipse.set_end(begin)
-						current_ellipse.set_meta("type", "circle")
-						Globals.draw_layer.add_child(current_ellipse)
-						current_ellipse.set_owner(layers_root)
+						current_polygon.set_begin(begin)
+						current_polygon.set_end(begin)
+						#current_polygon.fill_points_with_ellipse() - no need when size is 0,0
+						current_polygon.colorLines = Globals.colorLines
+						current_polygon.colorBG = Globals.colorBack
+						current_polygon.lineWidth = Globals.lineWidth
+						current_polygon.set_meta("type", "poly")
+						current_polygon.closed = true
+						Globals.draw_layer.add_child(current_polygon)
+						current_polygon.set_owner(layers_root)
 				#moved - modify objects
 				if event is InputEventMouseMotion && pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					var end = mouse_pos
 					if begin.x > end.x and begin.y > end.y:
-						current_ellipse.set_begin(end)
-						current_ellipse.set_end(begin)
+						current_polygon.set_begin(end)
+						current_polygon.set_end(begin)
 					elif begin.x > end.x:
-						current_ellipse.set_begin(Vector2(end.x, begin.y))
-						current_ellipse.set_end(Vector2(begin.x, end.y))
+						current_polygon.set_begin(Vector2(end.x, begin.y))
+						current_polygon.set_end(Vector2(begin.x, end.y))
 					elif begin.y > end.y:
-						current_ellipse.set_begin(Vector2(begin.x, end.y))
-						current_ellipse.set_end(Vector2(end.x, begin.y))
+						current_polygon.set_begin(Vector2(begin.x, end.y))
+						current_polygon.set_end(Vector2(end.x, begin.y))
 					else:
-						current_ellipse.set_begin(begin)
-						current_ellipse.set_end(end)
+						current_polygon.set_begin(begin)
+						current_polygon.set_end(end)
 					if Input.is_action_pressed("shift"):
-						current_ellipse.size.x = current_ellipse.size.y
-					current_ellipse.queue_redraw()
+						current_polygon.size.x = current_polygon.size.y
+					current_polygon.fill_points_with_ellipse()
 #endregion
 					
 #region Text
@@ -993,7 +1023,7 @@ func _unhandled_input(event):
 			if drawing_straight_line: #cancel draw straight line:
 				straight_line_end()
 				
-			if selected != null and select_box != null: #cancel selection
+			elif selected != null and select_box != null: #cancel selection
 				#remove select box
 				select_box.queue_free()
 				#resetting select box state variables
@@ -2005,7 +2035,11 @@ func create_or_enable_shadow(object):
 		shadow.occluder = OccluderPolygon2D.new()
 		shadow.light_mask = object.light_mask
 		shadow.occluder_light_mask = object.light_mask
-		if object is CustomEllipse:
+		if object is CustomPolygon:
+			print("custom polygon detected")
+			shadow.occluder.polygon = object.points
+			shadow.occluder.closed = object.closed
+		elif object is CustomEllipse:
 			print("custom ellipse detected")
 			shadow.occluder.polygon = object.pointArray
 		elif object is ColorRect:
@@ -2060,18 +2094,31 @@ func on_line_settings_changed(setting):
 	for object in selected:
 		if object.has_meta("type"):
 			var type = object.get_meta("type")
+			if type == "poly":
+				if setting == "lc":
+					object.colorLines = Globals.colorLines
+				elif setting == "lw":
+					object.lineWidth = Globals.lineWidth
+				elif setting == "bg":
+					object.colorBG = Globals.colorBack
+				object.queue_redraw()
+				create_object_on_remote_peers(object)
+			
+			#region obsolete
+			#rect circle line were replaced by poly, left for compatibility reasons
 			if type == "rect":
 				var style = object.get_theme_stylebox("panel")
 				if style == null:
 					print("style is null !!!!")
 					return
-				if setting == "lc":
-					style.border_color = Globals.colorLines
-				elif setting == "lw":
-					style.set_border_width_all(Globals.lineWidth)
-				elif setting == "bg":
-					style.bg_color = Globals.colorBack
-				create_object_on_remote_peers(object)
+				if style is StyleBoxFlat: #else texture
+					if setting == "lc":
+						style.border_color = Globals.colorLines
+					elif setting == "lw":
+						style.set_border_width_all(Globals.lineWidth)
+					elif setting == "bg":
+						style.bg_color = Globals.colorBack
+					create_object_on_remote_peers(object)
 			elif type == "circle":
 				if setting == "lc":
 					object.line_color = Globals.colorLines
@@ -2095,6 +2142,7 @@ func on_line_settings_changed(setting):
 				elif setting == "lc":
 					line.default_color = Globals.colorLines
 				create_object_on_remote_peers(object)
+			#endregion obsolete
 				
 #modify selected text objects
 func on_font_settings_changed(setting):
@@ -2314,65 +2362,21 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		return
 	
 	var node = null
-	if object_data_arr[0][0] == "rect": #object is rectangle - panel
-		print("rect object")
-		var style
-		node = Panel.new()
-		if object_data_arr[0][5].size() == 1: #texture:
-			print("texture rect on peer")
-			style = StyleBoxTexture.new()
-			var texture = Globals.load_texture(Globals.get_full_texture_path(object_data_arr[0][5][0]))
-			if texture != null:
-				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
-				style.texture = texture
-			else: #file not on client - check server
-				print("check for file on server")
-				texture = Texture2D.new()
-				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
-				var file_name = object_data_arr[0][5][0].get_file()
-				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
-				if not Globals.lobby.check_is_server():
-					Globals.lobby.tcp_client.send_file_request(file_name)
-		elif object_data_arr[0][5].size() == 3: #flat
-			style = StyleBoxFlat.new()
-			style.bg_color = object_data_arr[0][5][0]
-			style.border_color = object_data_arr[0][5][1]
-			style.set_border_width_all(object_data_arr[0][5][2])
+	if object_data_arr[0][0] == "poly":
+		node = CustomPolygon.new()
 		node.position = object_data_arr[0][1]
 		node.size = object_data_arr[0][2]
 		node.scale = object_data_arr[0][3]
 		node.rotation = object_data_arr[0][4]
-		node.set_meta("type", "rect")
-		node.add_theme_stylebox_override("panel", style)
+		node.set_meta("type", "poly")
+		node.points = object_data_arr[0][5][0]
+		node.points = object_data_arr[0][5][1]
+		node.closed = object_data_arr[0][5][2]
+		node.colorLines = object_data_arr[0][5][3]
+		node.colorBG = object_data_arr[0][5][4]
+		node.lineWidth = object_data_arr[0][5][5]
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	elif object_data_arr[0][0] == "line":
-		node = ColorRect.new()
-		node.color = Color(0,0,0,0)
-		node.position = object_data_arr[0][1]
-		node.size = object_data_arr[0][2]
-		node.scale = object_data_arr[0][3]
-		node.rotation = object_data_arr[0][4]
-		node.set_meta("type", "line")
-		node.set_meta("polygon", true)
-		var line = Line2D.new()
-		line.points = object_data_arr[0][5][0]
-		line.default_color = object_data_arr[0][5][1]
-		line.width = object_data_arr[0][5][2]
-		line.position = -node.position
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		node.add_child(line)
-	elif object_data_arr[0][0] == "circle":
-		node = CustomEllipse.new()
-		node.position = object_data_arr[0][1]
-		node.size = object_data_arr[0][2]
-		node.scale = object_data_arr[0][3]
-		node.rotation = object_data_arr[0][4]
-		node.line_color = object_data_arr[0][5][0]
-		node.back_color = object_data_arr[0][5][1]
-		node.line_width = object_data_arr[0][5][2]
-		node.set_meta("type", "circle")
-		node.set_meta("polygon", true)
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		Globals.draw_layer.add_child(node)
 	elif object_data_arr[0][0] == "text":
 		node = Label.new()
 		node.position = object_data_arr[0][1]
@@ -2436,6 +2440,67 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		if not object_data_arr[0][2] or object_data_arr[0][3]: #not visible or dm - hide layer
 			node.visible = false
 		layer_tree.add_new_item(object_data_arr[0][1], parent.get_meta("tree_item"), node)
+	elif object_data_arr[0][0] == "rect": #object is rectangle - panel
+		print("rect object")
+		var style
+		node = Panel.new()
+		if object_data_arr[0][5].size() == 1: #texture:
+			print("texture rect on peer")
+			style = StyleBoxTexture.new()
+			var texture = Globals.load_texture(Globals.get_full_texture_path(object_data_arr[0][5][0]))
+			if texture != null:
+				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
+				style.texture = texture
+			else: #file not on client - check server
+				print("check for file on server")
+				texture = Texture2D.new()
+				texture.set_meta("image_path", Globals.get_full_texture_path(object_data_arr[0][5][0]))
+				var file_name = object_data_arr[0][5][0].get_file()
+				Globals.lobby.add_to_objects_waiting_for_file(file_name, node)
+				if not Globals.lobby.check_is_server():
+					Globals.lobby.tcp_client.send_file_request(file_name)
+		elif object_data_arr[0][5].size() == 3: #flat - obsolete - replaced by poly
+			style = StyleBoxFlat.new()
+			style.bg_color = object_data_arr[0][5][0]
+			style.border_color = object_data_arr[0][5][1]
+			style.set_border_width_all(object_data_arr[0][5][2])
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "rect")
+		node.add_theme_stylebox_override("panel", style)
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+	#region obsolete
+	#line, circle replaced by poly, left for backward compatibility
+	elif object_data_arr[0][0] == "line":
+		node = ColorRect.new()
+		node.color = Color(0,0,0,0)
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.set_meta("type", "line")
+		var line = Line2D.new()
+		line.points = object_data_arr[0][5][0]
+		line.default_color = object_data_arr[0][5][1]
+		line.width = object_data_arr[0][5][2]
+		line.position = -node.position
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.add_child(line)
+	elif object_data_arr[0][0] == "circle":
+		node = CustomEllipse.new()
+		node.position = object_data_arr[0][1]
+		node.size = object_data_arr[0][2]
+		node.scale = object_data_arr[0][3]
+		node.rotation = object_data_arr[0][4]
+		node.line_color = object_data_arr[0][5][0]
+		node.back_color = object_data_arr[0][5][1]
+		node.line_width = object_data_arr[0][5][2]
+		node.set_meta("type", "circle")
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	#endregion obsolete
 
 	if node != null:
 		node.name = node_name
@@ -2502,6 +2567,8 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			occluder.occluder.cull_mode = object_data_arr[1][2]
 			occluder.light_mask = parent.light_mask
 			occluder.occluder_light_mask = parent.light_mask
+			if node is CustomPolygon:
+				occluder.occluder.closed = node.closed
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
 			node.set_meta("shadow", true)
@@ -2514,6 +2581,8 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				occluder.occluder.cull_mode = object_data_arr[2][2]
 				occluder.light_mask = parent.light_mask
 				occluder.occluder_light_mask = parent.light_mask
+				if node is CustomPolygon:
+					occluder.occluder.closed = node.closed
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
 				node.set_meta("shadow", true)
@@ -2525,30 +2594,11 @@ func serialize_object_for_rpc(node):
 	var object_data_arr = []
 	var type = node.get_meta("type")
 	print("save object - ", type)
-	if type == "rect": #object is rectangle - panel
-		var style_arr = []
-		var style = node.get_theme_stylebox("panel")
-		print(style)
-		if style is StyleBoxFlat:
-			style_arr = [style.bg_color, style.border_color, style.border_width_left]
-		elif style is StyleBoxTexture:
-			style_arr = [style.texture.get_meta("image_path").get_file()]
-		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
-	elif type == "line":
-		var line
-		for child in node.get_children():
-			if child is Line2D:
-				line = child
-				break
-		if line == null:
-			print("saving line - not line - need fix") 
-			return
-		var style_arr = [line.points, line.default_color, line.width]
-		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr])
-	elif type == "circle":
-		print("circle")
-		var style_arr = [node.line_color, node.back_color, node.line_width]
-		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr])
+	
+	if type == "poly": #represents all drawn objects
+		print("poly")
+		var style_arr = [node.points, node.closed, node.colorLines, node.colorBG, node.lineWidth]
+		object_data_arr.append(["poly", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "text":
 		var style_arr = [node.get_theme_font("font"), node.get_theme_font_size("font_size"), node.get_theme_color("font_color")]
 		object_data_arr.append(["text", node.position, node.size, node.scale, node.rotation, node.text, style_arr])
@@ -2571,6 +2621,33 @@ func serialize_object_for_rpc(node):
 		var DM = node.get_meta("DM")
 		var player_layer = node.get_meta("player_layer")
 		object_data_arr.append(["layer", name, visibility, DM, player_layer, node.light_mask])
+	elif type == "rect": #object is rectangle - panel
+		var style_arr = []
+		var style = node.get_theme_stylebox("panel")
+		print(style)
+		if style is StyleBoxFlat: #replaced by poly
+			style_arr = [style.bg_color, style.border_color, style.border_width_left]
+		elif style is StyleBoxTexture:
+			style_arr = [style.texture.get_meta("image_path").get_file()]
+		object_data_arr.append(["rect", node.position, node.size, node.scale, node.rotation, style_arr])
+	#region obsolete
+	#line circle is obsolete, left for compatibility - replaced with poly
+	elif type == "line":
+		var line
+		for child in node.get_children():
+			if child is Line2D:
+				line = child
+				break
+		if line == null:
+			print("saving line - not line - need fix") 
+			return
+		var style_arr = [line.points, line.default_color, line.width]
+		object_data_arr.append(["line", node.position, node.size, node.scale, node.rotation, style_arr])
+	elif type == "circle":
+		print("circle")
+		var style_arr = [node.line_color, node.back_color, node.line_width]
+		object_data_arr.append(["circle", node.position, node.size, node.scale, node.rotation, style_arr])
+	#endregion obsolete
 
 	#light and shadow can be be on any object
 	if "character" in node: #token
@@ -2701,17 +2778,17 @@ func _on_tutorial_window_close_requested():
 	
 func straight_line_end():
 	drawing_straight_line = false
-	if current_rect == null:
+	if current_polygon == null:
 		return
 	if min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
 		#lines.remove_child(current_rect)
-		current_rect.queue_free()
+		current_polygon.queue_free()
 		print("free")
 		return
-	#setting size of box around line for selection purposes
-	current_rect.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
-	current_rect.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
-	current_line.position = -current_rect.position
-	create_object_on_remote_peers(current_rect, true)
-	current_rect = null
+	#shift points to match change in object position
+	var shift = current_polygon.position - Vector2(min_max_x_y.x, min_max_x_y.y)
+	current_polygon.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
+	current_polygon.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
+	current_polygon.shift_points(shift)
+	create_object_on_remote_peers(current_polygon, true)
 	return
