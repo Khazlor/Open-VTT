@@ -200,6 +200,8 @@ func _unhandled_input(event):
 					select_box.position += snap_pos_offset
 				var i = 0
 				for object in selected:
+					if object == null:
+						continue
 					if Globals.snapping:
 						object.position += snap_pos_offset
 					var path = get_path_to(object)
@@ -213,6 +215,8 @@ func _unhandled_input(event):
 				Globals.lobby.add_operation_to_undo_stack([])
 				var i = 0
 				for object in selected:
+					if object == null:
+						continue
 					var path = get_path_to(object)
 					Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", object.position], ["rotation", object.rotation]], [["position", selected_org_pos[i]], ["rotation", selected_org_rots[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position], ["rotation", object.rotation]])
@@ -224,6 +228,8 @@ func _unhandled_input(event):
 				Globals.lobby.add_operation_to_undo_stack([])
 				var i = 0
 				for object in selected:
+					if object == null:
+						continue
 					var path = get_path_to(object)
 					Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", object.position], ["scale", object.scale]], [["position", selected_org_pos[i]], ["scale", selected_org_scales[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position], ["scale", object.scale]])
@@ -758,6 +764,8 @@ func _unhandled_input(event):
 						selected_org_scales.clear()
 						selected_org_pos.clear()
 						for object in selected:
+							if object == null:
+								continue
 							print(object)
 							selected_org_pos.append(object.position)
 #							if "character" in object: #character token - rotate only image, not bars
@@ -779,6 +787,8 @@ func _unhandled_input(event):
 						selected_org_rots.clear()
 						selected_org_pos.clear()
 						for object in selected:
+							if object == null:
+								continue
 							selected_org_pos.append(object.position)
 #							if "character" in object: #character token - rotate only image, not bars
 #								selected_org_rots.append(object.get_child(0).rotation)
@@ -788,6 +798,8 @@ func _unhandled_input(event):
 					elif mouse_over_selected: #drag
 						selected_org_pos.clear()
 						for object in selected:
+							if object == null:
+								continue
 							selected_org_pos.append(object.position)
 						print("mouse_over_selected")
 						selected_dragging = true
@@ -817,10 +829,14 @@ func _unhandled_input(event):
 						print("drag")
 						var relative_offset = event.relative/get_node("../Camera2D").zoom
 						for object in selected:
+							if object == null:
+								continue
 							object.position += relative_offset
 						select_box.position += relative_offset
 						if update_other_peers:
 							for object in selected:
+								if object == null:
+									continue
 								print("call synch on other peers")
 								synch_object_properties_udp.rpc(get_path_to(object), [["position", object.position]])
 							update_other_peers_timer_start()
@@ -842,6 +858,8 @@ func _unhandled_input(event):
 						var i = 0
 						print(select_box.position)
 						for object in selected:
+							if object == null:
+								continue
 							print("rot: ", object.rotation)
 							distance = select_center_pos.distance_to(selected_org_pos[i])
 							angle_org = select_center_pos.angle_to_point(selected_org_pos[i])
@@ -885,6 +903,8 @@ func _unhandled_input(event):
 								mouse_over_bl = true
 								mouse_over_tl = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							elif mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tr
@@ -892,6 +912,8 @@ func _unhandled_input(event):
 								mouse_over_tr = true
 								mouse_over_tl = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							else: #br
@@ -918,6 +940,8 @@ func _unhandled_input(event):
 								mouse_over_tl = true
 								mouse_over_bl = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							elif mouse_pos_rot.y > select_box.position.y: #br
@@ -925,6 +949,8 @@ func _unhandled_input(event):
 								mouse_over_br = true
 								mouse_over_bl = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							else: #tr
@@ -954,6 +980,8 @@ func _unhandled_input(event):
 								mouse_over_br = true
 								mouse_over_tr = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							elif mouse_pos_rot.y < select_box.position.y + select_box.size.y: #tl
@@ -961,6 +989,8 @@ func _unhandled_input(event):
 								mouse_over_tl = true
 								mouse_over_tr = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							else: #bl
@@ -984,6 +1014,8 @@ func _unhandled_input(event):
 								mouse_over_tr = true
 								mouse_over_br = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							elif mouse_pos_rot.y > select_box.position.y: #bl
@@ -992,6 +1024,8 @@ func _unhandled_input(event):
 								mouse_over_bl = true
 								mouse_over_br = false
 								for object in selected:
+									if object == null:
+										continue
 									if select_box.rotation != object.rotation:
 										object.rotation = -object.rotation
 							else: #tl
@@ -1182,21 +1216,29 @@ func _unhandled_input(event):
 		#arrow movement
 		elif Input.is_action_just_pressed("up"):
 			for object in selected:
+				if object == null:
+					continue
 				object.position.y -= Globals.new_map.grid_size
 			if select_box != null:
 				select_box.position.y -= Globals.new_map.grid_size
 		elif Input.is_action_just_pressed("down"):
 			for object in selected:
+				if object == null:
+					continue
 				object.position.y += Globals.new_map.grid_size
 			if select_box != null:
 				select_box.position.y += Globals.new_map.grid_size
 		elif Input.is_action_just_pressed("right"):
 			for object in selected:
+				if object == null:
+					continue
 				object.position.x += Globals.new_map.grid_size
 			if select_box != null:
 				select_box.position.x += Globals.new_map.grid_size
 		elif Input.is_action_just_pressed("left"):
 			for object in selected:
+				if object == null:
+					continue
 				object.position.x -= Globals.new_map.grid_size
 			if select_box != null:
 				select_box.position.x -= Globals.new_map.grid_size
@@ -1248,7 +1290,9 @@ func copy_to_clipboard():
 	Globals.clipboard_objects.clear()
 	Globals.clipboard_characters.clear()
 	Globals.clipboard_lights.clear()
-	for object in selected: #fill clipboard
+	for object in selected:
+		if object == null:
+			continue #fill clipboard
 		if "character" in object: #tokenpolygon - get token
 			object = object.get_parent()
 			#character data not duplicated - needs to be saved
@@ -1493,7 +1537,9 @@ func select_objects():
 			continue
 		token.unselect()
 	selected_tokens.clear()
-	for object in selected: #set selected token opacity and UI visibility
+	for object in selected:
+		if object == null:
+			continue #set selected token opacity and UI visibility
 		if "character" in object: #token
 			var token = object.get_parent()
 			selected_tokens.append(token)
@@ -1538,6 +1584,8 @@ func scale_items():
 	var scal = select_box.size/select_size_org
 	var i = 0
 	for object in selected:
+		if object == null:
+			continue
 		print("object scale: ", object.scale, selected_org_scales[i])
 #		var token = null #is character token - flip image, not object
 #		var char_offset = Vector2(0,0) #offset for character token - image is in different global location than token object
@@ -1755,12 +1803,18 @@ func _text_edit_text_changed():
 func _on_transform_signal(index, value):
 	if index == 0:
 		for object in selected:
+			if object == null:
+				continue
 			object.position.x = value
 	if index == 1:
 		for object in selected:
+			if object == null:
+				continue
 			object.position.y = value
 	if index == 2:
 		for object in selected:
+			if object == null:
+				continue
 			object.size.x = value
 			print(object)
 			if object.name == "TokenPolygon": #token - need to update polygon points
@@ -1768,6 +1822,8 @@ func _on_transform_signal(index, value):
 				object.get_parent().UI_set_position()
 	if index == 3:
 		for object in selected:
+			if object == null:
+				continue
 			object.size.y = value
 			print(object)
 			if object.name == "TokenPolygon": #token - need to update polygon points
@@ -1775,23 +1831,35 @@ func _on_transform_signal(index, value):
 				object.get_parent().UI_set_position()
 	if index == 4:
 		for object in selected:
+			if object == null:
+				continue
 			object.scale.x = value
 	if index == 5:
 		for object in selected:
+			if object == null:
+				continue
 			object.scale.y = value
 	if index == 6:
 		for object in selected:
+			if object == null:
+				continue
 			object.rotation = value
 			
 func _on_light_signal(index, value):
 	if index == 0:
 		for object in selected:
+			if object == null:
+				continue
 			object.position.x = value
 	if index == 1:
 		for object in selected:
+			if object == null:
+				continue
 			object.position.y = value
 	if index == 2:
 		for object in selected:
+			if object == null:
+				continue
 			object.size.x = value
 			print(object)
 			if object.name == "TokenPolygon": #token - need to update polygon points
@@ -1799,6 +1867,8 @@ func _on_light_signal(index, value):
 				object.get_parent().UI_set_position()
 	if index == 3:
 		for object in selected:
+			if object == null:
+				continue
 			object.size.y = value
 			print(object)
 			if object.name == "TokenPolygon": #token - need to update polygon points
@@ -1806,12 +1876,18 @@ func _on_light_signal(index, value):
 				object.get_parent().UI_set_position()
 	if index == 4:
 		for object in selected:
+			if object == null:
+				continue
 			object.scale.x = value
 	if index == 5:
 		for object in selected:
+			if object == null:
+				continue
 			object.scale.y = value
 	if index == 6:
 		for object in selected:
+			if object == null:
+				continue
 			object.rotation = value
 			
 #editing object in tool panel
@@ -1821,18 +1897,24 @@ func _on_object_change_signal(index, value):
 		Globals.lobby.add_operation_to_undo_stack([])
 	if index == 0: #position x
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", Vector2(value, object.position.y)]], [["position", object.position]]])
 			object.position.x = value
 			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 1: #position y
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", Vector2(object.position.x, value)]], [["position", object.position]]])
 			object.position.y = value
 			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 2: #size x
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["size", Vector2(value, object.size.y)]], [["size", object.size]]])
 			object.size.x = value
@@ -1842,6 +1924,8 @@ func _on_object_change_signal(index, value):
 			synch_object_properties.rpc(path, [["size", object.size]])
 	elif index == 3: #size y
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["size", Vector2(object.size.x, value)]], [["size", object.size]]])
 			object.size.y = value
@@ -1851,18 +1935,24 @@ func _on_object_change_signal(index, value):
 			synch_object_properties.rpc(path, [["size", object.size]])
 	elif index == 4: #scale x
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["scale", Vector2(value, object.scale.y)]], [["scale", object.scale]]])
 			object.scale.x = value
 			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 5: #scale y
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["scale", Vector2(object.scale.x, value)]], [["scale", object.scale]]])
 			object.scale.y = value
 			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 6: #rotation
 		for object in selected:
+			if object == null:
+				continue
 			var path = get_path_to(object)
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["rotation", value]], [["rotation", object.rotation]]])
 			object.rotation = value
@@ -1872,12 +1962,18 @@ func _on_object_change_signal(index, value):
 	elif index == 10: #light enable
 		if value == true:
 			for object in selected:
+				if object == null:
+					continue
 				create_or_enable_light(object)
 		else:
 			for object in selected:
+				if object == null:
+					continue
 				disable_light(object)
 	elif index == 11: #light offset x
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
 				var light_remote = get_object_light_remote(object)
 				if light_remote != null:
@@ -1885,6 +1981,8 @@ func _on_object_change_signal(index, value):
 					synch_object_properties.rpc(get_path_to(light_remote), [["position", light_remote.position]])
 	elif index == 12: #light offset y
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"): #changing offset in light does not change light casting point - requires changing position
 				var light_remote = get_object_light_remote(object)
 				if light_remote != null:
@@ -1892,6 +1990,8 @@ func _on_object_change_signal(index, value):
 					synch_object_properties.rpc(get_path_to(light_remote), [["position", light_remote.position]])
 	elif index == 13: #light texture resolution
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
@@ -1900,6 +2000,8 @@ func _on_object_change_signal(index, value):
 					synch_light_texture_resolution.rpc(get_path_to(light), value)
 	elif index == 14: #light radius
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
@@ -1907,6 +2009,8 @@ func _on_object_change_signal(index, value):
 					synch_object_properties.rpc(get_path_to(light), [["texture_scale", light.texture_scale]])
 	elif index == 15: #light color
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
@@ -1914,6 +2018,8 @@ func _on_object_change_signal(index, value):
 					synch_object_properties.rpc(get_path_to(light), [["color", value]])
 	elif index == 16: #light energy
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("light"):
 				var light = get_object_light(object)
 				if light != null:
@@ -1924,12 +2030,18 @@ func _on_object_change_signal(index, value):
 	elif index == 20: #shadow enable
 		if value == true:
 			for object in selected:
+				if object == null:
+					continue
 				create_or_enable_shadow(object)
 		else:
 			for object in selected:
+				if object == null:
+					continue
 				disable_shadow(object)
 	elif index == 21: #shadow one sided
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("shadow"):
 				var shadow = get_object_shadow(object)
 				if shadow != null:
@@ -1943,6 +2055,8 @@ func _on_object_change_signal(index, value):
 					synch_occluder_cull_mode.rpc(get_path_to(shadow), shadow.occluder.cull_mode)
 	elif index == 22: #shadow flip sides
 		for object in selected:
+			if object == null:
+				continue
 			if object.has_meta("shadow"):
 				var shadow = get_object_shadow(object)
 				if shadow != null:
@@ -2048,7 +2162,7 @@ func get_object_shadow(object):
 	return null
 
 
-func create_or_enable_shadow(object):
+func create_or_enable_shadow(object, cullmode = 0):
 	if object.has_meta("shadow"):
 		var shadow = get_object_shadow(object)
 		if shadow != null:
@@ -2059,6 +2173,7 @@ func create_or_enable_shadow(object):
 		shadow.occluder = OccluderPolygon2D.new()
 		shadow.light_mask = object.light_mask
 		shadow.occluder_light_mask = object.light_mask
+		shadow.occluder.cull_mode = cullmode
 		if object is CustomPolygon:
 			print("custom polygon detected")
 			shadow.occluder.polygon = object.points
@@ -2116,6 +2231,8 @@ func on_line_settings_changed(setting):
 	print(setting)
 	print(selected)
 	for object in selected:
+		if object == null:
+			continue
 		if object.has_meta("type"):
 			var type = object.get_meta("type")
 			if type == "poly":
@@ -2172,6 +2289,8 @@ func on_line_settings_changed(setting):
 func on_font_settings_changed(setting):
 	print(setting)
 	for object in selected:
+		if object == null:
+			continue
 		if object.has_meta("type"):
 			var type = object.get_meta("type")
 			if type == "text":
@@ -2853,8 +2972,12 @@ func union_polygons(main_polygon: CustomPolygon):
 		main_polygon.queue_redraw()
 		#get new position and size
 		set_new_polygon_pos_and_size(main_polygon)
-			
+		var shadow: LightOccluder2D = null
 		for merged_polygon in merged_polygon_list:
+			if shadow == null:
+				if merged_polygon.has_meta("shadow"):
+					shadow = get_object_shadow(merged_polygon)
+					create_or_enable_shadow(main_polygon, shadow.occluder.cull_mode)
 			remove_object(merged_polygon, false, false, true)
 		create_object_on_remote_peers(main_polygon, false, true)
 	else:

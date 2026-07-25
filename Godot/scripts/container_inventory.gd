@@ -13,6 +13,8 @@ var inventory_comp = preload("res://components/inventory.tscn")
 func _ready():
 	print(selected)
 	for object in selected:
+		if object == null:
+			continue
 		var new_inventory = inventory_comp.instantiate()
 		var tree = new_inventory.get_node("PanelContainer/Tree")
 		if "character" in object:

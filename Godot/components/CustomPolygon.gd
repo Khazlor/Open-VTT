@@ -5,7 +5,9 @@
 extends Node2D
 class_name CustomPolygon
 
-var points: PackedVector2Array
+var points: PackedVector2Array:
+	set(value):
+		update_shadow()
 var colorLines: Color
 var colorBG: Color
 var lineWidth: float
@@ -53,6 +55,11 @@ func fill_points_with_rect():
 	points.append(Vector2(self.size.x, self.size.y))
 	points.append(Vector2(self.size.x, 0))
 	queue_redraw()
+
+func update_shadow():
+	if self.has_meta("shadow"):
+		var shadow: LightOccluder2D = Globals.draw_comp.get_object_shadow(self)
+		shadow.occluder.polygon = points
 
 func fill_points_with_ellipse():
 	closed = true
