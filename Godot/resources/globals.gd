@@ -43,6 +43,7 @@ var snappingFraction = 1
 var snappingNearestSize = 70
 var select_recursive = true
 var tool = "select"
+var tool_mode = "draw"
 var colorLines = Color(0,0,0,1)
 var colorBack = Color(1,1,1,1)
 var lineWidth = 10

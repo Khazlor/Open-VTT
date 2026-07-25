@@ -149,7 +149,7 @@ func _unhandled_input(event):
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "lines":
 			if current_polygon == null:
 				return
-			if min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
+			if current_polygon.points.size() < 2 or min_max_x_y.x == min_max_x_y.z and min_max_x_y.y == min_max_x_y.w:
 				#lines.remove_child(current_rect)
 				current_polygon.queue_free()
 				print("free")
@@ -161,13 +161,23 @@ func _unhandled_input(event):
 			#create_object_on_remote_peers(current_rect, true)
 			#current_rect = null
 			
+			#check if we should close it
+			if mouse_pos.distance_squared_to(current_polygon.position) < 100:
+				current_polygon.closed = true
+			
 			#shift points to match change in object position
 			var shift = current_polygon.position - Vector2(min_max_x_y.x, min_max_x_y.y)
 			current_polygon.set_begin(Vector2(min_max_x_y.x, min_max_x_y.y))
 			current_polygon.set_end(Vector2(min_max_x_y.z, min_max_x_y.w))
 			current_polygon.shift_points(shift)
-			create_object_on_remote_peers(current_polygon, true)
-			
+			if Globals.tool_mode == "draw":
+				create_object_on_remote_peers(current_polygon, true)
+			elif Globals.tool_mode == "union":
+				if current_polygon.closed:
+					union_polygons(current_polygon)
+			elif Globals.tool_mode == "subtract":
+				if current_polygon.closed:
+					subtract_polygons(current_polygon)
 
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "measure":
 			for child in current_measure:
@@ -181,7 +191,7 @@ func _unhandled_input(event):
 			#drag finished
 			if selected_dragging:
 				selected_dragging = false
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 				var snap_pos_offset: Vector2
 				if Globals.snapping:
 					snap_pos_offset.x = round(select_box.position.x / Globals.snappingNearestSize) * (Globals.snappingNearestSize)
@@ -193,29 +203,29 @@ func _unhandled_input(event):
 					if Globals.snapping:
 						object.position += snap_pos_offset
 					var path = get_path_to(object)
-					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position]], [["position", selected_org_pos[i]]]])
+					Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", object.position]], [["position", selected_org_pos[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position]])
 					i += 1
 				return
 			#rotating selection finished
 			if selected_rotating:
 				selected_rotating = false
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 				var i = 0
 				for object in selected:
 					var path = get_path_to(object)
-					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position], ["rotation", object.rotation]], [["position", selected_org_pos[i]], ["rotation", selected_org_rots[i]]]])
+					Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", object.position], ["rotation", object.rotation]], [["position", selected_org_pos[i]], ["rotation", selected_org_rots[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position], ["rotation", object.rotation]])
 					i += 1
 				return
 			#scaling selection finished
 			if selected_scaling:
 				selected_scaling = false
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 				var i = 0
 				for object in selected:
 					var path = get_path_to(object)
-					Globals.lobby.add_operation_part_to_undo_stack([path, [["position", object.position], ["scale", object.scale]], [["position", selected_org_pos[i]], ["scale", selected_org_scales[i]]]])
+					Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", object.position], ["scale", object.scale]], [["position", selected_org_pos[i]], ["scale", selected_org_scales[i]]]])
 					synch_object_properties.rpc(path, [["position", object.position], ["scale", object.scale]])
 					i += 1
 				flip_x = false
@@ -243,9 +253,9 @@ func _unhandled_input(event):
 				for child in lines_children:
 					if "character" in child: #if character token
 						child = child.get_child(0)
-					if child.is_class("Node2D"): #inherits from Node2D
-						if Globals.select_recursive:
-							if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+					if child.is_class("Node2D") and child is not CustomPolygon: #inherits from Node2D
+						if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+							if Globals.select_recursive:
 								if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
 									continue
 								if child.visible:
@@ -357,14 +367,28 @@ func _unhandled_input(event):
 			if current_polygon.size.x == 0 or current_polygon.size.y == 0:
 				current_polygon.queue_free()
 			else:
-				create_object_on_remote_peers(current_polygon, true)
+				if Globals.tool_mode == "draw":
+					create_object_on_remote_peers(current_polygon, true)
+				elif Globals.tool_mode == "union":
+					if current_polygon.closed:
+						union_polygons(current_polygon)
+				elif Globals.tool_mode == "subtract":
+					if current_polygon.closed:
+						subtract_polygons(current_polygon)
 		if Input.is_action_just_released("mouseleft") and Globals.tool == "circle":
 			if current_polygon == null:
 				return
 			if current_polygon.size.x == 0 or current_polygon.size.y == 0:
 				current_polygon.queue_free()
 			else:
-				create_object_on_remote_peers(current_polygon, true)
+				if Globals.tool_mode == "draw":
+					create_object_on_remote_peers(current_polygon, true)
+				elif Globals.tool_mode == "union":
+					if current_polygon.closed:
+						union_polygons(current_polygon)
+				elif Globals.tool_mode == "subtract":
+					if current_polygon.closed:
+						subtract_polygons(current_polygon)
 		#else button held -> drawing
 		if draw_enable:
 #region Draw Shapes
@@ -375,7 +399,7 @@ func _unhandled_input(event):
 					if pressed:
 						current_polygon = CustomPolygon.new()
 						current_polygon.light_mask = Globals.draw_layer.light_mask
-						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+						#current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						current_polygon.set_begin(begin)
 						current_polygon.set_end(begin)
@@ -418,7 +442,7 @@ func _unhandled_input(event):
 						var pos = mouse_pos
 						current_polygon = CustomPolygon.new()
 						current_polygon.light_mask = Globals.draw_layer.light_mask
-						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+						#current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = pos
 						current_polygon.set_begin(begin)
 						current_polygon.set_end(begin)
@@ -471,7 +495,7 @@ func _unhandled_input(event):
 							var pos = mouse_pos
 							current_polygon = CustomPolygon.new()
 							current_polygon.light_mask = Globals.draw_layer.light_mask
-							current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+							#current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 							begin = pos
 							current_polygon.set_begin(begin)
 							current_polygon.set_end(begin)
@@ -507,7 +531,7 @@ func _unhandled_input(event):
 					if pressed:
 						current_polygon = CustomPolygon.new()
 						current_polygon.light_mask = Globals.draw_layer.light_mask
-						current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
+						#current_polygon.mouse_filter = Control.MOUSE_FILTER_PASS
 						begin = mouse_pos
 						current_polygon.set_begin(begin)
 						current_polygon.set_end(begin)
@@ -1001,13 +1025,13 @@ func _unhandled_input(event):
 
 #region Keyboard Event Handling
 	elif event is InputEventKey: #handle keyboard events
-		print("key pressed")
+		#print("key pressed")
 		if Input.is_action_just_pressed("Delete") or Input.is_action_just_pressed("ui_cut"): #delete or cut selection
 			if selected.is_empty():
 				return
 			if Input.is_action_just_pressed("ui_cut"):
 				copy_to_clipboard()
-			Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.REMOVE, []])
+			Globals.lobby.add_operation_to_undo_stack([])
 			for child in selected: #delete
 				remove_object(child, false, false, true)
 			#remove select box
@@ -1018,6 +1042,11 @@ func _unhandled_input(event):
 			selected_tokens.clear()
 			selected.clear()
 			mouse_over_clear()
+			
+		elif Input.is_action_just_pressed("ui_undo"):
+			Globals.lobby.undo_operation()
+		elif Input.is_action_just_released("redo"): #ui-redo seems to be bugged on 4.5
+			Globals.lobby.redo_operation()
 			
 		elif Input.is_action_just_pressed("Escape"): #cancel selection or go back to map selection
 			if drawing_straight_line: #cancel draw straight line:
@@ -1054,7 +1083,7 @@ func _unhandled_input(event):
 			var c = Globals.clipboard_characters.size() - 1 #index for character array
 			var l = Globals.clipboard_lights.size() - 1 #index for light array
 			if Globals.clipboard_objects.size() != 0:
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.CREATE, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 			for i in range(Globals.clipboard_objects.size()-1, -1, -1): #iterate backwards
 				var new_object = Globals.clipboard_objects[i].duplicate(5)
 				if "character" in new_object: #character data not duplicated - needs to be set
@@ -1173,21 +1202,16 @@ func _unhandled_input(event):
 				select_box.position.x -= Globals.new_map.grid_size
 		elif Input.is_action_just_pressed("help"):
 			$TutorialWindow.popup()
-		elif Input.is_action_just_pressed("ui_undo"):
-			Globals.lobby.undo_operation()
-		elif Input.is_action_just_pressed("ui_redo"):
-			Globals.lobby.redo_operation()
 #endregion
-
 
 func remove_object(object, remote = false, set_undo = false, set_undo_part = false):
 	if set_undo or set_undo_part:
 		var serialized_object = serialize_object_for_rpc(object)
 		var parent_path = get_path_to(object.get_parent())
 		if set_undo:
-			Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.REMOVE, [[object, parent_path, object.name, serialized_object]]])
+			Globals.lobby.add_operation_to_undo_stack([[Globals.lobby.undo_types.REMOVE, object, parent_path, object.name, serialized_object, Globals.lobby.undo_types.REMOVE]])
 		if set_undo_part:
-			Globals.lobby.add_operation_part_to_undo_stack([object, parent_path, object.name, serialized_object])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.REMOVE, object, parent_path, object.name, serialized_object])
 	if object.has_meta("type"):
 		if object.get_meta("type") == "token": #character token
 			Globals.new_map.remove_token(object)
@@ -1295,7 +1319,7 @@ func get_clicked(mouse_position: Vector2):
 		for child in array:
 			if "character" in child: #if character token
 				child = child.get_child(0)
-			if child.is_class("Node2D"): #inherits from Node2D
+			if child.is_class("Node2D") and child is not CustomPolygon: #inherits from Node2D
 				continue
 #					print("mouse pos: ", mouse_position)
 #					print("pos: ", child.position)
@@ -1711,7 +1735,7 @@ func on_files_dropped(files):
 func _text_edit_finished():
 	selected.clear()
 	var path = get_path_to(currently_editing_label)
-	Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, [[path, [["text", currently_editing_textedit.text]], [["text", currently_editing_label.text]]]]])
+	Globals.lobby.add_operation_to_undo_stack([[Globals.lobby.undo_types.MODIFY, path, [["text", currently_editing_textedit.text]], [["text", currently_editing_label.text]]]])
 	currently_editing_label.text = currently_editing_textedit.text
 	currently_editing_label.visible = true
 	#lines.remove_child(currently_editing_textedit)
@@ -1794,23 +1818,23 @@ func _on_light_signal(index, value):
 func _on_object_change_signal(index, value):
 	#transforms
 	if index < 10:
-		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY, []])
+		Globals.lobby.add_operation_to_undo_stack([])
 	if index == 0: #position x
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["position", Vector2(value, object.position.y)]], [["position", object.position]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", Vector2(value, object.position.y)]], [["position", object.position]]])
 			object.position.x = value
 			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 1: #position y
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["position", Vector2(object.position.x, value)]], [["position", object.position]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["position", Vector2(object.position.x, value)]], [["position", object.position]]])
 			object.position.y = value
 			synch_object_properties.rpc(path, [["position", object.position]])
 	elif index == 2: #size x
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["size", Vector2(value, object.size.y)]], [["size", object.size]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["size", Vector2(value, object.size.y)]], [["size", object.size]]])
 			object.size.x = value
 			#if object.name == "TokenPolygon": #token size - need to update polygon points
 				#object.scale_shape_to_size()
@@ -1819,7 +1843,7 @@ func _on_object_change_signal(index, value):
 	elif index == 3: #size y
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["size", Vector2(object.size.x, value)]], [["size", object.size]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["size", Vector2(object.size.x, value)]], [["size", object.size]]])
 			object.size.y = value
 			#if object.name == "TokenPolygon": #token size - need to update polygon points
 				#object.scale_shape_to_size()
@@ -1828,19 +1852,19 @@ func _on_object_change_signal(index, value):
 	elif index == 4: #scale x
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["scale", Vector2(value, object.scale.y)]], [["scale", object.scale]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["scale", Vector2(value, object.scale.y)]], [["scale", object.scale]]])
 			object.scale.x = value
 			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 5: #scale y
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["scale", Vector2(object.scale.x, value)]], [["scale", object.scale]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["scale", Vector2(object.scale.x, value)]], [["scale", object.scale]]])
 			object.scale.y = value
 			synch_object_properties.rpc(path, [["scale", object.scale]])
 	elif index == 6: #rotation
 		for object in selected:
 			var path = get_path_to(object)
-			Globals.lobby.add_operation_part_to_undo_stack([path, [["rotation", value]], [["rotation", object.rotation]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, path, [["rotation", value]], [["rotation", object.rotation]]])
 			object.rotation = value
 			synch_object_properties.rpc(path, [["rotation", object.rotation]])
 			
@@ -2344,10 +2368,11 @@ func create_object_on_remote_peers(object, set_undo = false, set_undo_part = fal
 	object.name = object.name
 	var serialized_object = serialize_object_for_rpc(object)
 	var parent_path = get_path_to(object.get_parent())
+	print("setting object name to: ", object.name)
 	if set_undo:
-		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.CREATE, [[object, parent_path, object.name, serialized_object]]])
+		Globals.lobby.add_operation_to_undo_stack([[Globals.lobby.undo_types.CREATE, object, parent_path, object.name, serialized_object]])
 	if set_undo_part:
-		Globals.lobby.add_operation_part_to_undo_stack([object, parent_path, object.name, serialized_object])
+		Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.CREATE, object, parent_path, object.name, serialized_object])
 	create_object.rpc(parent_path, object.name, serialized_object)
 
 #creates object on other peers
@@ -2370,13 +2395,13 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		node.rotation = object_data_arr[0][4]
 		node.set_meta("type", "poly")
 		node.points = object_data_arr[0][5][0]
-		node.points = object_data_arr[0][5][1]
-		node.closed = object_data_arr[0][5][2]
-		node.colorLines = object_data_arr[0][5][3]
-		node.colorBG = object_data_arr[0][5][4]
-		node.lineWidth = object_data_arr[0][5][5]
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.closed = object_data_arr[0][5][1]
+		node.colorLines = object_data_arr[0][5][2]
+		node.colorBG = object_data_arr[0][5][3]
+		node.lineWidth = object_data_arr[0][5][4]
+		#node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
+		node.queue_redraw()
 	elif object_data_arr[0][0] == "text":
 		node = Label.new()
 		node.position = object_data_arr[0][1]
@@ -2505,7 +2530,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 	if node != null:
 		node.name = node_name
 		var old_node = parent.get_node(node_name)
-		if old_node != null:
+		if old_node != null and old_node != node:
 			parent.remove_child(old_node)
 			old_node.queue_free()
 		parent.add_child(node, true)
@@ -2597,7 +2622,7 @@ func serialize_object_for_rpc(node):
 	
 	if type == "poly": #represents all drawn objects
 		print("poly")
-		var style_arr = [node.points, node.closed, node.colorLines, node.colorBG, node.lineWidth]
+		var style_arr = [node.points.duplicate(), node.closed, node.colorLines, node.colorBG, node.lineWidth]
 		object_data_arr.append(["poly", node.position, node.size, node.scale, node.rotation, style_arr])
 	elif type == "text":
 		var style_arr = [node.get_theme_font("font"), node.get_theme_font_size("font_size"), node.get_theme_color("font_color")]
@@ -2673,6 +2698,8 @@ func synch_object_properties(path_to_object, property_arr):
 		return
 	for property in property_arr:
 		node.set(property[0], property[1])
+	if node is CustomPolygon:
+		node.queue_redraw()
 		
 @rpc("any_peer", "call_remote", "unreliable_ordered")
 func synch_object_properties_udp(path_to_object, property_arr):
@@ -2792,3 +2819,141 @@ func straight_line_end():
 	current_polygon.shift_points(shift)
 	create_object_on_remote_peers(current_polygon, true)
 	return
+	
+func union_polygons(main_polygon: CustomPolygon):
+	var merged_polygon_list = []
+	var main_polygon_global_points: PackedVector2Array = []
+	for point in main_polygon.points:
+		main_polygon_global_points.append(main_polygon.to_global(point))
+	var polygon_list = get_all_overlapping_polygons_on_layer(main_polygon)
+	print("polygon list:", polygon_list)
+	for polygon: CustomPolygon in polygon_list:
+		var polygon_global_points: PackedVector2Array = []
+		for point in polygon.points:
+			polygon_global_points.append(polygon.to_global(point))
+		#check if they truely intersect:
+		var intersected_points = Geometry2D.intersect_polyline_with_polygon(polygon_global_points, main_polygon_global_points)
+		if intersected_points.is_empty():
+			continue
+		#they intersected - merge them:
+		print("polygons intersect!")
+		var new_polygons = Geometry2D.merge_polygons(main_polygon_global_points, polygon_global_points) #multiple polygons - there can be holes
+		if new_polygons.size() > 0:
+			main_polygon_global_points = new_polygons[0]
+			for i in range(1,new_polygons.size()): # not great but godot does not support polygons with holes by default - custom implementation required
+				var last_point = main_polygon_global_points[-1]
+				main_polygon_global_points.append_array(new_polygons[i])
+				main_polygon_global_points.append(last_point)
+		merged_polygon_list.append(polygon)
+	if not merged_polygon_list.is_empty():
+		Globals.lobby.add_operation_to_undo_stack([])
+		main_polygon.points.clear()
+		for global_point in main_polygon_global_points:
+			main_polygon.points.append(main_polygon.to_local(global_point))
+		main_polygon.queue_redraw()
+		#get new position and size
+		set_new_polygon_pos_and_size(main_polygon)
+			
+		for merged_polygon in merged_polygon_list:
+			remove_object(merged_polygon, false, false, true)
+		create_object_on_remote_peers(main_polygon, false, true)
+	else:
+		create_object_on_remote_peers(main_polygon, true, false)
+	
+func subtract_polygons(main_polygon: CustomPolygon):
+	var main_polygon_global_points: PackedVector2Array = []
+	for point in main_polygon.points:
+		main_polygon_global_points.append(main_polygon.to_global(point))
+	var polygon_list = get_all_overlapping_polygons_on_layer(main_polygon)
+	Globals.lobby.add_operation_to_undo_stack([])
+	print("polygon list:", polygon_list)
+	for polygon: CustomPolygon in polygon_list:
+		var polygon_global_points: PackedVector2Array = []
+		for point in polygon.points:
+			polygon_global_points.append(polygon.to_global(point))
+		#check if they truely intersect:
+		var intersected_points = Geometry2D.intersect_polyline_with_polygon(polygon_global_points, main_polygon_global_points)
+		if intersected_points.is_empty():
+			continue
+		#they intersected - clip them:
+		print("polygons intersect!")
+		var new_polygons = Geometry2D.clip_polygons(polygon_global_points, main_polygon_global_points)
+		if new_polygons.size() == 0:
+			#complete deletion
+			remove_object(polygon, false, false, true)
+		else:
+			#first one is clipped
+			polygon_global_points = new_polygons[0]
+			var old = [["points", polygon.points.duplicate()], ["position", polygon.position], ["rotation", polygon.rotation], ["size", polygon.size], ["scale", polygon.scale]]
+			polygon.points.clear()
+			for global_point in polygon_global_points:
+				polygon.points.append(polygon.to_local(global_point))
+			#get new position and size
+			set_new_polygon_pos_and_size(polygon)
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, get_path_to(polygon), [["points", polygon.points.duplicate()], ["position", polygon.position], ["rotation", polygon.rotation], ["size", polygon.size], ["scale", polygon.scale]], old]) 
+			synch_object_properties.rpc(get_path_to(polygon), [["points", polygon.points.duplicate()], ["position", polygon.position], ["rotation", polygon.rotation], ["size", polygon.size], ["scale", polygon.scale]])
+			#deal with created polygons on split
+			for i in range(1,new_polygons.size()):
+				var created_polygon = polygon.duplicate()
+				created_polygon.points.clear()
+				for global_point in new_polygons[i]:
+					create_object_on_remote_peers(created_polygon, false, true)
+				#get new position and size
+				set_new_polygon_pos_and_size(created_polygon)
+				polygon.get_parent().add_child(created_polygon)
+	main_polygon.queue_free()
+		
+func set_new_polygon_pos_and_size(polygon: CustomPolygon):
+	if polygon.points.size() > 0:
+		var max_xy: Vector2 = polygon.points[0]
+		var min_xy: Vector2 = polygon.points[0]
+		for point in polygon.points:
+			max_xy = max_xy.max(point)
+			min_xy = min_xy.min(point)
+		var shift = - min_xy
+		polygon.position += min_xy
+		polygon.size = max_xy - min_xy
+		polygon.shift_points(shift)
+
+func get_all_overlapping_polygons_on_layer(polygon: CustomPolygon):
+	var polygon_list = []
+	var lines_children = Globals.draw_layer.get_children()
+	lines_children.erase(polygon)
+	var polygon_begin = polygon.get_begin()
+	var polygon_end = polygon.get_end()
+	for child in lines_children:
+		if Globals.select_recursive and not child is CustomPolygon:
+			if child.is_class("Node2D"): #inherits from Node2D
+				if child.has_meta("type") and child.get_meta("type") == "layer": #is layer
+					if not Globals.lobby.check_is_server() and not child.get_meta("player_layer"):
+						continue
+					if child.visible:
+						lines_children.append_array(child.get_children())
+				continue
+		elif child is CustomPolygon:
+			var child_begin = Vector2(0,0)
+			var child_end = Vector2(0,0)
+			if child.rotation == 0: #no rotation - faster
+				child_begin = child.get_begin()
+				child_end = child.get_end_scaled()
+			else: #rotated object - locate corners then decide
+				var diagonal = Vector2(0,0).distance_to(child.size * child.scale)
+				var angle = Vector2(0,0).angle_to_point(child.size * child.scale)
+				var top_left = child.position
+				var top_right = Vector2(child.position.x + child.size.x * child.scale.x * cos(child.rotation), child.position.y + child.size.x * child.scale.x * sin(child.rotation))
+				var bottom_right = Vector2(child.position.x + diagonal * cos(angle + child.rotation), child.position.y + diagonal * sin(angle + child.rotation))
+				var bottom_left = Vector2(child.position.x + child.size.y * child.scale.y * cos(deg_to_rad(90) + child.rotation), child.position.y + child.size.y * child.scale.y * sin(deg_to_rad(90) + child.rotation))
+				print("located corners: ", top_left, top_right, bottom_left, bottom_right)
+				child_begin.x = min(top_left.x, top_right.x, bottom_left.x, bottom_right.x)
+				child_begin.y = min(top_left.y, top_right.y, bottom_left.y, bottom_right.y)
+				child_end.x = max(top_left.x, top_right.x, bottom_left.x, bottom_right.x)
+				child_end.y = max(top_left.y, top_right.y, bottom_left.y, bottom_right.y)
+			#check if one rectangle is to the left of the other
+			if child_begin.x > polygon_end.x or polygon_begin.x > child_end.x:
+				continue
+			#check if one rectangle is above the other
+			if child_begin.y > polygon_end.y or polygon_begin.y > child_end.y:
+				continue
+			polygon_list.append(child)
+			continue
+	return polygon_list

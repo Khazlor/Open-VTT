@@ -26,7 +26,7 @@ func _ready():
 	
 	
 
-func _on_draw_item_selected(index):
+func select_tool_from_index(index: int):
 	if index == 0:
 		Globals.tool = "rect"
 	elif index == 1:
@@ -35,7 +35,47 @@ func _on_draw_item_selected(index):
 		Globals.tool = "lines-straight"
 	elif index == 3:
 		Globals.tool = "circle"
+
+func _on_draw_item_selected(index):
+	Globals.tool_mode = "draw"
+	select_tool_from_index(index)
 	Globals.tool_bar = $MarginContainer/VBoxContainer/Draw
+
+
+func _on_draw_pressed():
+	Globals.tool_mode = "draw"
+	var btn = $MarginContainer/VBoxContainer/Draw
+	var index = btn.get_selected_id()
+	select_tool_from_index(index)
+	Globals.tool_bar = btn
+
+
+func _on_draw_union_item_selected(index: int) -> void:
+	Globals.tool_mode = "union"
+	select_tool_from_index(index)
+	Globals.tool_bar = $MarginContainer/VBoxContainer/Draw_Union
+
+
+func _on_draw_union_pressed() -> void:
+	Globals.tool_mode = "union"
+	var btn = $MarginContainer/VBoxContainer/Draw_Union
+	var index = btn.get_selected_id()
+	select_tool_from_index(index)
+	Globals.tool_bar = btn
+
+
+func _on_draw_subtract_item_selected(index: int) -> void:
+	Globals.tool_mode = "subtract"
+	select_tool_from_index(index)
+	Globals.tool_bar = $MarginContainer/VBoxContainer/Draw_Subtract
+
+
+func _on_draw_subtract_pressed() -> void:
+	Globals.tool_mode = "subtract"
+	var btn = $MarginContainer/VBoxContainer/Draw_Subtract
+	var index = btn.get_selected_id()
+	select_tool_from_index(index)
+	Globals.tool_bar = btn
 
 func _on_margin_container_mouse_entered():
 	Globals.mouseOverButton = true
@@ -48,20 +88,6 @@ func _on_margin_container_mouse_exited():
 func _on_select_pressed():
 	Globals.tool = "select"
 	Globals.tool_bar = $MarginContainer/VBoxContainer/Select
-
-
-func _on_draw_pressed():
-	var draw = $MarginContainer/VBoxContainer/Draw
-	var index = draw.get_selected_id()
-	if index == 0:
-		Globals.tool = "rect"
-	elif index == 1:
-		Globals.tool = "lines"
-	elif index == 2:
-		Globals.tool = "lines-straight"
-	elif index == 3:
-		Globals.tool = "circle"
-	Globals.tool_bar = draw
 
 
 func _on_snap_options_pressed():

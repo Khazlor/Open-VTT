@@ -113,6 +113,40 @@ popup/item_2/id = 2
 popup/item_3/text = "○"
 popup/item_3/id = 3
 
+[node name="Draw_Union" type="OptionButton" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_mode = 1
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+alignment = 1
+selected = 0
+item_count = 4
+popup/item_0/text = "+▧"
+popup/item_0/id = 0
+popup/item_1/text = "+~"
+popup/item_1/id = 1
+popup/item_2/text = "+⭔"
+popup/item_2/id = 2
+popup/item_3/text = "+○"
+popup/item_3/id = 3
+
+[node name="Draw_Subtract" type="OptionButton" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_mode = 1
+mouse_filter = 1
+theme_override_font_sizes/font_size = 25
+alignment = 1
+selected = 0
+item_count = 4
+popup/item_0/text = "-▧"
+popup/item_0/id = 0
+popup/item_1/text = "-~"
+popup/item_1/id = 1
+popup/item_2/text = "-⭔"
+popup/item_2/id = 2
+popup/item_3/text = "-○"
+popup/item_3/id = 3
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -311,6 +345,10 @@ color = Color(1, 1, 1, 1)
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Select" to="." method="_on_select_pressed"]
 [connection signal="item_selected" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_item_selected"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Draw" to="." method="_on_draw_pressed"]
+[connection signal="item_selected" from="MarginContainer/VBoxContainer/Draw_Union" to="." method="_on_draw_union_item_selected"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Draw_Union" to="." method="_on_draw_union_pressed"]
+[connection signal="item_selected" from="MarginContainer/VBoxContainer/Draw_Subtract" to="." method="_on_draw_subtract_item_selected"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Draw_Subtract" to="." method="_on_draw_subtract_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Measure" to="." method="_on_measure_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/MeasureOptions" to="." method="_on_measure_options_pressed"]
 [connection signal="toggled" from="MarginContainer/VBoxContainer/MeasurePopupPanel/VBoxContainer/MeasureLineRadio" to="." method="_on_measure_line_radio_toggled"]

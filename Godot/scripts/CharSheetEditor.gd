@@ -261,7 +261,7 @@ func load_input_from_dict(dict):
 	
 func load_polygon_from_dict(dict):
 	var polygon = CustomPolygon.new()
-	polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	#polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.add_child(polygon)
 	polygon.position = dict["pos"]
 	polygon.size = dict["size"]
@@ -390,7 +390,7 @@ func _unhandled_input(event):
 					var dict = polygon_dict.duplicate(true)
 					dict["points"] = []
 					created_object = CustomPolygon.new()
-					created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					#created_object.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					node.add_child(created_object)
 					creating = true
 					begin = mouse_pos

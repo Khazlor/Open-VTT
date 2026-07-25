@@ -2,9 +2,8 @@
 #Desc:
 #Custom shape, draws polygon of shape based on normalized mapping, scaled to control size
 
-extends Control
+extends Node2D
 class_name CustomPolygon
-
 
 var points: PackedVector2Array
 var colorLines: Color
@@ -18,6 +17,24 @@ var angle_shift = 5:
 		angle_shift_rad = deg_to_rad(value)
 #do not modify - change by using angle_shift
 var angle_shift_rad = deg_to_rad(5)
+
+#implementing control functionality
+var size: Vector2 = Vector2(0,0)
+
+func set_begin(begin: Vector2):
+	position = begin
+	
+func set_end(end: Vector2):
+	size = end-position
+	
+func get_begin():
+	return position
+	
+func get_end():
+	return position+size
+	
+func get_end_scaled():
+	return position+(size*scale)
 
 func add_point(point: Vector2):
 	points.append(point - self.position)

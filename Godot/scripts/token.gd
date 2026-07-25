@@ -293,7 +293,7 @@ func bar_bubble_submit(new_text):
 			var diff = s.to_float() - character.attributes[edited_attr][1].to_float()
 			print("diff: ", diff)
 			character.attributes[edited_attr][0] = str(character.attributes[edited_attr][0].to_float() - diff)
-		Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, [[character, [[edited_attr, character.attributes[edited_attr].duplicate(true), old_attr_val]]]]])
+		Globals.lobby.add_operation_to_undo_stack([[Globals.lobby.undo_types.MODIFY_ATTRIBUTE, character, [[edited_attr, character.attributes[edited_attr].duplicate(true), old_attr_val]]]])
 		character.emit_signal("attr_updated", edited_attr, false)
 			
 			

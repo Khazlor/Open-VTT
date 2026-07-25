@@ -328,7 +328,7 @@ func add_operation_to_undo_stack(undo_arr):
 	
 	
 func add_operation_part_to_undo_stack(undo_arr):
-	undo_stack[-1][1].append(undo_arr)
+	undo_stack[-1].append(undo_arr)
 	
 func undo_operation():
 	print("undo ", undo_stack_pos)
@@ -336,31 +336,29 @@ func undo_operation():
 	if undo_stack_pos == -1:
 		print("nothing to undo")
 		return
-	var operation = undo_stack[undo_stack_pos]
-	if operation[0] == undo_types.CREATE:
-		#undo create == remove objects
-		for object_arr in operation[1]:
-			if object_arr[0] != null:
-				Globals.draw_comp.remove_object(object_arr[0])
-	elif operation[0] == undo_types.REMOVE:
-		#undo REMOVE == create objects
-		for object_arr in operation[1]:
-			if object_arr[0] == null:
-				object_arr[0] = Globals.draw_comp.create_object(object_arr[1], object_arr[2], object_arr[3])
-				Globals.draw_comp.create_object_on_remote_peers(object_arr[0])
-	elif operation[0] == undo_types.MODIFY:
-		#undo MODIFY == load original values
-		for object_arr in operation[1]:
-			
-			Globals.draw_comp.synch_object_properties(object_arr[0], object_arr[2])
-			Globals.draw_comp.synch_object_properties.rpc(object_arr[0], object_arr[2])
-	elif operation[0] == undo_types.MODIFY_ATTRIBUTE:
-		#undo MODIFY_ATTRIBUTE == load original values to character attribute
-		for object_arr in operation[1]:
-			if object_arr[0] != null:
-				for attr_arr in object_arr[1]:
-					object_arr[0].attributes[attr_arr[0]] = attr_arr[2]
-					object_arr[0].emit_signal("attr_updated", attr_arr[0], false)
+	for object_arr in undo_stack[undo_stack_pos]:
+		var operation = object_arr[0]
+		if operation == undo_types.CREATE:
+			#undo create == remove objects
+			if object_arr[1] == null:
+				object_arr[1] = Globals.draw_comp.get_node_or_null(NodePath(String(object_arr[2]) + "/" + object_arr[3]))
+			if object_arr[1] != null:
+				Globals.draw_comp.remove_object(object_arr[1])
+		elif operation == undo_types.REMOVE:
+			#undo REMOVE == create objects
+			if object_arr[1] == null:
+				object_arr[1] = Globals.draw_comp.create_object(object_arr[2], object_arr[3], object_arr[4])
+				Globals.draw_comp.create_object_on_remote_peers(object_arr[1])
+		elif operation == undo_types.MODIFY:
+			#undo MODIFY == load original values
+			Globals.draw_comp.synch_object_properties(object_arr[1], object_arr[3])
+			Globals.draw_comp.synch_object_properties.rpc(object_arr[1], object_arr[3])
+		elif operation == undo_types.MODIFY_ATTRIBUTE:
+			#undo MODIFY_ATTRIBUTE == load original values to character attribute
+			if object_arr[1] != null:
+				for attr_arr in object_arr[2]:
+					object_arr[1].attributes[attr_arr[0]] = attr_arr[2]
+					object_arr[1].emit_signal("attr_updated", attr_arr[0], false)
 	undo_stack_pos -= 1
 		
 func redo_operation():
@@ -369,29 +367,28 @@ func redo_operation():
 	if undo_stack_pos == undo_stack.size() - 1:
 		print("nothing to redo")
 		return
-	var operation = undo_stack[undo_stack_pos + 1]
-	if operation[0] == undo_types.CREATE:
-		#redo create == create removed objects
-		for object_arr in operation[1]:
-			if object_arr[0] == null:
-				object_arr[0] = Globals.draw_comp.create_object(object_arr[1], object_arr[2], object_arr[3])
-				Globals.draw_comp.create_object_on_remote_peers(object_arr[0])
-	elif operation[0] == undo_types.REMOVE:
-		#redo REMOVE == remove objects
-		for object_arr in operation[1]:
-			if object_arr[0] != null:
-				Globals.draw_comp.remove_object(object_arr[0])
-	elif operation[0] == undo_types.MODIFY:
-		#redo MODIFY == load new values
-		for object_arr in operation[1]:
-			Globals.draw_comp.synch_object_properties(object_arr[0], object_arr[1])
-			Globals.draw_comp.synch_object_properties.rpc(object_arr[0], object_arr[1])
-	elif operation[0] == undo_types.MODIFY_ATTRIBUTE:
-		#undo MODIFY_ATTRIBUTE == load new values to character attribute
-		for object_arr in operation[1]:
-			if object_arr[0] != null:
-				for attr_arr in object_arr[1]:
-					object_arr[0].attributes[attr_arr[0]] = attr_arr[1]
-					object_arr[0].emit_signal("attr_updated", attr_arr[0], false)
+	for object_arr in undo_stack[undo_stack_pos + 1]:
+		var operation = object_arr[0]
+		if operation == undo_types.CREATE:
+			#redo create == create removed objects
+			if object_arr[1] == null:
+				object_arr[1] = Globals.draw_comp.create_object(object_arr[2], object_arr[3], object_arr[4])
+				Globals.draw_comp.create_object_on_remote_peers(object_arr[1])
+		elif operation == undo_types.REMOVE:
+			#redo REMOVE == remove objects
+			if object_arr[1] == null:
+				object_arr[1] = Globals.draw_comp.get_node_or_null(NodePath(String(object_arr[2]) + "/" + object_arr[3]))
+			if object_arr[1] != null:
+				Globals.draw_comp.remove_object(object_arr[1])
+		elif operation == undo_types.MODIFY:
+			#redo MODIFY == load new values
+			Globals.draw_comp.synch_object_properties(object_arr[1], object_arr[2])
+			Globals.draw_comp.synch_object_properties.rpc(object_arr[1], object_arr[2])
+		elif operation == undo_types.MODIFY_ATTRIBUTE:
+			#undo MODIFY_ATTRIBUTE == load new values to character attribute
+			if object_arr[1] != null:
+				for attr_arr in object_arr[2]:
+					object_arr[1].attributes[attr_arr[0]] = attr_arr[1]
+					object_arr[1].emit_signal("attr_updated", attr_arr[0], false)
 	undo_stack_pos += 1
 #endregion

@@ -292,7 +292,7 @@ func _on_input_changed(input):
 	
 func load_polygon_from_dict(dict):
 	var polygon = CustomPolygon.new()
-	polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	#polygon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	char_sheet_node.add_child(polygon)
 	polygon.position = dict["pos"]
 	polygon.size = dict["size"]

@@ -227,7 +227,7 @@ func load_data_for_self_and_children(file: FileAccess):
 		node.colorLines = object_data_arr[0][5][2]
 		node.colorBG = object_data_arr[0][5][3]
 		node.lineWidth = object_data_arr[0][5][4]
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		#node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		Globals.draw_layer.add_child(node)
 		node.name = object_data_arr[0][6]
 	

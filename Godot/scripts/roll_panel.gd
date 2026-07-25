@@ -642,9 +642,9 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 			else:
 				character.attributes[attr][0] = new_var
 			if not undo_entry_exists: #create main entry on undo stack
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 				undo_entry_exists = true
-			Globals.lobby.add_operation_part_to_undo_stack([character, [[attr, character.attributes[attr].duplicate(true), old_attr_val]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, character, [[attr, character.attributes[attr].duplicate(true), old_attr_val]]])
 			character.emit_signal("attr_updated", attr, false)
 			return
 	elif attr[0] == "@" and target != null: #target
@@ -668,9 +668,9 @@ func assignment(text_in, i: int, attr: String, character: Character = null, targ
 			else:
 				target.attributes[attr][0] = new_var
 			if not undo_entry_exists: #create main entry on undo stack
-				Globals.lobby.add_operation_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, []])
+				Globals.lobby.add_operation_to_undo_stack([])
 				undo_entry_exists = true
-			Globals.lobby.add_operation_part_to_undo_stack([target, [[attr, target.attributes[attr].duplicate(true), old_attr_val]]])
+			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY_ATTRIBUTE, target, [[attr, target.attributes[attr].duplicate(true), old_attr_val]]])
 			target.emit_signal("attr_updated", attr, false)
 			return
 	#error cannot access attribute - resolve and skip
