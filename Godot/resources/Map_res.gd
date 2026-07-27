@@ -428,6 +428,7 @@ func load_data_for_self_and_children(file: FileAccess):
 			occluder.occluder.cull_mode = object_data_arr[1][2]
 			occluder.occluder_light_mask = Globals.draw_layer.light_mask
 			if node is CustomPolygon:
+				occluder.occluder.polygon = node.points
 				occluder.occluder.closed = node.closed
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
@@ -440,6 +441,7 @@ func load_data_for_self_and_children(file: FileAccess):
 				occluder.occluder.cull_mode = object_data_arr[2][2]
 				occluder.occluder_light_mask = Globals.draw_layer.light_mask
 				if node is CustomPolygon:
+					occluder.occluder.polygon = node.points
 					occluder.occluder.closed = node.closed
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]

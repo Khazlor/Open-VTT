@@ -13,7 +13,7 @@ func _ready():
 		if texture != null:
 			$HBoxContainer/TextureRect.texture = texture
 		$HBoxContainer/NameLabel.text = token.character.name
-		$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"][1]
+		$HBoxContainer/InitiativeLabel.text = token.character.attributes["Initiative"][1]
 
 
 #click on item - select token
@@ -30,4 +30,4 @@ func unselect():
 	$Button.flat = true
 
 func update():
-	$HBoxContainer/InitiativeLabel.text = token.character.attributes["initiative"][1]
+	$HBoxContainer/InitiativeLabel.text = token.character.attributes["Initiative"][1]

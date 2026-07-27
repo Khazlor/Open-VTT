@@ -739,7 +739,7 @@ layer = 1
 motion_mirroring = Vector2(70000, 70000)
 
 [node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
-texture_filter = 2
+texture_filter = 6
 texture_repeat = 3
 texture = SubResource("GradientTexture2D_rmbfd")
 region_enabled = true

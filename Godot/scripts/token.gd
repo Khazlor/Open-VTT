@@ -38,7 +38,7 @@ func _ready():
 	character.connect("attr_bubbles_changed", change_attr_bubbles)
 	if not preview:
 		print("not preview")
-		fov.shadow_item_cull_mask = get_parent().light_mask
+		fov.shadow_item_cull_mask = get_parent().light_mask + (1<<19)
 		character.connect("get_token_request", on_get_token_request)
 		#synch through signals triggers multiple times when multiple tokens have the same character - use character.token instead
 		#character.connect("synch_macro", on_synch_macro)
@@ -173,8 +173,8 @@ func update_bars(attr: StringName, remote = false):
 		if attr_bubble["name"] == attr:
 			attr_bubbles.get_child(i).get_meta("text").text = character.attributes[attr][1]
 			UI_set_position()
-	#update initiative
-	if attr == "initiative" and not preview:
+	#update Initiative
+	if attr == "Initiative" and not preview:
 		if in_turn_order == null:
 			in_turn_order = Globals.turn_order.create_item(self)
 		else:

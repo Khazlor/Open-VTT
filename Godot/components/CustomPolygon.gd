@@ -5,9 +5,7 @@
 extends Node2D
 class_name CustomPolygon
 
-var points: PackedVector2Array:
-	set(value):
-		update_shadow()
+var points: PackedVector2Array
 var colorLines: Color
 var colorBG: Color
 var lineWidth: float
@@ -72,6 +70,9 @@ func fill_points_with_ellipse():
 		points.append(center + Vector2(center.x * cos(angle), center.y * sin(angle)))#cast point by angle from center
 	queue_redraw()
 	
+func _ready() -> void:
+	queue_redraw()
+
 func _draw(): #draw polygon and polyline
 	if points.size() > 1:
 		if closed and points.size() > 2:

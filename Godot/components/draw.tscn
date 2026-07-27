@@ -120,7 +120,7 @@ Used for chat between players, and executing dice rolls and other macros.
 The tutorial to this component is in it's own section accessed by pressing the ? button on Roll panel.
 [font_size=25]Turn order[/font_size]
 Turn order contains tokens that can be sorted based on initiative and go through them in order. Is used for tracking order of character macros during a round.
-New tokens are added by changing the value of \"Iniciative\" attribute in character attributes, either manually or by using assignment macro
+New tokens are added by changing the value of \"Initiative\" attribute in character attributes, either manually or by using assignment macro
 [font_size=25]Character sheet[/font_size]
 Character sheet is the place where character information is stored. Can be accessed by double clicking on character in character tree by the DM, or double clicking a token in selected layer.
 Has section for notes, used in place of regullar character sheet, which will be worked on in the future.

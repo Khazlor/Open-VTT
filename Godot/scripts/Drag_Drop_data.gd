@@ -42,7 +42,6 @@ func _drop_data(position, data):
 		Globals.draw_layer.add_child(token)
 		Globals.map.add_token(token)
 		token.light_mask = Globals.draw_layer.light_mask
-		token.fov.shadow_item_cull_mask = Globals.draw_layer.light_mask
 		Globals.draw_comp.create_object_on_remote_peers(token, true)
 	if data.has_meta("item_dict"): #dropping item - add to inventory or create container
 		print("item drop")

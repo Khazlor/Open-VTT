@@ -269,7 +269,9 @@ func set_light_on_self_and_children(node, mask):
 		if node is PointLight2D:
 			if not node.has_meta("fov"): #not fov light
 				node.range_item_cull_mask = mask
-			node.shadow_item_cull_mask = mask
+				node.shadow_item_cull_mask = mask
+			else:
+				node.shadow_item_cull_mask = mask + (1<<19)
 		if node is LightOccluder2D:
 			node.occluder_light_mask = mask
 		for child in node.get_children():

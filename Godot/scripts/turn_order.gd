@@ -43,7 +43,7 @@ func _on_next_button_pressed():
 
 func _on_sort_button_pressed():
 #	for item in items.get_children():
-#		var item_i = item.token.character.attributes["initiative"][1]
+#		var item_i = item.token.character.attributes["Initiative"][1]
 	var sorted = items.get_children()
 	sorted.sort_custom(custom_sort)
 	for item in sorted:
@@ -51,7 +51,7 @@ func _on_sort_button_pressed():
 
 
 func custom_sort(a, b):
-	return a.token.character.attributes["initiative"][1].to_int() < b.token.character.attributes["initiative"][1].to_int()
+	return a.token.character.attributes["Initiative"][1].to_int() < b.token.character.attributes["Initiative"][1].to_int()
 
 
 func _on_close_requested():

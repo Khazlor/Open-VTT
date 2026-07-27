@@ -13,3 +13,8 @@ Godot/keymaps.dat
 *.csv.import
 *.cfg
 player_test
+<<<<<<< Updated upstream
+*.import
+=======
+*.import
+>>>>>>> Stashed changes

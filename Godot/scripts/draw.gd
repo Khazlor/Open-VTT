@@ -13,6 +13,8 @@ var update_timer_interval = 0.05 #how often synch when dragging
 
 var control_groups = [[],[],[],[],[],[],[],[],[],[]]
 
+var ignore_all_inputs = false
+
 #drawing
 var pressed = false
 var draw_enable = true
@@ -102,8 +104,19 @@ func _ready():
 	connect("line_settings_changed", on_line_settings_changed)
 	connect("font_settings_changed", on_font_settings_changed)
 	
+func abort_all_inputs():
+	ignore_all_inputs = true
+	pressed = false
+	draw_enable = false
+	selected_creating = false
+	
+func resume_all_inputs():
+	ignore_all_inputs = false
+	
 #handles all user input that wasn't handled by buttons, textedits etc.
 func _unhandled_input(event):
+	if ignore_all_inputs:
+		return
 	if event is InputEventMouse: #handle mouse envents
 		if Globals.draw_layer == null: #check if layer is selected
 			return
@@ -2712,6 +2725,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 			occluder.light_mask = parent.light_mask
 			occluder.occluder_light_mask = parent.light_mask
 			if node is CustomPolygon:
+				occluder.occluder.polygon = node.points
 				occluder.occluder.closed = node.closed
 			node.add_child(occluder)
 			occluder.name = object_data_arr[1][3]
@@ -2726,6 +2740,7 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 				occluder.light_mask = parent.light_mask
 				occluder.occluder_light_mask = parent.light_mask
 				if node is CustomPolygon:
+					occluder.occluder.polygon = node.points
 					occluder.occluder.closed = node.closed
 				node.add_child(occluder)
 				occluder.name = object_data_arr[2][3]
@@ -2818,6 +2833,7 @@ func synch_object_properties(path_to_object, property_arr):
 	for property in property_arr:
 		node.set(property[0], property[1])
 	if node is CustomPolygon:
+		node.update_shadow()
 		node.queue_redraw()
 		
 @rpc("any_peer", "call_remote", "unreliable_ordered")
@@ -3012,18 +3028,31 @@ func subtract_polygons(main_polygon: CustomPolygon):
 			for global_point in polygon_global_points:
 				polygon.points.append(polygon.to_local(global_point))
 			#get new position and size
+			var shadow: LightOccluder2D = null
 			set_new_polygon_pos_and_size(polygon)
+			if polygon.has_meta("shadow"):
+				shadow = get_object_shadow(polygon)
+				polygon.update_shadow()
 			Globals.lobby.add_operation_part_to_undo_stack([Globals.lobby.undo_types.MODIFY, get_path_to(polygon), [["points", polygon.points.duplicate()], ["position", polygon.position], ["rotation", polygon.rotation], ["size", polygon.size], ["scale", polygon.scale]], old]) 
 			synch_object_properties.rpc(get_path_to(polygon), [["points", polygon.points.duplicate()], ["position", polygon.position], ["rotation", polygon.rotation], ["size", polygon.size], ["scale", polygon.scale]])
 			#deal with created polygons on split
 			for i in range(1,new_polygons.size()):
-				var created_polygon = polygon.duplicate()
-				created_polygon.points.clear()
+				var created_polygon = CustomPolygon.new()
+				created_polygon.points = []
+				created_polygon.closed = true
+				created_polygon.colorBG = polygon.colorBG
+				created_polygon.colorLines = polygon.colorLines
+				created_polygon.lineWidth = polygon.lineWidth
+				created_polygon.set_meta("type", "poly")
 				for global_point in new_polygons[i]:
-					create_object_on_remote_peers(created_polygon, false, true)
+					created_polygon.points.append(created_polygon.to_local(global_point))
 				#get new position and size
 				set_new_polygon_pos_and_size(created_polygon)
 				polygon.get_parent().add_child(created_polygon)
+				if shadow != null:
+					create_or_enable_shadow(created_polygon, shadow.occluder.cull_mode)
+				create_object_on_remote_peers(created_polygon, false, true)
+				created_polygon.queue_redraw()
 	main_polygon.queue_free()
 		
 func set_new_polygon_pos_and_size(polygon: CustomPolygon):
