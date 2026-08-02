@@ -2531,8 +2531,6 @@ func create_object(parent_path: NodePath, node_name: String, object_data_arr):
 		node.colorLines = object_data_arr[0][5][2]
 		node.colorBG = object_data_arr[0][5][3]
 		node.lineWidth = object_data_arr[0][5][4]
-		#node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		Globals.draw_layer.add_child(node)
 		node.queue_redraw()
 	elif object_data_arr[0][0] == "text":
 		node = Label.new()
@@ -2917,14 +2915,20 @@ func synch_object_inventory_remove(object_path, item, item_pos = 0):
 		if equipped:
 			object.character.unequip_item(inventory[item_pos])
 		inventory.remove_at(item_pos)
-		object.emit_signal("inv_changed")
+		if "character" in object: #token
+			object.character.emit_signal("inv_changed")
+		else: #container
+			object.emit_signal("inv_changed")
 		return
 	for i in inventory.size():
 		if inventory[i] == item: #remove from inventory array
 			if equipped:
 				object.character.unequip_item(inventory[item_pos])
 			inventory.remove_at(i)
-			object.emit_signal("inv_changed")
+			if "character" in object: #token
+				object.character.emit_signal("inv_changed")
+			else: #container
+				object.emit_signal("inv_changed")
 			break
 
 #timer for drag synch - saves network trafic

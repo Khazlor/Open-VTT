@@ -201,8 +201,11 @@ func _get_drag_data(_item_position):
 	return selected
 	
 func _can_drop_data(at_position, data):
-	print(data, data.has_meta("item_dict"))
-	return data.has_meta("item_dict")
+	if data != null:
+		print(data, data.has_meta("item_dict"))
+		return data.has_meta("item_dict")
+	else:
+		return false
 	
 func _drop_data(at_position, data):
 	var item_dict = data.get_meta("item_dict")

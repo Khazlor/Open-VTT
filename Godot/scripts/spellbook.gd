@@ -120,15 +120,15 @@ func _on_spellbook_spells_changed(signal_spellbook_name, spell_dict, status):
 		if spell_dict == null:
 			return
 		if status == Character.SPELL_ADD:
-			var max_level = spell_libraries.size()
+			var max_level = spell_libraries.size() - 1
 			var spell_level = spell_dict["spell_level"]
 			if spell_level > max_level: #create spell library containers
-				for i in range(max_level, spell_level + 1):
-					print("GENERATING SPELLBOOK LEVEL " , i)
+				for i in range(max_level, spell_level):
+					print("GENERATING SPELLBOOK LEVEL " , i + 1)
 					var new_spell_level_library = spell_level_library_comp.instantiate()
-					new_spell_level_library.spell_level = i
+					new_spell_level_library.spell_level = i + 1
 					new_spell_level_library.spellbook = self
-					new_spell_level_library.name = "Lvl " + str(i)
+					new_spell_level_library.name = "Lvl " + str(i + 1)
 					spell_libraries_container.add_child(new_spell_level_library)
 					spell_libraries.append(new_spell_level_library)
 			spell_libraries[spell_level].add_spell_to_library(spell_dict)

@@ -1,17 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://nxmvcsx2xf44"]
+[gd_scene load_steps=10 format=3 uid="uid://nxmvcsx2xf44"]
 
 [ext_resource type="Script" uid="uid://cpfo3qmkokouf" path="res://scripts/CollapsibleContainer.gd" id="1_p7j0e"]
 [ext_resource type="Script" uid="uid://dp4c2bmt2qk1d" path="res://scripts/CharSheetEditor.gd" id="1_x4rqg"]
-[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/smooth_scroll_container.gd" id="2_uqffv"]
-[ext_resource type="Texture2D" uid="uid://cnbnkt1fgj6ry" path="res://icon.svg" id="2_xsa7h"]
-[ext_resource type="Texture2D" uid="uid://bwmti4y1i2olq" path="res://icons/Collapse.svg" id="3_hdbiu"]
-[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="3_v74aw"]
-
-[sub_resource type="Resource" id="Resource_wygoe"]
-script = ExtResource("3_v74aw")
-
-[sub_resource type="Resource" id="Resource_lf8nt"]
-script = ExtResource("3_v74aw")
+[ext_resource type="Texture2D" uid="uid://d15j5tp00rbr8" path="res://icon.svg" id="2_xsa7h"]
+[ext_resource type="Texture2D" uid="uid://c5lwgoeq05hjf" path="res://icons/Collapse.svg" id="3_hdbiu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0u6px"]
 bg_color = Color(1, 1, 1, 1)
@@ -23,12 +15,6 @@ border_width_top = 4
 border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.478431, 0.788235, 1, 1)
-
-[sub_resource type="Resource" id="Resource_3c1rr"]
-script = ExtResource("3_v74aw")
-
-[sub_resource type="Resource" id="Resource_xkgri"]
-script = ExtResource("3_v74aw")
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_rby7l"]
 
@@ -63,10 +49,6 @@ split_offset = -200
 [node name="CanvasScrollContainer" type="ScrollContainer" parent="HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-script = ExtResource("2_uqffv")
-wheel_scroll_damper = SubResource("Resource_wygoe")
-dragging_scroll_damper = SubResource("Resource_lf8nt")
-metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="Canvas" type="Panel" parent="HSplitContainer/CanvasScrollContainer"]
 z_index = -2
@@ -97,10 +79,6 @@ layout_mode = 2
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
-script = ExtResource("2_uqffv")
-wheel_scroll_damper = SubResource("Resource_3c1rr")
-dragging_scroll_damper = SubResource("Resource_xkgri")
-metadata/_custom_type_script = "uid://bgqglerkcylxx"
 
 [node name="Settings" type="VBoxContainer" parent="HSplitContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2

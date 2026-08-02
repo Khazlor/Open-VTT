@@ -18,7 +18,10 @@ func _unhandled_input(event):
 #drag and drop section
 
 func _can_drop_data(position, data):
-	return data is TreeItem
+	if data != null:
+		return data is TreeItem
+	else:
+		return false
 	
 func _drop_data(position, data):
 	Globals.drag_drop_canvas_layer.layer = -1

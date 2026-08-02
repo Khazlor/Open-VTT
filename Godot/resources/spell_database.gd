@@ -179,6 +179,9 @@ func edit_spellcard_in_db(spellcard_name, component_array):
 
 	
 func get_spellcard_from_db(spellcard_name):
+	
+	if spellcard_name == null:
+		return null
 	var result_array = database.select_rows("spellcards", "spellcard_name = \'" + spellcard_name + "\'", ["*"])
 	if result_array.is_empty():
 		return null

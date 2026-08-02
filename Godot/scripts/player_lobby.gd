@@ -45,7 +45,7 @@ func _ready():
 
 			map = map_comp.instantiate()
 			if has_node("Map"):
-				remove_child(get_node("map"))
+				remove_child(get_node("Map"))
 			add_child(map)
 			map.name = "Map"
 			#set all connected peers to this map
@@ -69,7 +69,7 @@ func _ready():
 	else: #singleplayer
 		map = map_comp.instantiate()
 		if has_node("Map"):
-			remove_child(get_node("map"))
+			remove_child(get_node("Map"))
 		add_child(map)
 		map.name = "Map"
 

@@ -618,8 +618,7 @@ func select_selection():
 	else:
 		print("shift held ", selected_objects)
 	for object in node.get_children():
-		if object is Control:
-			#print(object.name)
+		if object is Control or object is CustomPolygon:
 			if object.position.x >= select_pos_local.x and \
 			object.position.y >= select_pos_local.y and \
 			object.position.x + object.size.x <= select_pos_local.x + select_box.size.x and \
@@ -630,7 +629,7 @@ func select_selection():
 				found = true
 	if not found: #nothing selected - get clicked
 		for object in node.get_children():
-			if object is Control:
+			if object is Control or object is CustomPolygon:
 				var mouse_pos = get_canvas_mouse_pos()
 				#print(object.name)
 				if object.position.x <= mouse_pos.x and \

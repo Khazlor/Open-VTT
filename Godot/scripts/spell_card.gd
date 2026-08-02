@@ -89,6 +89,8 @@ func load_spell_card():
 
 func load_spell_card_content():
 	content_loaded = true
+	if card_comp_array == null:
+		return
 	for dict in card_comp_array[2]:
 		var type = dict["type"]
 		if type == "label":
@@ -116,8 +118,6 @@ func replace_attributes_in_text(text):
 			if spell_dict["spell_attributes"].has(word):
 				text = text.insert(last_index, spell_dict["spell_attributes"][word])
 				last_index = last_index + spell_dict["spell_attributes"][word].length()#ignore recursive @
-			else:
-				last_index += word_len
 		else:
 			last_index += word_len
 		last_index = text.find('@',last_index)
